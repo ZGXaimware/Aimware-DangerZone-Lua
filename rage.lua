@@ -1,5 +1,5 @@
 --author ZGXaimware
---version 1.0.0
+--version 1.0.1
 
 local font = draw.CreateFont("Microsoft Tai Le", 30, 1000);
 local fontA = draw.CreateFont("Microsoft Tai Le", 80, 1000);
@@ -1083,7 +1083,7 @@ callbacks.Register("CreateMove", function()
 		end
 		needshieldprotect = localhp <= 75 and string.find(weaponstr, "shield") ~= nil and
 			autoshield:GetValue() and shieldprotectenable
-		needesync = aimstatus == '"Automatic"' and
+		needesync = (aimstatus == '"Automatic"' or angle == 180) and
 			(weaponClass ~= "kniefetc" and weaponClass ~= "SHIELD" and localweaponid ~= 69)
 	end
 end)
@@ -1284,10 +1284,10 @@ end);
 local function switch()
 	if disablevisual:GetValue() then
 		gui.SetValue("esp.master", 0)
-	if plocallive then
-		f = (fasthop:GetValue() ~= nil and fasthop:GetValue() ~= 0 and input.IsButtonPressed(fasthop:GetValue())) and
-		0 or f;
-	end
+		if plocallive then
+			f = (fasthop:GetValue() ~= nil and fasthop:GetValue() ~= 0 and input.IsButtonPressed(fasthop:GetValue())) and
+				0 or f;
+		end
 		return
 	else
 		gui.SetValue("esp.master", 1)
