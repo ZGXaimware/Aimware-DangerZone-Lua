@@ -1,5 +1,5 @@
 --author ZGXaimware
---version 1.0.1
+--version 1.0.2
 
 local font = draw.CreateFont("Microsoft Tai Le", 30, 1000);
 local fontA = draw.CreateFont("Microsoft Tai Le", 80, 1000);
@@ -495,15 +495,15 @@ local function lockonitleg(Enemy, step)
 	local rcalf = engine.TraceLine(Enemy:GetHitboxPosition(10), localheadbox)
 	local lfoot = engine.TraceLine(Enemy:GetHitboxPosition(11), localheadbox)
 	local rfoot = engine.TraceLine(Enemy:GetHitboxPosition(12), localheadbox)
-	local bestfraction = lfoot.fraction
-	local tra = lfoot
-	local hitboxnumber = 11
+	local bestfraction = rcalf.fraction
+	local tra = rcalf
+	local hitboxnumber = 10
 
 	if Distance > 300 then
-		if bestfraction < rfoot.fraction then
-			bestfraction = rfoot.fraction
-			tra = rcalf
-			hitboxnumber = 12
+		if bestfraction < lfoot.fraction then
+			bestfraction = lfoot.fraction
+			tra = lfoot
+			hitboxnumber = 11
 		end
 
 		if bestfraction < lcalf.fraction then
@@ -512,16 +512,16 @@ local function lockonitleg(Enemy, step)
 			hitboxnumber = 9
 		end
 
-		if bestfraction < rcalf.fraction then
-			bestfraction = rcalf.fraction
-			tra = rcalf
-			hitboxnumber = 10
-		end
-	else
 		if bestfraction < rfoot.fraction then
 			bestfraction = rfoot.fraction
-			tra = rcalf
+			tra = rfoot
 			hitboxnumber = 12
+		end
+	else
+		if bestfraction < lfoot.fraction then
+			bestfraction = lfoot.fraction
+			tra = lfoot
+			hitboxnumber = 11
 		end
 	end
 
@@ -842,17 +842,6 @@ callbacks.Register("CreateMove", function()
 					shieldhit = (BestDistance < 76)
 				else
 					gui.SetValue("esp.chams.localweapon.visible", 0)
-					if weaponClass == "rifle" then
-						if BestDistance <= 2800 then
-							gui.SetValue("rbot.hitscan.accuracy.rifle.hitchance", 50)
-							gui.SetValue("rbot.hitscan.accuracy.rifle.hitchanceburst", 50)
-							gui.SetValue("rbot.hitscan.accuracy.rifle.mindamage", 10)
-						else
-							gui.SetValue("rbot.hitscan.accuracy.rifle.hitchance", 85)
-							gui.SetValue("rbot.hitscan.accuracy.rifle.hitchanceburst", 85)
-							gui.SetValue("rbot.hitscan.accuracy.rifle.mindamage", 21)
-						end
-					end
 				end
 				-----print(enemyalive)
 				Closedto = islook(BestEnemy)
