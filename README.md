@@ -2,9 +2,9 @@
 Dont sell my code on NL/SK/Pri market.It is opensource<br />
 
 Ref:I have used code from<br />
-[url=https://aimware.net/forum/thread/147031][Release] Danger Zone Speedhack | AIMWARE.net[/url] (Has fixed by me) @Zerdos Thanks for your origin code<br />
-[url=https://aimware.net/forum/thread/168455][Release] UpperHook Semi Rage Helper (Updated 21/7/2022) | AIMWARE.net[/url] (Used its ui design) @RDX_K3LL3R<br />
-[url=https://aimware.net/forum/thread/100971][Release] Dangerzone Tweaks[/url] (used for extraesp) @ambien55<br />
+[[Release] Danger Zone Speedhack | AIMWARE.net](https://aimware.net/forum/thread/147031) (Has fixed by me) @Zerdos Thanks for your origin code<br />
+[[Release] UpperHook Semi Rage Helper (Updated 21/7/2022) | AIMWARE.net](https://aimware.net/forum/thread/168455) (Used its ui design) @RDX_K3LL3R<br />
+[[Release] Dangerzone Tweaks](https://aimware.net/forum/thread/100971) (used for extraesp) @ambien55<br />
 
 Note:I have hard coded <br />
 1.smg hitchance, due to smg need different value(like bizon,mac10 need low,and mp9,mp7 for high hitchance)<br />
