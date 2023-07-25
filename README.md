@@ -9,8 +9,15 @@ Ref:I have used code from<br />
 Note:I have hard coded <br />
 1.smg hitchance, due to smg need different value(like bizon,mac10 need low,and mp9,mp7 for high hitchance)<br />
 2.static fov 23,For your acc safety,i'm highly recommend you not change the value,and keep "SmoothAim" on (Aimstep).I have banned for lots of acc due to high fov.<br />
+3.force set shotgun baim(Headshot is very hard before you being killed)<br />
+4.force set sniper baim (this mode awp cant get too much ammo and HS miss will LOSE your winner chance rate)<br />
 WARNING:IF YOU WANT USE HIGH FOV you can turn off AimSmooth and FOV will be dynamic that you could always hit cloest ENEMY.(abandon function but still work)<br />
 
+part of showcase:<br />
+[SpeedHack](https://www.bilibili.com/video/BV1a8411m7HR/) <br />
+[NotHitShield](https://www.bilibili.com/video/BV1mP411r7F7/) <br />
+[AimDrone&DroneDetect](https://www.bilibili.com/video/BV1n14y1X7hq) <br />
+[Shieldbot](https://www.bilibili.com/video/BV1A94y1B7iZ/) <br />
 
 
 
@@ -46,11 +53,7 @@ tablechecker.lua:<br />
 teamchecker.lua: (once run script)<br />
   （&nbsp;）reveal player team and print it on cheat console (Same as ESP.lua righttext do)<br />
 
-  
-[url=https://www.bilibili.com/video/BV1a8411m7HR/]SpeedHack[/url][/font][/size][/color]
-[url=https://www.bilibili.com/video/BV1mP411r7F7/][/url][url=https://www.bilibili.com/video/BV1mP411r7F7/]NoHitShield[/url]
-[url=https://www.bilibili.com/video/BV1n14y1X7hq]AimDrone&DroneDetect[/url]
-[url=https://www.bilibili.com/video/BV1A94y1B7iZ/]Shieldbot[/url]
+
 
 
 Update 1.0.1:<br />
