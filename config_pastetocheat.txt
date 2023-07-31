@@ -641,7 +641,7 @@ misc.fakelag.condition.moving "On"
 misc.fakelag.condition.peek "On"
 misc.fakelag.condition.standing "On"
 misc.fakelag.enable "On"
-misc.fakelag.factor 7
+misc.fakelag.factor 3
 misc.fakelag.key 0
 misc.fakelag.override.inair "Off"
 misc.fakelag.override.moving "Off"

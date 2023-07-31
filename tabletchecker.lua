@@ -1,7 +1,3 @@
---author ZGXaimware
---version 1.0.0
-
-
 local ranks_mode = gui.Combobox(gui.Reference("Misc", "General", "Extra"), "tablet.mode", "Message SendWay",
     "In Party chat", "Only Console")
 client.AllowListener("client_disconnect");

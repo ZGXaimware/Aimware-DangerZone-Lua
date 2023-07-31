@@ -1,6 +1,15 @@
---author ZGXaimware
---version 1.0.2
-
+-- local callbacks = 0
+-- local draw = 0
+-- local gui = 0
+-- local client = 0
+-- local engine = 0
+-- local Vector3 = 0
+-- local entities = 0
+-- local input = 0
+-- local EulerAngles = 0
+-- local bit = 0
+-- local globals = 0
+gui.SetValue("rbot.antiaim.base", "0 Desync")
 local font = draw.CreateFont("Microsoft Tai Le", 30, 1000);
 local fontA = draw.CreateFont("Microsoft Tai Le", 80, 1000);
 local font1 = draw.CreateFont("Verdana", 22, 400);
@@ -10,7 +19,7 @@ local tab = gui.Tab(ref, "DZe", "DangerZone Elite");
 
 
 local main_box = gui.Groupbox(tab, "Main", 16, 16, 200, 0);
-local legit_aa_box = gui.Groupbox(tab, "Legit Anti-Aim", 232, 16, 200, 0);
+local legit_aa_box = gui.Groupbox(tab, "(Desync) Legit Anti-Aim", 232, 16, 200, 0);
 local switch_box = gui.Groupbox(tab, "Switch", 448, 16, 174, 0);
 
 
@@ -18,32 +27,37 @@ local switch_box = gui.Groupbox(tab, "Switch", 448, 16, 174, 0);
 
 
 
-
+local legit_aa_switch = gui.Checkbox(legit_aa_box, "aa.switch", "Master Switch", 1);
 local legit_aa_type = gui.Combobox(legit_aa_box, "aa.type", "DeSync Type", "Default", "Low");
 local legit_aa_key = gui.Keybox(legit_aa_box, "aa.inverter", "Inverter", 0);
 local switch_awall_key = gui.Keybox(switch_box, "switch.autowall", "Auto Wall", 0);
+local legit_aa_switch = gui.Checkbox(legit_aa_box, "aa.switch", "Master Switch", 1);
+
 local smooth = gui.Checkbox(main_box, "main.aimsmooth", "AimSmooth", 1)
 smooth:SetDescription("Aimstep like function, turn off will use fov based")
 local autoshield = gui.Checkbox(main_box, "main.autoshield", "Autoshield", 1)
 autoshield:SetDescription("Auto inject healthshot when you have shield and low hp")
 local notshield = gui.Checkbox(main_box, "main.notshield", "NoHitShield", 0)
 notshield:SetDescription("off aimbot when enemy who covered by shield")
-local hitshieldleg = gui.Keybox(main_box, "main.hitshieldleg", "HitShieldguyLeg", 81)
+local hitshieldleg = gui.Keybox(switch_box, "main.hitshieldleg", "HitShieldguyLeg", 81)
 hitshieldleg:SetDescription("Press key to lock you viewangle to shieldguy's foot or calf")
 local autolock = gui.Checkbox(main_box, "main.autolock", "Autolock", 1)
 autolock:SetDescription("Auto switch to Enemy who close to you and visible (by Aimsmooth) ")
-local lockmdrone = gui.Keybox(main_box, "main.lockmdrone", "LockOnManualDrone", 17)
+local lockmdrone = gui.Keybox(switch_box, "main.lockmdrone", "LockOnManualDrone", 17)
 lockmdrone:SetDescription("lock viewangle to closet manual drone")
-local lockcdrone = gui.Keybox(main_box, "main.lockndrone", "LockOnCargoDrone", 18)
+local lockcdrone = gui.Keybox(switch_box, "main.lockndrone", "LockOnCargoDrone", 18)
 lockcdrone:SetDescription("lock viewangle to closet cargo drone")
 local shieldreturn = gui.Checkbox(main_box, "main.shieldreturn", "shieldreturn", 1)
 shieldreturn:SetDescription("when weapon reload auto switch to 180 backward and when done auto reset")
 local cshieldhit = gui.Checkbox(main_box, "main.shieldhit", "ShieldHit", 1)
 cshieldhit:SetDescription("when shieldguy switch to another weapon or another enemy close to you then switch aimbot on")
+local disablefakelag = gui.Checkbox(main_box, "main.disablefakelag", "Disable FakeLag", 0)
+local disabledistancevis = gui.Checkbox(main_box, "main.disabledisvis", "DisableDistanceVis", 0)
+disabledistancevis:SetDescription("disable distance visual function supply by che@t")
 local disablevisual = gui.Checkbox(main_box, "main.disablevisual", "DisableVisual", 0)
 disablevisual:SetDescription("disable all visual function supply by che@t")
 
-local fasthop = gui.Keybox(main_box, "danger.fasthop", "FastHop", 70)
+local fasthop = gui.Keybox(switch_box, "danger.fasthop", "FastHop", 70)
 fasthop:SetDescription("DZ movement exploit that makes you hop super fast.")
 local f = 0
 local n = 0
@@ -495,15 +509,15 @@ local function lockonitleg(Enemy, step)
 	local rcalf = engine.TraceLine(Enemy:GetHitboxPosition(10), localheadbox)
 	local lfoot = engine.TraceLine(Enemy:GetHitboxPosition(11), localheadbox)
 	local rfoot = engine.TraceLine(Enemy:GetHitboxPosition(12), localheadbox)
-	local bestfraction = rcalf.fraction
-	local tra = rcalf
-	local hitboxnumber = 10
+	local bestfraction = lfoot.fraction
+	local tra = lfoot
+	local hitboxnumber = 11
 
 	if Distance > 300 then
-		if bestfraction < lfoot.fraction then
-			bestfraction = lfoot.fraction
-			tra = lfoot
-			hitboxnumber = 11
+		if bestfraction < rfoot.fraction then
+			bestfraction = rfoot.fraction
+			tra = rcalf
+			hitboxnumber = 12
 		end
 
 		if bestfraction < lcalf.fraction then
@@ -512,16 +526,16 @@ local function lockonitleg(Enemy, step)
 			hitboxnumber = 9
 		end
 
-		if bestfraction < rfoot.fraction then
-			bestfraction = rfoot.fraction
-			tra = rfoot
-			hitboxnumber = 12
+		if bestfraction < rcalf.fraction then
+			bestfraction = rcalf.fraction
+			tra = rcalf
+			hitboxnumber = 10
 		end
 	else
-		if bestfraction < lfoot.fraction then
-			bestfraction = lfoot.fraction
-			tra = lfoot
-			hitboxnumber = 11
+		if bestfraction < rfoot.fraction then
+			bestfraction = rfoot.fraction
+			tra = rcalf
+			hitboxnumber = 12
 		end
 	end
 
@@ -661,6 +675,10 @@ callbacks.Register("CreateMove", function()
 		local BestDDistance = math.huge
 		local bestShield = nil
 		local bestShieldDistance = math.huge
+		bx = 0
+		by = 0
+		cx = 0
+		cy = 0
 
 
 		if client.GetConVar("game_type") == "6" and lockmdrone:GetValue() ~= nil and lockmdrone:GetValue() ~= 0 and lockcdrone:GetValue() ~= nil and lockcdrone:GetValue() ~= 0 then
@@ -693,7 +711,7 @@ callbacks.Register("CreateMove", function()
 				lockatdrone = lockdrone(BestD, 20)
 				dronedistance = BestDDistance
 			end
-		else
+		elseif client.GetConVar("game_type") == "6" then
 			enemyalive = 0
 			for i, Enemy in pairs(Enemies) do
 				if Enemy:IsAlive() then
@@ -842,6 +860,17 @@ callbacks.Register("CreateMove", function()
 					shieldhit = (BestDistance < 76)
 				else
 					gui.SetValue("esp.chams.localweapon.visible", 0)
+					if weaponClass == "rifle" then
+						if BestDistance <= 2800 then
+							gui.SetValue("rbot.hitscan.accuracy.rifle.hitchance", 50)
+							gui.SetValue("rbot.hitscan.accuracy.rifle.hitchanceburst", 50)
+							gui.SetValue("rbot.hitscan.accuracy.rifle.mindamage", 10)
+						else
+							gui.SetValue("rbot.hitscan.accuracy.rifle.hitchance", 85)
+							gui.SetValue("rbot.hitscan.accuracy.rifle.hitchanceburst", 85)
+							gui.SetValue("rbot.hitscan.accuracy.rifle.mindamage", 21)
+						end
+					end
 				end
 				-----print(enemyalive)
 				Closedto = islook(BestEnemy)
@@ -1073,7 +1102,8 @@ callbacks.Register("CreateMove", function()
 		needshieldprotect = localhp <= 75 and string.find(weaponstr, "shield") ~= nil and
 			autoshield:GetValue() and shieldprotectenable
 		needesync = (aimstatus == '"Automatic"' or angle == 180) and
-			(weaponClass ~= "kniefetc" and weaponClass ~= "SHIELD" and localweaponid ~= 69)
+			(weaponClass ~= "kniefetc" and weaponClass ~= "SHIELD" and localweaponid ~= 69) and
+			legit_aa_switch:GetValue()
 	end
 end)
 
@@ -1108,7 +1138,7 @@ local function steptotargetangle(angle, targetangle, aimstep)
 end
 
 local function antiaim()
-	local needesync_value = needesync
+	--local needesync_value = needesync
 	local legit_aa_type_value = legit_aa_type:GetValue()
 	local legit_aa_key_value = legit_aa_key:GetValue()
 
@@ -1221,7 +1251,7 @@ callbacks.Register("CreateMove", function(ucmd)
 			stargetangle = enemydir and 45 or -45
 		end
 		loadback = false
-		if not (velo < 169 and (math.abs(angle) > 135 and math.abs(angle) < 45)) and fasthop:GetValue() ~= nil and fasthop:GetValue() ~= 0 and input.IsButtonDown(fasthop:GetValue()) and not gui.Reference("Menu"):IsActive() then
+		if not (velo < 169 and (math.abs(angle) > 135 and math.abs(angle) < 45)) and fasthop:GetValue() ~= nil and fasthop:GetValue() ~= 0 and input.IsButtonDown(fasthop:GetValue()) then
 			ucmd.buttons = f < 2 and (f == 0 and ucmd.buttons - 4 or (f == 1 and ucmd.buttons - 2 or ucmd.buttons)) or
 				(n and ucmd.buttons - 6 or ucmd.buttons);
 			local isTouchingGround = bit.band(pLocal:GetPropInt("m_fFlags"), 1) ~= 0;
@@ -1246,7 +1276,7 @@ callbacks.Register("CreateMove", function(ucmd)
 			if not input.IsButtonDown(17) then
 				client.Command("-duck", true);
 			end
-			if localweaponid ~= 9 then
+			if localweaponid ~= 9 and not disablefakelag:GetValue() then
 				gui.SetValue("misc.fakelag.enable", true);
 			end
 			loadback = autoreloadback()
@@ -1317,74 +1347,76 @@ local function switch()
 				gui.SetValue("rbot.hitscan.accuracy." .. v .. ".autowall", autowall_value)
 			end
 		end
-		if enemyalive ~= 0 then
-			draw.Color(255, 0, 0, 255);
-			draw.SetFont(fontA)
-			if shieldjumper then
-				draw.Text(screen_w / 2, screen_h / 2 + 200,
-					"V:" .. math.floor(kvelocity) .. " (S)stupid jumper(S)! Name:" .. shieldjumpername)
-			elseif normaljumper then
-				draw.Text(screen_w / 2, screen_h / 2 + 200,
-					"V: " .. nvelocity .. " stupid jumper! CName:" .. normaljumpername);
-			end
-
-			if #tracename ~= 0 then
-				draw.SetFont(font)
-				draw.Color(255, 255, 255, 255)
-				local nextstep = 0
-				for i = 1, #tracename do
-					nextstep = nextstep + 40
-					draw.Text(screen_w / 2 - 400, screen_h / 2 + nextstep,
-						tracename[i] ..
-						" " ..
-						tracedistance[i] ..
-						" " ..
-						tracegun[i] ..
-						" " .. string.format("%.1f", tracebf[i])
-					)
+		if not disabledistancevis:GetValue() then
+			if enemyalive ~= 0 then
+				draw.Color(255, 0, 0, 255);
+				draw.SetFont(fontA)
+				if shieldjumper then
+					draw.Text(screen_w / 2, screen_h / 2 + 200,
+						"V:" .. math.floor(kvelocity) .. " (S)stupid jumper(S)! Name:" .. shieldjumpername)
+				elseif normaljumper then
+					draw.Text(screen_w / 2, screen_h / 2 + 200,
+						"V: " .. nvelocity .. " stupid jumper! CName:" .. normaljumpername);
 				end
-			end
-			if autolockmessage ~= "" then
-				draw.SetFont(font)
-				draw.Color(255, 0, 0, 255)
-				draw.Text(screen_w / 2, screen_h / 2 + 200, autolockmessage)
-			end
-			draw.Color(colorx, 255, colorz, 255)
-			draw.SetFont(font);
-			if bevisible then
-				draw.Text(screen_w / 2 - 180, screen_h / 2 + 80, "Visible")
-			elseif benoscreen then
-				draw.SetFont(fontA)
-				draw.Text(screen_w / 2 - 180, screen_h / 2 + 80, "Be NoScreen!")
-			end
-			draw.SetFont(font);
-			if cvisible then
-				draw.Text(screen_w / 2 - 180, screen_h / 2 + 140, "CVisible")
-			elseif cnoscreen then
-				draw.SetFont(fontA)
-				draw.Text(screen_w / 2 - 180, screen_h / 2 + 140, "C NoScreen!")
-			end
 
-			if Nobest and not cbeaimme then
+				if #tracename ~= 0 then
+					draw.SetFont(font)
+					draw.Color(255, 255, 255, 255)
+					local nextstep = 0
+					for i = 1, #tracename do
+						nextstep = nextstep + 40
+						draw.Text(screen_w / 2 - 400, screen_h / 2 + nextstep,
+							tracename[i] ..
+							" " ..
+							tracedistance[i] ..
+							" " ..
+							tracegun[i] ..
+							" " .. string.format("%.1f", tracebf[i])
+						)
+					end
+				end
+				if autolockmessage ~= "" then
+					draw.SetFont(font)
+					draw.Color(255, 0, 0, 255)
+					draw.Text(screen_w / 2, screen_h / 2 + 200, autolockmessage)
+				end
+				draw.Color(colorx, 255, colorz, 255)
 				draw.SetFont(font);
-				draw.Text(screen_w / 2 - 400, screen_h / 2 - 250, "Safe")
-			end
-			if beaimme then
-				draw.SetFont(fontA)
-				draw.Text(screen_w / 2 - 400, screen_h / 2 - 250, "BE aim me!")
-			end
+				if bevisible then
+					draw.Text(screen_w / 2 - 180, screen_h / 2 + 80, "Visible")
+				elseif benoscreen then
+					draw.SetFont(fontA)
+					draw.Text(screen_w / 2 - 180, screen_h / 2 + 80, "Be NoScreen!")
+				end
+				draw.SetFont(font);
+				if cvisible then
+					draw.Text(screen_w / 2 - 180, screen_h / 2 + 140, "CVisible")
+				elseif cnoscreen then
+					draw.SetFont(fontA)
+					draw.Text(screen_w / 2 - 180, screen_h / 2 + 140, "C NoScreen!")
+				end
 
-			if cbeaimme then
-				draw.SetFont(fontA)
-				draw.Text(screen_w / 2 - 400, screen_h / 2 - 300, "CBE aim me!")
+				if Nobest and not cbeaimme then
+					draw.SetFont(font);
+					draw.Text(screen_w / 2 - 400, screen_h / 2 - 250, "Safe")
+				end
+				if beaimme then
+					draw.SetFont(fontA)
+					draw.Text(screen_w / 2 - 400, screen_h / 2 - 250, "BE aim me!")
+				end
+
+				if cbeaimme then
+					draw.SetFont(fontA)
+					draw.Text(screen_w / 2 - 400, screen_h / 2 - 300, "CBE aim me!")
+				end
+				draw.SetFont(font);
+				if needCdisplay then
+					draw.Text(screen_w / 2, screen_h / 2 - 250, cdistance)
+					draw.Text(screen_w / 2 + 200, screen_h / 2 - 250, cname)
+				end
+				draw.Text(screen_w / 2, screen_h / 2 - 200, bedistance);
+				draw.Text(screen_w / 2 + 200, screen_h / 2 - 200, bename);
 			end
-			draw.SetFont(font);
-			if needCdisplay then
-				draw.Text(screen_w / 2, screen_h / 2 - 250, cdistance)
-				draw.Text(screen_w / 2 + 200, screen_h / 2 - 250, cname)
-			end
-			draw.Text(screen_w / 2, screen_h / 2 - 200, bedistance);
-			draw.Text(screen_w / 2 + 200, screen_h / 2 - 200, bename);
 		end
 		draw.SetFont(font1);
 		draw.Color(255, 255, 255, 255)
@@ -1443,7 +1475,6 @@ local function switch()
 		elseif needoffaim and bestny then
 			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160, "AimShield! angle: " .. bestny)
 		end
-
 		if aimstatus == '"Off"' and not needoffaim then
 			if loadback then
 				draw.Text(screen_w / 2 - 450, screen_h / 2 - 160, "Desync " .. angle .. " LoadBack!")
@@ -1453,20 +1484,22 @@ local function switch()
 				draw.Text(screen_w / 2 - 450, screen_h / 2 - 160, "Desync " .. angle .. " Aimbot disabled!")
 			end
 		end
-		draw.SetFont(fontA)
-		if targetde < 0 then
-			draw.Text(screen_w / 2, screen_h / 2 - 40, "<-")
-		elseif targetde > 0 then
-			draw.Text(screen_w / 2, screen_h / 2 - 40, "->")
-		elseif angle ~= 0 then
-			draw.Text(screen_w / 2, screen_h / 2 - 40, "V")
-		end
-		draw.Color(colorx, 255, colorz, 255)
-		if not benoscreen then
-			draw.Line(bx, by, screenCenterX, 0)
-		end
-		if not cnoscreen then
-			draw.Line(cx, cy, screenCenterX, 0)
+		if not disabledistancevis:GetValue() then
+			draw.SetFont(fontA)
+			if targetde < 0 then
+				draw.Text(screen_w / 2, screen_h / 2 - 40, "<-")
+			elseif targetde > 0 then
+				draw.Text(screen_w / 2, screen_h / 2 - 40, "->")
+			elseif angle ~= 0 then
+				draw.Text(screen_w / 2, screen_h / 2 - 40, "V")
+			end
+			draw.Color(colorx, 255, colorz, 255)
+			if not benoscreen and bx ~= 0 then
+				draw.Line(bx, by, screenCenterX, 0)
+			end
+			if not cnoscreen and cx ~= 0 then
+				draw.Line(cx, cy, screenCenterX, 0)
+			end
 		end
 	end
 end
@@ -1489,5 +1522,5 @@ callbacks.Register("FireGameEvent", function(e)
 			beshieldid = -1
 		end
 	end
-	return attacker
+	-- return attacker
 end)
