@@ -63,8 +63,8 @@ Update 1.0.2:<br />
 (rage.lua)Removed rifle hitchance hardcode,use right calf as first target when HitShieldguyLeg (You can hit rcalf even this enemy used any angle Desync)
 
 Update 1.0.3:<br />
-(rage.lua) Provided switch that you can disable LegitAA(Desync), Fakelag, DistanceBased Visual.GUI changed
-(snapline.lua)Changed the color of piston/light weapon,used async function to draw line that no much performance cost
-(extraesp.lua)used async function to draw line that no much performance cost
-(tablechecker.lua) fixed bug that partyapi say not show enemy's name
+(rage.lua) Provided switch that you can disable LegitAA(Desync), Fakelag, DistanceBased Visual.GUI changed<br />
+(snapline.lua)Changed the color of piston/light weapon,used async function to draw line that no much performance cost<br />
+(extraesp.lua)used async function to draw line that no much performance cost<br />
+(tablechecker.lua) fixed bug that partyapi say not show enemy's name<br />
 config changed fakelag 7 -> 3
