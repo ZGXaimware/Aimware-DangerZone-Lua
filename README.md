@@ -68,3 +68,7 @@ Update 1.0.3:<br />
 (extraesp.lua)used async function to draw line that no much performance cost<br />
 (tablechecker.lua) fixed bug that partyapi say not show enemy's name<br />
 config changed fakelag 7 -> 3
+
+Update 1.0.4:<br />
+(ESP.lua)fixed incorrect Enemy team distance calc way.<br />
+(snapline.lua)drawESP function back old mode due to some problem<br />
