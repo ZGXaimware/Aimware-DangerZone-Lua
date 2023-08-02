@@ -42,7 +42,7 @@ ESP.lua:<br />
   （&nbsp;）DZ special ESP<br />
   （&nbsp;）show weapon class on top(when this one has shield,add"(S)" to string<br />
   （&nbsp;）show distance on left (localplayer to enemy Distance)<br />
-  （&nbsp;）show Enemy's Teammate and between two guy's distance, if his auto muted (probably cheating) then add "(Cheating)" (Example "(M)(Cheater)  will11801") in right<br />
+  （&nbsp;）show Enemy's Teammate and between two guy's distance, if his auto muted (probably cheating) then add "(Cheating)" (Example "(M)(Cheater)  1000 will11801") in right<br />
   （&nbsp;）show ammo status on bottom<br />
   <br />
 extraesp.lua:<br />
