@@ -1,7 +1,3 @@
---author ZGXaimware
---version 1.0.0
-
-
 local warning = gui.Checkbox(gui.Reference("Visuals", "Overlay", "Enemy"), "vis.dzesp", "DangerZoneESP", 1)
 
 local function returnweaponstr(player)
@@ -91,10 +87,10 @@ callbacks.Register("CreateMove", function()
 				if playerdata[teamstr] == nil then playerdata[teamstr] = {} end
 				if player:IsAlive() then
 				table.insert(playerdata[teamstr],
-					{ player:GetIndex(), player:GetName(), math.floor((player:GetAbsOrigin() - pLocal:GetAbsOrigin()):Length()), player:IsAlive() })
+					{ player:GetIndex(), player:GetName(), player:GetAbsOrigin(), player:IsAlive() })
 				else
 					table.insert(playerdata[teamstr],
-					{ player:GetIndex(), player:GetName(), 0, player:IsAlive() })
+					{ player:GetIndex(), player:GetName(), player:GetAbsOrigin(), player:IsAlive() })
 				end
 			end
 		end
@@ -118,8 +114,8 @@ local function drawEspHook(builder)
 		builder:AddTextBottom(tostring(current_weapon:GetProp("m_iClip1") ..
 			"/" .. current_weapon:GetProp("m_iPrimaryReserveAmmoCount")))
 	end
-
-	local Distance = math.floor((builder_entity:GetAbsOrigin() - pLocal:GetAbsOrigin()):Length())
+	local lpabs = builder_entity:GetAbsOrigin()
+	local Distance = math.floor((lpabs - pLocal:GetAbsOrigin()):Length())
 	if Distance ~= nil then
 		builder:AddTextLeft("D:" .. Distance)
 	end
@@ -152,12 +148,12 @@ local function drawEspHook(builder)
 				if data[1] ~= builder_entity:GetIndex() then
 					if abuseteam[teamstr] then
 						if ischeater == 1 then
-							righttext = data[4] and "(M)(Cheater) " .. math.abs(Distance - data[3]) .. " " .. data[2] or "(M)(Cheater)(Dead) " .. data[2]
+							righttext = data[4] and "(M)(Cheater) " .. math.abs((lpabs - data[3]):Length()) .. " " .. data[2] or "(M)(Cheater)(Dead) " .. data[2]
 						else
-							righttext = data[4] and "(Cheater) " .. math.abs(Distance - data[3]) .. " " .. data[2] or "(Cheater)(Dead) " .. data[2]
+							righttext = data[4] and "(Cheater) " .. math.abs((lpabs - data[3]):Length()) .. " " .. data[2] or "(Cheater)(Dead) " .. data[2]
 						end
 					else
-						righttext = data[4] and math.abs(Distance - data[3]) .. " " .. data[2] or "(Dead) "  .. data[2]
+						righttext = data[4] and math.abs((lpabs - data[3]):Length()) .. " " .. data[2] or "(Dead) "  .. data[2]
 					end
 				end
 			end

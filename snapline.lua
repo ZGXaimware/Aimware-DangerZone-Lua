@@ -106,10 +106,7 @@ local function DrawLine()
         draw.Color(key[5], key[6], key[7], key[8])
         draw.Line(key[1], key[2], key[3], key[4])
     end
-    for _, key in pairs(drawespxy) do
-        draw.Color(key[5], key[6], key[7], key[8])
-        draw.Line(key[1], key[2], key[3], key[4])
-    end
+
     for _, key in pairs(dronetable) do
         if BestMDistance < 1200 then
             draw.SetFont(fontA)
@@ -368,6 +365,7 @@ end
 
 local function drawEspHook(builder)
     if isNeedW then
+        drawespxy = {}
         local builder_entity = builder:GetEntity()
         if builder_entity == nil then return end
         local builder_name = builder_entity:GetName()
@@ -436,6 +434,10 @@ local function drawEspHook(builder)
                     end
                 end
             end
+        end
+        for _, key in pairs(drawespxy) do
+            draw.Color(key[5], key[6], key[7], key[8])
+            draw.Line(key[1], key[2], key[3], key[4])
         end
     end
 end
