@@ -1,6 +1,8 @@
 ﻿# Aimware-DangerZone-Lua<br />
+Last Updated 2023/8/2 1.0.4
 Dont sell my code on NL/SK/Pri market.It is opensource<br />
-
+But you can transfer to another cheat as free version to spilit out is allowed<br />
+<br />
 Ref:I have used code from<br />
 [[Release] Danger Zone Speedhack | AIMWARE.net](https://aimware.net/forum/thread/147031) (Has fixed by me) @Zerdos Thanks for your origin code<br />
 [[Release] UpperHook Semi Rage Helper (Updated 21/7/2022) | AIMWARE.net](https://aimware.net/forum/thread/168455) (Used its ui design) @RDX_K3LL3R<br />
