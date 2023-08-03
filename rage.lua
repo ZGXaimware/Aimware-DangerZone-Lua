@@ -130,6 +130,7 @@ local screenCenterX = screen_w * 0.5;
 local loadback = false
 local enemydir = true
 local beshieldid = -1
+local legit_aa_key_value = true
 client.AllowListener("weapon_fire");
 client.AllowListener("bullet_impact");
 client.Command("unbind mouse3;unbind shift;unbind q", true)
@@ -232,6 +233,7 @@ callbacks.Register("CreateMove", function()
 		aimstatus = gui.GetValue("rbot.aim.enable")
 		local localteamidt = pLocal:GetPropInt("m_nSurvivalTeam")
 		localteamid = (localteamidt == -1) and -2 or localteamidt
+		legit_aa_key_value = legit_aa_key:GetValue()
 	else
 		plocallive = false
 	end
@@ -1140,7 +1142,6 @@ end
 local function antiaim()
 	--local needesync_value = needesync
 	local legit_aa_type_value = legit_aa_type:GetValue()
-	local legit_aa_key_value = legit_aa_key:GetValue()
 
 	if needesync then
 		if not aa_side then
@@ -1159,12 +1160,6 @@ local function antiaim()
 				targetde = 25
 				roll = 10
 			end
-		end
-	end
-
-	if legit_aa_key_value ~= 0 then
-		if input.IsButtonPressed(legit_aa_key_value) then
-			aa_side = not aa_side
 		end
 	end
 
@@ -1304,6 +1299,11 @@ local function switch()
 	if disablevisual:GetValue() then
 		gui.SetValue("esp.master", 0)
 		if plocallive then
+			if legit_aa_key_value ~= 0 then
+				if input.IsButtonPressed(legit_aa_key_value) then
+					aa_side = not aa_side
+				end
+			end
 			f = (fasthop:GetValue() ~= nil and fasthop:GetValue() ~= 0 and input.IsButtonPressed(fasthop:GetValue())) and
 				0 or f;
 		end
@@ -1312,6 +1312,11 @@ local function switch()
 		gui.SetValue("esp.master", 1)
 	end
 	if plocallive then
+		if legit_aa_key_value ~= 0 then
+			if input.IsButtonPressed(legit_aa_key_value) then
+				aa_side = not aa_side
+			end
+		end
 		f = (fasthop:GetValue() ~= nil and fasthop:GetValue() ~= 0 and input.IsButtonPressed(fasthop:GetValue())) and
 			0 or f;
 		draw.SetFont(font1)

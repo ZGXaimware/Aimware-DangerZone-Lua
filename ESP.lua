@@ -148,12 +148,12 @@ local function drawEspHook(builder)
 				if data[1] ~= builder_entity:GetIndex() then
 					if abuseteam[teamstr] then
 						if ischeater == 1 then
-							righttext = data[4] and "(M)(Cheater) " .. math.abs((lpabs - data[3]):Length()) .. " " .. data[2] or "(M)(Cheater)(Dead) " .. data[2]
+							righttext = data[4] and "(M)(Cheater) " .. math.floor((lpabs - data[3]):Length()) .. " " .. data[2] or "(M)(Cheater)(Dead) " .. data[2]
 						else
-							righttext = data[4] and "(Cheater) " .. math.abs((lpabs - data[3]):Length()) .. " " .. data[2] or "(Cheater)(Dead) " .. data[2]
+							righttext = data[4] and "(Cheater) " .. math.floor((lpabs - data[3]):Length()) .. " " .. data[2] or "(Cheater)(Dead) " .. data[2]
 						end
 					else
-						righttext = data[4] and math.abs((lpabs - data[3]):Length()) .. " " .. data[2] or "(Dead) "  .. data[2]
+						righttext = data[4] and math.floor((lpabs - data[3]):Length()) .. " " .. data[2] or "(Dead) "  .. data[2]
 					end
 				end
 			end

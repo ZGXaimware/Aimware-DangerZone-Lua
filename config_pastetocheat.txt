@@ -1,9 +1,9 @@
 lua.unloadall
-lua.load "ESP.lua"
-lua.load "extraesp.lua"
-lua.load "rage.lua"
-lua.load "snapline.lua"
-lua.load "tabletchecker.lua"
+lua.load "githubDZ/ESP.lua"
+lua.load "githubDZ/extraesp.lua"
+lua.load "githubDZ/rage.lua"
+lua.load "githubDZ/snapline.lua"
+lua.load "githubDZ/tabletchecker.lua"
 adv.binds "Off"
 adv.confirm "On"
 adv.conkey 36

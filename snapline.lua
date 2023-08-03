@@ -97,34 +97,36 @@ local function returnweaponstr(player)
 end
 
 local function DrawLine()
-    if warning:GetValue() then
-        draw.Color(255, 255, 255, 255);
-        draw.SetFont(font1);
-        draw.Text(screenCenterX - 782, screenH / 2 - 100, "SnapLine")
-    end
-    for _, key in pairs(drawxy) do
-        draw.Color(key[5], key[6], key[7], key[8])
-        draw.Line(key[1], key[2], key[3], key[4])
-    end
-
-    for _, key in pairs(dronetable) do
-        if BestMDistance < 1200 then
-            draw.SetFont(fontA)
-            draw.Color(255, 0, 0, 255);
-        else
-            draw.SetFont(font)
+    if isNeedW then
+        if warning:GetValue() then
             draw.Color(255, 255, 255, 255);
+            draw.SetFont(font1);
+            draw.Text(screenCenterX - 782, screenH / 2 - 100, "SnapLine")
         end
-        draw.Text(key[1], key[2], key[3])
-    end
-    if #dronetable ~= 0 and BestMDistance < 6000 then
-        draw.Text(screenCenterX - 800, screenH / 2 + 200, "MD Distance:" .. math.floor(BestMDistance));
-    end
-    draw.SetFont(font)
-    draw.Color(255, 255, 255, 255);
-    if ENDdistance ~= 0 then
-        draw.Text(screenCenterX - 800, screenH / 2 + 140,
-            "EndCircle Distance:" .. ENDdistance);
+        for _, key in pairs(drawxy) do
+            draw.Color(key[5], key[6], key[7], key[8])
+            draw.Line(key[1], key[2], key[3], key[4])
+        end
+
+        for _, key in pairs(dronetable) do
+            if BestMDistance < 1200 then
+                draw.SetFont(fontA)
+                draw.Color(255, 0, 0, 255);
+            else
+                draw.SetFont(font)
+                draw.Color(255, 255, 255, 255);
+            end
+            draw.Text(key[1], key[2], key[3])
+        end
+        if #dronetable ~= 0 and BestMDistance < 6000 then
+            draw.Text(screenCenterX - 800, screenH / 2 + 200, "MD Distance:" .. math.floor(BestMDistance));
+        end
+        draw.SetFont(font)
+        draw.Color(255, 255, 255, 255);
+        if ENDdistance ~= 0 then
+            draw.Text(screenCenterX - 800, screenH / 2 + 140,
+                "EndCircle Distance:" .. ENDdistance);
+        end
     end
 end
 
