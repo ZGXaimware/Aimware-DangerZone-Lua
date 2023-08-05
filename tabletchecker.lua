@@ -46,8 +46,9 @@ callbacks.Register("CreateMove", function(cmd)
 
         for i, player in ipairs(players) do
             local playerIndex = player:GetIndex()
+            local localindex = (entities.GetLocalPlayer()):GetIndex()
 
-            if player:GetName() ~= "GOTV" and entities.GetPlayerResources():GetPropInt("m_iPing", playerIndex) ~= 0 then
+            if player:GetName() ~= "GOTV" and entities.GetPlayerResources():GetPropInt("m_iPing", playerIndex) ~= 0 and localindex ~= playerIndex then
                 table.insert(playerlist, player:GetName())
                 if player:GetWeaponID() == 72 then
                     local playerMoney = player:GetPropInt("m_iAccount")

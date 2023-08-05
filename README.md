@@ -15,7 +15,9 @@ Note:I have hard coded <br />
 4.force set sniper baim (this mode awp cant get too much ammo and HS miss will LOSE your winner chance rate)<br />
 WARNING:IF YOU WANT USE HIGH FOV you can turn off AimSmooth and FOV will be dynamic that you could always hit cloest ENEMY.(abandon function but still work)<br />
 
-part of showcase:<br />
+Main showcase:<br />
+https://youtu.be/rttTZmpphz4 <br />
+part of function showcase:<br />
 [SpeedHack](https://www.bilibili.com/video/BV1a8411m7HR/) <br />
 [NotHitShield](https://www.bilibili.com/video/BV1mP411r7F7/) <br />
 [AimDrone&DroneDetect](https://www.bilibili.com/video/BV1n14y1X7hq) <br />
@@ -69,8 +71,16 @@ Update 1.0.3:<br />
 (snapline.lua)Changed the color of piston/light weapon,used async function to draw line that no much performance cost<br />
 (extraesp.lua)used async function to draw line that no much performance cost<br />
 (tablechecker.lua) fixed bug that partyapi say not show enemy's name<br />
-config changed fakelag 7 -> 3
-
+config changed fakelag 7 -> 3<br />
+<br />
 Update 1.0.4:<br />
 (ESP.lua)fixed incorrect Enemy team distance calc way.<br />
 (snapline.lua)drawESP function back old mode due to some problem<br />
+<br />
+Update 1.0.5:<br />
+(all)fixed potential bug when select jump spot makes game crash<br />
+(rage.lua) add extra switch to disable some setprop function<br />
+(rage.lua) press key 'USE' will suspend autoshield/shieldreturn due to conflict<br />
+(esp.lua/snapline.lua) used correct detection<br />
+(tablechecker.lua) now will not check localplayer's profile<br />
+<br />

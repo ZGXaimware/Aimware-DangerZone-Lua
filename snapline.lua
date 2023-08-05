@@ -97,6 +97,8 @@ local function returnweaponstr(player)
 end
 
 local function DrawLine()
+    if not warning:GetValue() or not gui.GetValue("esp.master")  then return end
+
     if isNeedW then
         if warning:GetValue() then
             draw.Color(255, 255, 255, 255);
@@ -175,6 +177,8 @@ end)
 -- end
 
 local function SnapLines()
+    if not warning:GetValue() or not gui.GetValue("esp.master")  then return end
+
     if isNeedW then
         hss = entities.FindByClass("CHostage")
         lcs = entities.FindByClass("CPhysPropLootCrate");
@@ -366,6 +370,8 @@ local function SnapLines()
 end
 
 local function drawEspHook(builder)
+    if not warning:GetValue() or not gui.GetValue("esp.master")  then return end
+
     if isNeedW then
         drawespxy = {}
         local builder_entity = builder:GetEntity()
@@ -455,7 +461,7 @@ callbacks.Register("CreateMove", "SnapLines", SnapLines)
 callbacks.Register('DrawESP', "drawEspHook", drawEspHook)
 callbacks.Register("CreateMove", function()
     local_player = entities.GetLocalPlayer()
-    if local_player and local_player:IsAlive() and gui.GetValue("esp.master") and client.GetConVar("game_type") == "6" then
+    if local_player and local_player:IsAlive() and client.GetConVar("game_type") == "6" then
         isNeedW = true
         localabs = local_player:GetAbsOrigin()
         localweaponid = local_player:GetWeaponID()

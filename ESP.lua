@@ -1,5 +1,8 @@
 local warning = gui.Checkbox(gui.Reference("Visuals", "Overlay", "Enemy"), "vis.dzesp", "DangerZoneESP", 1)
 
+local pLocal = nil
+local plocallive = false
+
 local function returnweaponstr(player)
 	if player:IsPlayer() and player:IsAlive() then
 		local recstr = ""
@@ -71,8 +74,7 @@ local playerdata = {}
 local abuseteam = {}
 
 callbacks.Register("CreateMove", function()
-	local pLocal = entities.GetLocalPlayer()
-	if pLocal == nil or not pLocal:IsAlive() then return end
+	if not warning:GetValue() or not gui.GetValue("esp.master") or not plocallive then return end
 	local players = entities.FindByClass("CCSPlayer")
 	playerdata = {}
 	abuseteam = {}
@@ -99,11 +101,7 @@ end)
 
 
 local function drawEspHook(builder)
-	if not warning:GetValue() then return end
-
-	local pLocal = entities.GetLocalPlayer()
-	if pLocal == nil or not pLocal:IsAlive() then return end
-
+	if not warning:GetValue() or not gui.GetValue("esp.master") or not plocallive then return end
 	local builder_entity = builder:GetEntity()
 	if builder_entity == nil then return end
 	if not builder_entity:IsPlayer() or not builder_entity:IsAlive() then return end
@@ -180,3 +178,16 @@ end
 
 
 callbacks.Register('DrawESP', "drawEspHook", drawEspHook)
+
+
+callbacks.Register("CreateMove", function()
+	pLocal = entities.GetLocalPlayer()
+	if pLocal ~= nil then plocallive = false end
+	weaponstr = returnweaponstr(pLocal)
+
+	if weaponstr ~= "weapon_fists " and pLocal:IsAlive() then
+		plocallive = true
+	else
+		plocallive = false
+	end
+end)

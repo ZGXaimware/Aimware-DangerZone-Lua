@@ -56,7 +56,8 @@ local disabledistancevis = gui.Checkbox(main_box, "main.disabledisvis", "Disable
 disabledistancevis:SetDescription("disable distance visual function supply by che@t")
 local disablevisual = gui.Checkbox(main_box, "main.disablevisual", "DisableVisual", 0)
 disablevisual:SetDescription("disable all visual function supply by che@t")
-
+local disablesetprop = gui.Checkbox(main_box, "main.disablevisual", "DisableProp", 1)
+disablesetprop:SetDescription("disable all visual by setprop")
 local fasthop = gui.Keybox(switch_box, "danger.fasthop", "FastHop", 70)
 fasthop:SetDescription("DZ movement exploit that makes you hop super fast.")
 local f = 0
@@ -218,12 +219,14 @@ local localteamid = -2
 
 callbacks.Register("CreateMove", function()
 	pLocal = entities.GetLocalPlayer()
-	if pLocal ~= nil and pLocal:IsAlive() then
+	if pLocal ~= nil then plocallive = false end
+	weaponstr = returnweaponstr(pLocal)
+
+	if weaponstr ~= "weapon_fists " and pLocal:IsAlive() then
 		plocallive = true
 		local rab = string.sub(gui.GetValue("rbot.antiaim.base"), 2, -2)
 		local r1, _ = string.find(rab, " ")
 		angle = tonumber(string.sub(rab, 0, r1))
-		weaponstr = returnweaponstr(pLocal)
 		localweaponid = pLocal:GetWeaponID() or 0
 		weaponClass = get_weapon_class(localweaponid)
 		localabs = pLocal:GetAbsOrigin()
@@ -629,7 +632,7 @@ end
 
 local function autoreloadback()
 	local weaponvalid = weapons_table[weaponClass]
-	if weaponvalid == nil or not shieldreturn:GetValue() then
+	if weaponvalid == nil or not shieldreturn:GetValue() or input.IsButtonDown(69) then
 		return false
 	end
 	local pwentitie = pLocal:GetPropEntity("m_hActiveWeapon")
@@ -1176,12 +1179,14 @@ end
 
 callbacks.Register("CreateMove", function(ucmd)
 	if plocallive then
-		pLocal:SetProp("m_flHealthShotBoostExpirationTime", -1)
-		local tablets = entities.FindByClass("CTablet")
-		if tablets ~= nil then
-			for i = 1, #tablets do
-				local tablet = tablets[i]
-				tablet:SetProp("m_bTabletReceptionIsBlocked", false)
+		if not disablesetprop:GetValue() then
+			pLocal:SetProp("m_flHealthShotBoostExpirationTime", -1)
+			local tablets = entities.FindByClass("CTablet")
+			if tablets ~= nil then
+				for i = 1, #tablets do
+					local tablet = tablets[i]
+					tablet:SetProp("m_bTabletReceptionIsBlocked", false)
+				end
 			end
 		end
 		antiaim()
@@ -1214,7 +1219,7 @@ callbacks.Register("CreateMove", function(ucmd)
 				if string.find(weaponstr, "healthshot") ~= nil then
 					healthshotinject = true
 					gui.SetValue("misc.showspec", 1)
-					if localweaponid ~= 57 then
+					if localweaponid ~= 57 and not input.IsButtonDown(69) then
 						client.Command("use weapon_healthshot", true)
 					elseif (pLocal:GetPropEntity("m_hActiveWeapon")):GetPropInt("m_iIronSightMode") ~= 2 then
 						ucmd.buttons = 1
@@ -1309,7 +1314,7 @@ local function switch()
 		end
 		return
 	else
-		gui.SetValue("esp.master", 1)
+		if not gui.GetValue("esp.master") then gui.SetValue("esp.master", 1) end
 	end
 	if plocallive then
 		if legit_aa_key_value ~= 0 then
@@ -1516,7 +1521,7 @@ callbacks.Register("FireGameEvent", function(e)
 		["weapon_fire"] = true,
 		["bullet_impact"] = true
 	}
-	if weaponEvents[eventName] then
+	if weaponEvents[eventName] and localhp <= 90 and plocallive then
 		if client.GetPlayerIndexByUserID(e:GetInt("userid")) ~= localindex and entities.GetByUserID(e:GetInt("userid")):GetPropInt("m_nSurvivalTeam") ~= localteamid then
 			attacker = entities.GetByUserID(e:GetInt("userid"))
 		end
