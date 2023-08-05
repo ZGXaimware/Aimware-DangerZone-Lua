@@ -1,5 +1,5 @@
 ﻿# Aimware-DangerZone-Lua<br />
-Last Updated 2023/8/2 1.0.4
+Last Updated 2023/8/5 1.0.5
 Dont sell my code on NL/SK/Pri market.It is opensource<br />
 But you can transfer to another cheat as free version to spilit out is allowed<br />
 <br />
