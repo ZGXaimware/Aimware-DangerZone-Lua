@@ -1,5 +1,5 @@
 --author ZGXaimware
---version 1.0.0
+--version 1.0.5
 
 
 local playerdata = {}
@@ -15,7 +15,7 @@ if players ~= nil then
     for i, player in ipairs(players) do
         local playerName = player:GetName()
         local playerIndex = player:GetIndex()
-        if playerName ~= "GOTV" and entities.GetPlayerResources():GetPropInt("m_iPing", playerIndex) ~= 0 then
+        if playerName ~= "GOTV" then
             local playerTeam = player:GetPropInt("m_nSurvivalTeam")
             local teamstr = "team" .. playerTeam
             if entities.GetPlayerResources():GetPropInt("m_bHasCommunicationAbuseMute", playerIndex) == 1 and teamstr ~= "team-1" then
@@ -26,7 +26,6 @@ if players ~= nil then
             end
             table.insert(playerdata[teamstr],
                 { playerIndex, playerName, playerTeam, player:IsAlive() })
-
         end
     end
     print("--------------------------------------")
@@ -43,10 +42,13 @@ if players ~= nil then
             end
         else
             local playerTeamData = playerdata[teamstr]
-            for j, data in ipairs(playerTeamData) do
-                if data[1] ~= player:GetIndex() then
-                    local teammateString = abuseteam[teamstr] and "Cheater Teammate:" or "Teammate:"
-                    nonsingleteamout[teamstr] = teamstr .. ": " .. player:GetName() .. " " .. teammateString .. data[2]
+            if playerTeamData ~= nil then
+                for j, data in ipairs(playerTeamData) do
+                    if data[1] ~= player:GetIndex() then
+                        local teammateString = abuseteam[teamstr] and "Cheater Teammate:" or "Teammate:"
+                        nonsingleteamout[teamstr] = teamstr ..
+                        ": " .. player:GetName() .. " " .. teammateString .. data[2]
+                    end
                 end
             end
         end
@@ -57,6 +59,6 @@ if players ~= nil then
             print(nonsingleteamout[teamstr])
         end
     end
-    print("Total: " .. #players -1 .. " players")
+    print("Total: " .. #players - 1 .. " players")
     print("-----------------END------------------")
 end

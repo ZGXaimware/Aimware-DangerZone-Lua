@@ -65,7 +65,7 @@ callbacks.Register("CreateMove", function(cmd)
 
                     if cachelistpurchaseid[playerIndex] ~= purchaseIndex then
                         if cachemoneylist[playerIndex] - playerMoney > 0 and purchaseIndex ~= -1 then
-                            print(player:GetName() .. " has brought " .. tabletitemindex[purchaseIndex])
+                            print(player:GetName() .. " purchased " .. tabletitemindex[purchaseIndex])
                         end
 
                         cachelistpurchaseid[playerIndex] = purchaseIndex
@@ -75,14 +75,14 @@ callbacks.Register("CreateMove", function(cmd)
         end
         cachemoneylist = moneylist
 
-
+        local money = entities.FindByClass("CItemCash")
         if #cachelist ~= #playerlist or #cachelist == 0 then
             local ranksModeValue = ranks_mode:GetValue()
             for i, enemy in ipairs(cachelist) do
                 if not findthisguy(enemy, playerlist) then
-                    if entities.FindByClass("CItemCash") ~= nil then
+                    if money ~= nil and #money ~= 0 then
                         if ranksModeValue == 0 then
-                            local message = "「Defeat Exit" .. string.gsub(": " .. enemy, "%s", "") .. "」"
+                            local message = "「Exit" .. string.gsub(": " .. enemy, "%s", "") .. "」"
                             panorama.RunScript(
                                 "PartyListAPI.SessionCommand('Game::Chat', 'run all xuid ' + MyPersonaAPI.GetXuid() + ' chat " ..
                                 message .. "');")
@@ -90,7 +90,7 @@ callbacks.Register("CreateMove", function(cmd)
                         print("Defeat Exit" .. ": " .. enemy)
                     else
                         if ranksModeValue == 0 then
-                            local message = "「Warmup Escaped" .. string.gsub(": " .. enemy, "%s", "") .. "」"
+                            local message = "「WExit" .. string.gsub(": " .. enemy, "%s", "") .. "」"
                             panorama.RunScript(
                                 "PartyListAPI.SessionCommand('Game::Chat', 'run all xuid ' + MyPersonaAPI.GetXuid() + ' chat " ..
                                 message .. "');")

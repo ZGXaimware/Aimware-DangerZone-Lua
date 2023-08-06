@@ -1,5 +1,5 @@
 ﻿# Aimware-DangerZone-Lua<br />
-Last Updated 2023/8/5 1.0.5
+Last Updated 2023/8/6 1.0.6
 Dont sell my code on NL/SK/Pri market.It is opensource<br />
 But you can transfer to another cheat as free version to spilit out is allowed<br />
 <br />
@@ -83,4 +83,10 @@ Update 1.0.5:<br />
 (rage.lua) press key 'USE' will suspend autoshield/shieldreturn due to conflict<br />
 (esp.lua/snapline.lua) used correct detection<br />
 (tablechecker.lua) now will not check localplayer's profile<br />
+<br />
+Update 1.0.6:<br />
+(rage.lua) fixed bug for shield jumper will not smoothaim<br />
+(rage.lua) now Legaim need not enable NohitShield<br />
+(rage.lua) Updated Jumper TextView<br />
+(etc)Fixed some bugs that has no another function changed<br />
 <br />

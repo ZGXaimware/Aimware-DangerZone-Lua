@@ -99,6 +99,8 @@ local tracebf = {}
 local autolockmessage = ""
 local normaljumper = false
 local normaljumpername = ""
+local normaljumpernameDistance = math.huge
+local shieldjumpernameDistance = math.huge
 local nvelocity = 0
 local enemyalive = 0
 local colorx = 255
@@ -132,6 +134,8 @@ local loadback = false
 local enemydir = true
 local beshieldid = -1
 local legit_aa_key_value = true
+local smoothstep = 15
+
 client.AllowListener("weapon_fire");
 client.AllowListener("bullet_impact");
 client.Command("unbind mouse3;unbind shift;unbind q", true)
@@ -312,6 +316,7 @@ local function detectEnemydir(Enemy)
 end
 
 local function stepchangeviewanglemain(own_eyex, enemy_x, own_eyey, enemy_y, step)
+	if input.IsButtonDown(hitshieldleg:GetValue()) then return end
 	local needx = nil
 	local needy = nil
 	local stepx = step
@@ -670,7 +675,6 @@ callbacks.Register("CreateMove", function()
 		local CBestDistance = math.huge
 		local totaldistance = 0
 		local Closedto = false
-		local smoothstep = 15
 		local shieldguy = {}
 		local shieldguyny = {}
 		local BestMD = nil
@@ -826,6 +830,9 @@ callbacks.Register("CreateMove", function()
 							BestDistance = Distance
 							shieldjumper = true
 							shieldjumpername = shield:GetName()
+							shieldjumpernameDistance = Distance
+
+							if autolock:GetValue() then smoothon = smoothaim(shield, smoothstep) end
 						end
 					end
 				end
@@ -913,7 +920,7 @@ callbacks.Register("CreateMove", function()
 									Closedto = islook(attacker)
 									gui.SetValue("rbot.aim.target.selection", 2)
 
-									if not Closedto then
+									if not Closedto and not smoothon then
 										smoothon = smoothaim(attacker, smoothstep + 5)
 									end
 								end
@@ -929,12 +936,12 @@ callbacks.Register("CreateMove", function()
 							end
 
 							if localhp <= 109 then
-								if BestDistance < 1750 and not Closedto then
+								if BestDistance < 1750 and not Closedto and not smoothon then
 									smoothon = smoothaim(BestEnemy, smoothstep)
 									autolockmessage = "Too Close and Low HP " .. localhp
 								end
 							else
-								if BestDistance < 1250 and not Closedto then
+								if BestDistance < 1250 and not Closedto and not smoothon then
 									smoothon = smoothaim(BestEnemy, smoothstep)
 									autolockmessage = "Extremely Close"
 								end
@@ -942,16 +949,18 @@ callbacks.Register("CreateMove", function()
 						end
 					end
 					normaljumper = false
-					if ((CBestDistance < 3000 or BestDistance < 3000) and nvelocity > 399 and Closedto ~= true) then
-						if Cowner == owner and autolock:GetValue() then
+					if ((CBestDistance < 3000 or BestDistance < 3000) and nvelocity > 399 and Closedto ~= true) and not shieldjumper then
+						if Cowner == owner and autolock:GetValue() and not smoothon  then
 							smoothon = smoothaim(BestEnemy, smoothstep)
 						end
 						normaljumper = true
 
 						if cvbest then
 							normaljumpername = CBestEnemy:GetName()
+							normaljumpernameDistance = CBestDistance
 						else
 							normaljumpername = BestEnemy:GetName()
+							normaljumpernameDistance = BestDistance
 						end
 					else
 						normaljumper = false
@@ -1056,10 +1065,10 @@ callbacks.Register("CreateMove", function()
 							end
 						end
 					end
-
-					if needoffaim and input.IsButtonDown(hitshieldleg:GetValue()) then
-						aimingleg = lockonitleg(bestShield, smoothstep)
-					end
+				end
+				if input.IsButtonDown(hitshieldleg:GetValue()) and bestShield ~= nil then
+					aimingleg = lockonitleg(bestShield, smoothstep)
+					needoffaim = true
 				end
 			elseif BestEnemy ~= nil and beshieldid == BestEnemy:GetIndex() then
 				beshieldid = -1
@@ -1363,10 +1372,10 @@ local function switch()
 				draw.SetFont(fontA)
 				if shieldjumper then
 					draw.Text(screen_w / 2, screen_h / 2 + 200,
-						"V:" .. math.floor(kvelocity) .. " (S)stupid jumper(S)! Name:" .. shieldjumpername)
+						math.floor(shieldjumpernameDistance) .. "jumper(Shield)! Name:" .. shieldjumpername)
 				elseif normaljumper then
 					draw.Text(screen_w / 2, screen_h / 2 + 200,
-						"V: " .. nvelocity .. " stupid jumper! CName:" .. normaljumpername);
+						math.floor(normaljumpernameDistance) .. "jumper! CName:" .. normaljumpername);
 				end
 
 				if #tracename ~= 0 then
