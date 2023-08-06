@@ -316,7 +316,6 @@ local function detectEnemydir(Enemy)
 end
 
 local function stepchangeviewanglemain(own_eyex, enemy_x, own_eyey, enemy_y, step)
-	if input.IsButtonDown(hitshieldleg:GetValue()) then return end
 	local needx = nil
 	local needy = nil
 	local stepx = step
