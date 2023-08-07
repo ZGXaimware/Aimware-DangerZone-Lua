@@ -1,5 +1,5 @@
-﻿# Aimware-DangerZone-Lua<br />
-Last Updated 2023/8/6 1.0.6
+# Aimware-DangerZone-Lua<br />
+Last Updated 2023/8/7 1.0.8
 Dont sell my code on NL/SK/Pri market.It is opensource<br />
 But you can transfer to another cheat as free version to spilit out is allowed<br />
 <br />
@@ -89,4 +89,12 @@ Update 1.0.6:<br />
 (rage.lua) now Legaim need not enable NohitShield<br />
 (rage.lua) Updated Jumper TextView<br />
 (etc)Fixed some bugs that has no another function changed<br />
+<br />
+Update 1.0.7:<br />
+(rage.lua) ShieldHit function Updated ,now shieldguy distance < 130 and hold shield will auto enable backward shield to prevent plocal get hurt from enemy<br />
+(rage.lua) Updated shieldguy textview style for notice
+、<br />
+Update 1.0.8:<br />
+(rage.lua) (VERY USEFUL) when any (not affect with nothitshield ) shield guy distance < 800 then auto lock its leg and autoattack,he cant protect himself but only crouch and holdshield<br />
+BUT IT IS VERY SLOW SO YOU CAN KILL HIM ANY WAY LOL<br /> 
 <br />

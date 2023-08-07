@@ -450,14 +450,14 @@ end
 
 
 
-local function islook(Enemy)
-	local targetDirection = Enemy:GetHitboxPosition(1) - localheadbox
+local function islook(Enemy, hitboxnum)
+	local targetDirection = Enemy:GetHitboxPosition(hitboxnum) - localheadbox
 	local targetDistance = targetDirection:Length()
 	local targetAngles = targetDirection:Angles()
 	local myeye = engine.GetViewAngles()
 	local nx, ny = eyetoneedyangle(myeye.x, myeye.y, targetAngles.x, targetAngles.y)
 
-	if targetDistance < 400 then
+	if targetDistance < 400 and hitboxnum < 9 then
 		return math.abs(nx) < 20 and math.abs(ny) < 15
 	elseif targetDistance < 1500 then
 		return math.abs(nx) < 40 and math.abs(ny) < 20
@@ -468,23 +468,24 @@ end
 
 
 
-local function lockonitleg(Enemy, step)
-	if angle ~= 0 then return end
-
+local function lockonitlegprecalc(Enemy)
+	if angle ~= 0 or get_weapon_class(localweaponid) == "shared" or get_weapon_class(localweaponid) == "SHIELD" then
+		return 1
+	end
 	local Distance = (Enemy:GetAbsOrigin() - localabs):Length()
 	local lcalf = engine.TraceLine(Enemy:GetHitboxPosition(9), localheadbox)
 	local rcalf = engine.TraceLine(Enemy:GetHitboxPosition(10), localheadbox)
 	local lfoot = engine.TraceLine(Enemy:GetHitboxPosition(11), localheadbox)
 	local rfoot = engine.TraceLine(Enemy:GetHitboxPosition(12), localheadbox)
-	local bestfraction = lfoot.fraction
-	local tra = lfoot
-	local hitboxnumber = 11
+	local bestfraction = rfoot.fraction
+	local tra = rfoot
+	local hitboxnumber = 12
 
 	if Distance > 300 then
-		if bestfraction < rfoot.fraction then
+		if bestfraction < rcalf.fraction then
 			bestfraction = rfoot.fraction
 			tra = rcalf
-			hitboxnumber = 12
+			hitboxnumber = 10
 		end
 
 		if bestfraction < lcalf.fraction then
@@ -493,26 +494,33 @@ local function lockonitleg(Enemy, step)
 			hitboxnumber = 9
 		end
 
-		if bestfraction < rcalf.fraction then
-			bestfraction = rcalf.fraction
-			tra = rcalf
-			hitboxnumber = 10
+		if bestfraction < lfoot.fraction then
+			bestfraction = lfoot.fraction
+			tra = lfoot
+			hitboxnumber = 11
 		end
 	else
-		if bestfraction < rfoot.fraction then
-			bestfraction = rfoot.fraction
-			tra = rcalf
-			hitboxnumber = 12
+		if bestfraction < lfoot.fraction then
+			bestfraction = lfoot.fraction
+			tra = lfoot
+			hitboxnumber = 11
 		end
 	end
 
-	if tra == nil then return end
+	if tra == nil or bestfraction < 0.85 then
+		return 1
+	else
+		return hitboxnumber
+	end
+end
 
-	if bestfraction > 0.85 then
+local function lockonitlegac(Enemy, hitboxnumber, step, distance)
+	if hitboxnumber ~= 1 then
 		if get_weapon_class(pLocal:GetWeaponID()) == "shared" or get_weapon_class(pLocal:GetWeaponID()) == "SHIELD" then return end
 		local enemyangle = (Enemy:GetHitboxPosition(hitboxnumber) - pLocal:GetHitboxPosition(1)):Angles()
 		local enemy_x = enemyangle.x
 		local enemy_y = enemyangle.y
+		if distance < 101 then enemy_y = enemy_y + 5 end
 		local own_eye = engine.GetViewAngles()
 		local own_eyex = own_eye.x
 		local own_eyey = own_eye.y
@@ -588,7 +596,7 @@ end
 
 
 
-callbacks.Register("CreateMove", function()
+callbacks.Register("CreateMove", function(ucmd)
 	if plocallive then
 		beaimme = false
 		cbeaimme = false
@@ -764,8 +772,7 @@ callbacks.Register("CreateMove", function()
 							shieldjumper = true
 							shieldjumpername = shield:GetName()
 							shieldjumpernameDistance = Distance
-
-							if autolock:GetValue() then smoothon = smoothaim(shield, smoothstep) end
+							if Distance < 2000 and Distance > 1000 then smoothon = smoothaim(shield, smoothstep) end
 						end
 					end
 				end
@@ -818,7 +825,7 @@ callbacks.Register("CreateMove", function()
 					end
 				end
 				-----print(enemyalive)
-				Closedto = islook(BestEnemy)
+				Closedto = islook(BestEnemy, 1)
 				local cvelocity = 0
 				local bvelocity = 0
 				local cvx = CBestEnemy:GetPropFloat('localdata', 'm_vecVelocity[0]')
@@ -850,7 +857,7 @@ callbacks.Register("CreateMove", function()
 
 							if trace ~= nil and trace.fraction >= 0.2 then
 								if enemyislook(attacker) then
-									Closedto = islook(attacker)
+									Closedto = islook(attacker, 1)
 									gui.SetValue("rbot.aim.target.selection", 2)
 
 									if not Closedto and not smoothon then
@@ -961,6 +968,7 @@ callbacks.Register("CreateMove", function()
 			shieldistance = {}
 			needoffaim = false
 			local shieldids = {}
+			local bestShieldisUseShield = false
 			if #shieldguy ~= 0 and #shieldguyny ~= 0 then
 				for k, shield in pairs(shieldguy) do
 					local sDistance = (localabs - shield:GetAbsOrigin()):Length()
@@ -973,12 +981,13 @@ callbacks.Register("CreateMove", function()
 						bestny = shieldguyny[k]
 					end
 				end
+				bestShieldisUseShield = bestShield:GetWeaponID() == 37
 				if (shieldids[beshieldid] or false) and beshieldistance > bestShieldDistance and beshieldid ~= -1 and cshieldhit:GetValue() then
 					if gui.GetValue("misc.showspec") == true then
 						gui.SetValue("misc.showspec", 0)
 					end
 				end
-				if bestShield:GetWeaponID() == 37 then
+				if bestShieldisUseShield then
 					beshieldistance = math.floor(bestShieldDistance)
 					beshieldid = bestShield:GetIndex()
 					beshieldidname = bestShield:GetName()
@@ -989,27 +998,38 @@ callbacks.Register("CreateMove", function()
 					end
 					needoffaim = false
 					if bestny < 50 or bestny > 100 then
-						if islook(bestShield) then
+						local leghitbox = lockonitlegprecalc(bestShield)
+						if islook(bestShield, 1) or islook(bestShield, leghitbox) then
 							if Closedto and bestShieldDistance > BestDistance and #shieldguy ~= enemyalive then
 								needoffaim = false
 							else
-								needoffaim = true
+								if notshield:GetValue() then needoffaim = true end
+								if (bestShield:GetWeaponID() ~= 37 or bestShield:GetProp('m_flDuckAmount') < 0.1) and autolock:GetValue() and bestShieldDistance < 800 and cshieldhit:GetValue() then
+									needoffaim = true
+									aimingleg = lockonitlegac(bestShield, leghitbox, smoothstep, bestShieldDistance)
+									if islook(bestShield, leghitbox) and aimingleg then
+										client.Command("+attack", true);
+									else
+										client.Command("-attack", true);
+									end
+								end
 							end
 						end
 					end
 				end
-				if input.IsButtonDown(hitshieldleg:GetValue()) and bestShield ~= nil and angle == 0 then
-					aimingleg = lockonitleg(bestShield, smoothstep)
+				if input.IsButtonDown(hitshieldleg:GetValue()) and bestShield ~= nil and not aimingleg then
+					local leghitbox = lockonitlegprecalc(bestShield)
+					aimingleg = lockonitlegac(bestShield, leghitbox, smoothstep, bestShieldDistance)
 					needoffaim = true
+				end
+				if bestShieldDistance < 130 and cshieldhit:GetValue() and bestShieldisUseShield and gui.GetValue("misc.showspec") == false then
+					gui.SetValue("misc.showspec", 1)
 				end
 			elseif BestEnemy ~= nil and beshieldid == BestEnemy:GetIndex() then
 				beshieldid = -1
 				if gui.GetValue("misc.showspec") == true and cshieldhit:GetValue() then
 					gui.SetValue("misc.showspec", 0)
 				end
-			end
-			if bestShieldDistance < 130 and cshieldhit:GetValue() then
-				gui.SetValue("misc.showspec", 1)
 			end
 		end
 		if angle ~= 0 or smoothon or needoffaim then
@@ -1385,9 +1405,9 @@ local function switch()
 
 		if notshield:GetValue() then
 			if math.floor(bestShieldDistance) < 1500 then
-			draw.Text(screen_w / 2 - 782, screen_h / 2 - 60, "NohitShield ".. math.floor(bestShieldDistance) )
+				draw.Text(screen_w / 2 - 782, screen_h / 2 - 60, "NohitShield " .. math.floor(bestShieldDistance))
 			else
-			draw.Text(screen_w / 2 - 782, screen_h / 2 - 60, "NohitShield" )
+				draw.Text(screen_w / 2 - 782, screen_h / 2 - 60, "NohitShield")
 			end
 		end
 		if #shieldname ~= 0 then
@@ -1441,7 +1461,7 @@ local function switch()
 			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160, "AimDrone: " .. dronedistance)
 		elseif aimingleg then
 			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160,
-				"AimLeg!   D:" .. beshieldistance .. "m")
+				"AimLeg! " .. math.floor(bestShieldDistance))
 		elseif smoothon then
 			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160, "AimLOCK!")
 		elseif needoffaim and bestny then
