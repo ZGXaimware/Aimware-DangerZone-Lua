@@ -1004,15 +1004,15 @@ callbacks.Register("CreateMove", function(ucmd)
 								needoffaim = false
 							else
 								if notshield:GetValue() then needoffaim = true end
-								if (bestShield:GetWeaponID() ~= 37 or bestShield:GetProp('m_flDuckAmount') < 0.1) and autolock:GetValue() and bestShieldDistance < 800 and cshieldhit:GetValue() then
-									needoffaim = true
-									aimingleg = lockonitlegac(bestShield, leghitbox, smoothstep, bestShieldDistance)
-									if islook(bestShield, leghitbox) and aimingleg then
-										client.Command("+attack", true);
-									else
-										client.Command("-attack", true);
-									end
-								end
+							end
+						end
+						if not smoothon and (not bestShieldisUseShield or bestShield:GetProp('m_flDuckAmount') < 0.1) and autolock:GetValue() and bestShieldDistance < 900 and cshieldhit:GetValue() then
+							needoffaim = true
+							aimingleg = lockonitlegac(bestShield, leghitbox, smoothstep, bestShieldDistance)
+							if islook(bestShield, leghitbox) and aimingleg then
+								client.Command("+attack", true);
+							else
+								client.Command("-attack", true);
 							end
 						end
 					end
