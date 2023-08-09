@@ -1,5 +1,5 @@
 # Aimware-DangerZone-Lua<br />
-Last Updated 2023/8/7 1.0.8
+Last Updated 2023/8/9 1.0.9
 Dont sell my code on NL/SK/Pri market.It is opensource<br />
 But you can transfer to another cheat as free version to spilit out is allowed<br />
 <br />
@@ -98,3 +98,9 @@ Update 1.0.8:<br />
 (rage.lua) (VERY USEFUL) when any (not affect with nothitshield ) shield guy distance < 800 then auto lock its leg and autoattack,he cant protect himself but only crouch and holdshield<br />
 BUT IT IS VERY SLOW SO YOU CAN KILL HIM ANY WAY LOL<br /> 
 <br />
+Update 1.0.9:<br />
+(rage.lua) hitshield enable for rifle,piston,smg,lmg in different distance(experiment function)<br />
+(rage.lua) add new indicater show bestshield<br />
+(rage.lua) use new color set<br />
+(tablechecker.lua) use ffi print to chat windows instead of print to console<br />
+(tablechecker.lua) print out when game started(not warmup) enemy respawn<br />
