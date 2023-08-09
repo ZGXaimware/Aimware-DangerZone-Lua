@@ -22,12 +22,6 @@ local main_box = gui.Groupbox(tab, "Main", 16, 16, 200, 0);
 local legit_aa_box = gui.Groupbox(tab, "(Desync) Legit Anti-Aim", 232, 16, 200, 0);
 local switch_box = gui.Groupbox(tab, "Switch", 448, 16, 174, 0);
 
-
-
-
-
-
-local legit_aa_switch = gui.Checkbox(legit_aa_box, "aa.switch", "Master Switch", 1);
 local legit_aa_type = gui.Combobox(legit_aa_box, "aa.type", "DeSync Type", "Default", "Low");
 local legit_aa_key = gui.Keybox(legit_aa_box, "aa.inverter", "Inverter", 0);
 local switch_awall_key = gui.Keybox(switch_box, "switch.autowall", "Auto Wall", 0);
@@ -104,6 +98,7 @@ local shieldjumpernameDistance = math.huge
 local nvelocity = 0
 local enemyalive = 0
 local colorx = 255
+local colory = 255
 local colorz = 255
 local bevisible = false
 local benoscreen = false
@@ -121,14 +116,16 @@ local aimingleg = false
 local beshieldistance = 0
 local bestny = 0
 local smoothon = false
-local shieldname = {}
-local shieldistance = {}
+-- local shieldname = {}
+-- local shieldistance = {}
 local needoffaim = false
 local aimstatus = ""
 local bx = 0
 local by = 0
 local cx = 0
 local cy = 0
+local sx = 0
+local sy = 0
 local screenCenterX = screen_w * 0.5;
 local loadback = false
 local enemydir = true
@@ -136,7 +133,9 @@ local beshieldid = -1
 local legit_aa_key_value = true
 local smoothstep = 15
 local bestShieldDistance = math.huge
+local bestShieldName = nil
 local beshieldidname = ""
+local velo = 0
 
 client.AllowListener("weapon_fire");
 client.AllowListener("bullet_impact");
@@ -144,6 +143,9 @@ client.Command("unbind mouse3;unbind shift;unbind q", true)
 client.AllowListener("client_disconnect");
 client.AllowListener("begin_new_match");
 
+local function setColors(x, y, z)
+    colorx, colory, colorz = x, y, z
+end
 
 local function returnweaponstr(player)
 	if player:IsPlayer() and player:IsAlive() then
@@ -207,6 +209,18 @@ local weaponClasses = {
 	[80] = "kniefetc",
 	[70] = "RemoteBomb"
 }
+
+local weaponHitable = {
+	["rifle"] = 1000,
+	["smg"] = 900,
+	["shotgun"] = 500,
+	["lmg"] = 1500,
+	["pistol"] = 500,
+	["hpistol"] = 500
+}
+
+
+
 local function get_weapon_class(weapon_id)
 	return weaponClasses[weapon_id] or "shared"
 end
@@ -243,6 +257,11 @@ callbacks.Register("CreateMove", function()
 		local localteamidt = pLocal:GetPropInt("m_nSurvivalTeam")
 		localteamid = (localteamidt == -1) and -2 or localteamidt
 		legit_aa_key_value = legit_aa_key:GetValue()
+		local vx = pLocal:GetPropFloat('localdata', 'm_vecVelocity[0]')
+		local vy = pLocal:GetPropFloat('localdata', 'm_vecVelocity[1]')
+		if vx ~= nil then
+			velo = math.floor(math.min(10000, math.sqrt(vx * vx + vy * vy) + 0.5))
+		end
 	else
 		plocallive = false
 	end
@@ -325,28 +344,28 @@ local function stepchangeviewanglemain(own_eyex, enemy_x, own_eyey, enemy_y, ste
 	local x = 0
 	local y = 0
 	if (own_eyex > enemy_x) then
-		needx = -math.floor(math.abs((own_eyex - enemy_x)))
+		needx = -math.abs((own_eyex - enemy_x))
 	else
-		needx = math.floor(math.abs((own_eyex - enemy_x)))
+		needx = math.abs((own_eyex - enemy_x))
 	end
 
 	if (own_eyey >= 0 and enemy_y >= 0) or (own_eyey < 0 and enemy_y < 0) then
-		needy = math.floor(math.abs(own_eyey - enemy_y))
+		needy = math.abs(own_eyey - enemy_y)
 		if enemy_y < own_eyey then
 			needy = -needy
 		end
 	else
 		if (own_eyey > 0 and enemy_y < 0) then
 			if (math.abs(own_eyey) + math.abs(enemy_y)) >= ((180 - math.abs(own_eyey)) + (180 - math.abs(enemy_y))) then
-				needy = math.floor(((180 - math.abs(own_eyey)) + (180 - math.abs(enemy_y))))
+				needy = ((180 - math.abs(own_eyey)) + (180 - math.abs(enemy_y)))
 			else
-				needy = -math.floor((math.abs(own_eyey) + math.abs(enemy_y)))
+				needy = -(math.abs(own_eyey) + math.abs(enemy_y))
 			end
 		else
 			if (math.abs(own_eyey) + math.abs(enemy_y)) >= ((180 - math.abs(own_eyey)) + (180 - math.abs(enemy_y))) then
-				needy = -math.floor(((180 - math.abs(own_eyey)) + (180 - math.abs(enemy_y))))
+				needy = -((180 - math.abs(own_eyey)) + (180 - math.abs(enemy_y)))
 			else
-				needy = math.floor((math.abs(own_eyey) + math.abs(enemy_y)))
+				needy = (math.abs(own_eyey) + math.abs(enemy_y))
 			end
 		end
 	end
@@ -520,7 +539,7 @@ local function lockonitlegac(Enemy, hitboxnumber, step, distance)
 		local enemyangle = (Enemy:GetHitboxPosition(hitboxnumber) - pLocal:GetHitboxPosition(1)):Angles()
 		local enemy_x = enemyangle.x
 		local enemy_y = enemyangle.y
-		if distance < 101 then enemy_y = enemy_y + 5 end
+		if distance < 101 then enemy_x = enemy_x - 5 end
 		local own_eye = engine.GetViewAngles()
 		local own_eyex = own_eye.x
 		local own_eyey = own_eye.y
@@ -625,10 +644,13 @@ callbacks.Register("CreateMove", function(ucmd)
 		local BestDDistance = math.huge
 		local bestShield = nil
 		bestShieldDistance = math.huge
+		bestShieldName = nil
 		bx = 0
 		by = 0
 		cx = 0
 		cy = 0
+		sx = 0
+		sy = 0
 
 
 		if client.GetConVar("game_type") == "6" and lockmdrone:GetValue() ~= nil and lockmdrone:GetValue() ~= 0 and lockcdrone:GetValue() ~= nil and lockcdrone:GetValue() ~= 0 then
@@ -667,7 +689,7 @@ callbacks.Register("CreateMove", function(ucmd)
 				if Enemy:IsAlive() then
 					local btrace = engine.TraceLine(Enemy:GetHitboxPosition(1), localheadbox)
 					local Distance = (Enemy:GetAbsOrigin() - localabs):Length()
-
+					local pass = false
 					if btrace.fraction > 0.09 and string.find(returnweaponstr(Enemy), "shield") ~= nil and Distance < 3001 then
 						local targetDirection = localheadbox - Enemy:GetHitboxPosition(1)
 						local targetAngles = targetDirection:Angles()
@@ -678,20 +700,14 @@ callbacks.Register("CreateMove", function(ucmd)
 							if Enemy:GetIndex() ~= localindex and Enemy:GetPropInt("m_nSurvivalTeam") ~= localteamid then
 								table.insert(shieldguy, Enemy)
 								table.insert(shieldguyny, math.abs(ny))
+								if notshield:GetValue() and (math.abs(ny) < 50 or math.abs(ny) > 100) then
+									pass = true
+									enemyalive = enemyalive + 1
+								end
 							end
 						end
 					end
-
 					totaldistance = totaldistance + Distance
-					local pass = false
-					if #shieldguy ~= 0 and #shieldguyny ~= 0 and notshield:GetValue() then
-						for k, shield in pairs(shieldguy) do
-							if shield:GetIndex() == Enemy:GetIndex() and (shieldguyny[k] < 50 or shieldguyny[k] > 100) then
-								pass = true
-								enemyalive = enemyalive + 1
-							end
-						end
-					end
 					if returnweaponstr(Enemy) == "weapon_fists " or Enemy:GetIndex() == localindex then
 						pass = true
 					end
@@ -907,18 +923,6 @@ callbacks.Register("CreateMove", function(ucmd)
 					end
 				end
 
-				draw.SetFont(font);
-				if BestDistance <= math.floor(((totaldistance / enemyalive) * 1) / 3) or enemyalive <= 5 or BestDistance < 2500 or CBestDistance < 2500 then
-					colorx = 255
-					colorz = 0
-				elseif BestDistance <= math.floor(totaldistance / enemyalive) then
-					colorx = 0
-					colorz = 0
-				else
-					colorx = 255
-					colorz = 255
-				end
-
 				bx, by = client.WorldToScreen(BestEnemy:GetAbsOrigin())
 				bevisible = false
 				benoscreen = false
@@ -964,24 +968,27 @@ callbacks.Register("CreateMove", function(ucmd)
 			else
 				enemyalive = 0
 			end
-			shieldname = {}
-			shieldistance = {}
+			-- shieldname = {}
+			-- shieldistance = {}
 			needoffaim = false
 			local shieldids = {}
 			local bestShieldisUseShield = false
 			if #shieldguy ~= 0 and #shieldguyny ~= 0 then
 				for k, shield in pairs(shieldguy) do
 					local sDistance = (localabs - shield:GetAbsOrigin()):Length()
-					table.insert(shieldname, shield:GetName())
-					table.insert(shieldistance, math.floor(sDistance))
+					-- table.insert(shieldname, shield:GetName())
+					-- table.insert(shieldistance, math.floor(sDistance))
 					shieldids[shield:GetIndex()] = true
 					if sDistance < bestShieldDistance then
+						bestShieldName = shield:GetName()
 						bestShieldDistance = sDistance
 						bestShield = shield
 						bestny = shieldguyny[k]
 					end
 				end
 				bestShieldisUseShield = bestShield:GetWeaponID() == 37
+				sx, sy = client.WorldToScreen(bestShield:GetAbsOrigin())
+
 				if (shieldids[beshieldid] or false) and beshieldistance > bestShieldDistance and beshieldid ~= -1 and cshieldhit:GetValue() then
 					if gui.GetValue("misc.showspec") == true then
 						gui.SetValue("misc.showspec", 0)
@@ -992,7 +999,7 @@ callbacks.Register("CreateMove", function(ucmd)
 					beshieldid = bestShield:GetIndex()
 					beshieldidname = bestShield:GetName()
 				end
-				if bestShield ~= nil and notshield:GetValue() then
+				if bestShield ~= nil then
 					if bestShieldDistance < 500 then
 						shieldprotectenable = false
 					end
@@ -1006,10 +1013,10 @@ callbacks.Register("CreateMove", function(ucmd)
 								if notshield:GetValue() then needoffaim = true end
 							end
 						end
-						if not smoothon and (not bestShieldisUseShield or bestShield:GetProp('m_flDuckAmount') < 0.1) and autolock:GetValue() and bestShieldDistance < 900 and cshieldhit:GetValue() then
+						if weaponHitable[weaponClass] and velo < 150 and not smoothon and (not bestShieldisUseShield or bestShield:GetProp('m_flDuckAmount') < 0.1) and autolock:GetValue() and bestShieldDistance < weaponHitable[weaponClass] and cshieldhit:GetValue() then
 							needoffaim = true
 							aimingleg = lockonitlegac(bestShield, leghitbox, smoothstep, bestShieldDistance)
-							if islook(bestShield, leghitbox) and aimingleg then
+							if aimingleg then
 								client.Command("+attack", true);
 							else
 								client.Command("-attack", true);
@@ -1032,6 +1039,21 @@ callbacks.Register("CreateMove", function(ucmd)
 				end
 			end
 		end
+
+		if BestDistance <= math.floor(totaldistance / enemyalive) then
+			if BestDistance <= math.floor(((totaldistance / enemyalive) * 1) / 5) or BestDistance < 1000 or CBestDistance < 1000 or bestShieldDistance < 1000 then
+				setColors(220,20,60)
+			elseif BestDistance < 2500 or CBestDistance < 2500 or bestShieldDistance < 3000 or enemyalive <= 5 then
+				setColors(255,215,0)
+			else
+				setColors(0, 255, 0)
+			end
+		else
+			setColors(255, 255, 255)
+		end
+
+
+
 		if angle ~= 0 or smoothon or needoffaim then
 			gui.SetValue("rbot.antiaim.condition.use", 0)
 
@@ -1154,12 +1176,7 @@ callbacks.Register("CreateMove", function(ucmd)
 			end
 		end
 		antiaim()
-		local velo = 0
-		local vx = pLocal:GetPropFloat('localdata', 'm_vecVelocity[0]')
-		local vy = pLocal:GetPropFloat('localdata', 'm_vecVelocity[1]')
-		if vx ~= nil then
-			velo = math.floor(math.min(10000, math.sqrt(vx * vx + vy * vy) + 0.5))
-		end
+
 		--print(step)
 		if weaponClass == "smg" then
 			if localweaponid == 17 or localweaponid == 26 then
@@ -1354,7 +1371,7 @@ local function switch()
 					draw.Color(255, 0, 0, 255)
 					draw.Text(screen_w / 2, screen_h / 2 + 200, autolockmessage)
 				end
-				draw.Color(colorx, 255, colorz, 255)
+				draw.Color(colorx, colory, colorz, 255)
 				draw.SetFont(font);
 				if bevisible then
 					draw.Text(screen_w / 2 - 180, screen_h / 2 + 80, "Visible")
@@ -1384,12 +1401,41 @@ local function switch()
 					draw.Text(screen_w / 2 - 400, screen_h / 2 - 300, "CBE aim me!")
 				end
 				draw.SetFont(font);
+				if bestShieldName ~= nil then
+					draw.Text(screen_w / 2, screen_h / 2 - 300, math.floor(bestShieldDistance))
+					draw.Text(screen_w / 2 + 200, screen_h / 2 - 300, bestShieldName.. "(S)")
+					if sx ~= 0 then
+						draw.Line(sx, sy, screenCenterX, 0)
+					end
+		
+					-- if bestShieldDistance < 1500 and notshield:GetValue() then
+					-- 	draw.SetFont(fontA)
+					-- 	draw.Color(255, 0, 0, 255)
+					-- else
+					-- 	draw.SetFont(font)
+					-- 	draw.Color(255, 255, 255, 255)
+					-- end
+					-- draw.Text(screen_w / 2 - 500, screen_h / 2 - 60, "Shieldguy:")
+					-- local drawstepa = 0
+					-- if notshield:GetValue() and bestShieldDistance < 1500 then
+					-- 	drawstepa = 50
+					-- end
+					-- for i = 1, #shieldname do
+					-- 	draw.Text(screen_w / 2 - 500, screen_h / 2 - 35 + drawstepa,
+					-- 		shieldname[i] .. " " .. shieldistance[i])
+					-- 	if notshield:GetValue() and bestShieldDistance < 1500 then
+					-- 		drawstepa = drawstepa + 100
+					-- 	else
+					-- 		drawstepa = drawstepa + 25
+					-- 	end
+					-- end
+				end
 				if needCdisplay then
 					draw.Text(screen_w / 2, screen_h / 2 - 250, cdistance)
-					draw.Text(screen_w / 2 + 200, screen_h / 2 - 250, cname)
+					draw.Text(screen_w / 2 + 200, screen_h / 2 - 250, cname .. "(C)")
 				end
 				draw.Text(screen_w / 2, screen_h / 2 - 200, bedistance);
-				draw.Text(screen_w / 2 + 200, screen_h / 2 - 200, bename);
+				draw.Text(screen_w / 2 + 200, screen_h / 2 - 200, bename .. "(B)");
 			end
 		end
 		draw.SetFont(font1);
@@ -1404,33 +1450,10 @@ local function switch()
 		end
 
 		if notshield:GetValue() then
-			if math.floor(bestShieldDistance) < 1500 then
+			if math.floor(bestShieldDistance) < 2000 then
 				draw.Text(screen_w / 2 - 782, screen_h / 2 - 60, "NohitShield " .. math.floor(bestShieldDistance))
 			else
 				draw.Text(screen_w / 2 - 782, screen_h / 2 - 60, "NohitShield")
-			end
-		end
-		if #shieldname ~= 0 then
-			if bestShieldDistance < 1500 and notshield:GetValue() then
-				draw.SetFont(fontA)
-				draw.Color(255, 0, 0, 255)
-			else
-				draw.SetFont(font)
-				draw.Color(255, 255, 255, 255)
-			end
-			draw.Text(screen_w / 2 - 500, screen_h / 2 - 60, "Shieldguy:")
-			local drawstepa = 0
-			if notshield:GetValue() and bestShieldDistance < 1500 then
-				drawstepa = 50
-			end
-			for i = 1, #shieldname do
-				draw.Text(screen_w / 2 - 500, screen_h / 2 - 35 + drawstepa,
-					shieldname[i] .. " " .. shieldistance[i])
-				if notshield:GetValue() and bestShieldDistance < 1500 then
-					drawstepa = drawstepa + 100
-				else
-					drawstepa = drawstepa + 25
-				end
 			end
 		end
 		draw.SetFont(font1);
@@ -1485,7 +1508,7 @@ local function switch()
 			elseif angle ~= 0 then
 				draw.Text(screen_w / 2, screen_h / 2 - 40, "V")
 			end
-			draw.Color(colorx, 255, colorz, 255)
+			draw.Color(colorx, colory, colorz, 255)
 			if not benoscreen and bx ~= 0 then
 				draw.Line(bx, by, screenCenterX, 0)
 			end

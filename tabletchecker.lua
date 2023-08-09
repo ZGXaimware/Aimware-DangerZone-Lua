@@ -1,3 +1,26 @@
+--took ffi funktions from FFIChatVoteReveal.lua
+local CHudChat_Printf_Index = 27
+local ChatPrefix = "\02[\07Table\02] "
+local function FindHudElement(name)
+    local m_Table = mem.FindPattern("client.dll", "B9 ?? ?? ?? ?? 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 89 46 24")
+    local m_Function = mem.FindPattern("client.dll", "55 8B EC 53 8B 5D 08 56 57 8B F9 33 F6 39")
+
+    if m_Table ~= nil and m_Function ~= nil then
+        return ffi.cast("void*(__thiscall*)(void*, const char*)", m_Function)(ffi.cast("void**", m_Table + 0x1)[0], name)
+    end
+
+    return nil
+end
+local CHudChat = FindHudElement("CHudChat")
+if CHudChat == nil then
+    error("CHudChat is nullptr.")
+end
+local CHudChat_Printf = ffi.cast("void(__cdecl*)(void*, int, int, const char*, ...)",
+    ffi.cast("void***", CHudChat)[0][CHudChat_Printf_Index])
+local function ChatPrint(msg)
+    CHudChat_Printf(CHudChat, 0, 0, " " .. ChatPrefix .. msg)
+end
+
 local ranks_mode = gui.Combobox(gui.Reference("Misc", "General", "Extra"), "tablet.mode", "Message SendWay",
     "In Party chat", "Only Console")
 client.AllowListener("client_disconnect");
@@ -12,9 +35,11 @@ local function findthisguy(thisguy, tab)
     return false
 end
 
+local ingamestatus = false
 local cachelist = {}
 local cachelistpurchaseid = {}
 local cachemoneylist = {}
+local deadlist = {}
 local tabletitemindex = {
     [-1] = "None",
     [0] = "Knief",
@@ -37,19 +62,53 @@ local tabletitemindex = {
     [21] = "Shield"
 }
 
+local function ingame()
+    local DZ = entities.FindByClass("CDangerZoneController")
+    if DZ ~= nil then
+        for i = 1, #DZ do
+            local DZS = DZ[i]
+            if DZS ~= nil then
+                if DZS:GetProp("m_bDangerZoneControllerEnabled") == 1 then
+                    return true
+                end
+            end
+        end
+    end
+    return false
+end
+
+
 callbacks.Register("CreateMove", function(cmd)
     local players = entities.FindByClass("CCSPlayer")
+    local ingamestatus = ingame()
 
     if players ~= nil then
         local moneylist = {}
         local playerlist = {}
-
+        if ingamestatus then
+            for i, player in ipairs(players) do
+                local playername = player:GetName()
+                if player:IsAlive() and deadlist[playername] then
+                    print("Respawn" .. ": " .. playername)
+                    ChatPrint("\04Respawn" .. ": " .. playername)
+                end
+            end
+            deadlist = {}
+        end
         for i, player in ipairs(players) do
             local playerIndex = player:GetIndex()
             local localindex = (entities.GetLocalPlayer()):GetIndex()
+            local playername = player:GetName()
 
-            if player:GetName() ~= "GOTV" and entities.GetPlayerResources():GetPropInt("m_iPing", playerIndex) ~= 0 and localindex ~= playerIndex then
-                table.insert(playerlist, player:GetName())
+            if player:GetName() ~= "GOTV" then
+                if localindex ~= playerIndex then
+                    table.insert(playerlist, player:GetName())
+                end
+                if not player:IsAlive() and ingamestatus then
+                    deadlist[playername] = true
+                end
+
+
                 if player:GetWeaponID() == 72 then
                     local playerMoney = player:GetPropInt("m_iAccount")
                     local purchaseIndex = (player:GetPropEntity("m_hActiveWeapon")):GetPropInt("m_nLastPurchaseIndex")
@@ -66,6 +125,7 @@ callbacks.Register("CreateMove", function(cmd)
                     if cachelistpurchaseid[playerIndex] ~= purchaseIndex then
                         if cachemoneylist[playerIndex] - playerMoney > 0 and purchaseIndex ~= -1 then
                             print(player:GetName() .. " purchased " .. tabletitemindex[purchaseIndex])
+                            ChatPrint("\04" .. player:GetName() .. " purchased " .. tabletitemindex[purchaseIndex])
                         end
 
                         cachelistpurchaseid[playerIndex] = purchaseIndex
@@ -75,12 +135,11 @@ callbacks.Register("CreateMove", function(cmd)
         end
         cachemoneylist = moneylist
 
-        local money = entities.FindByClass("CItemCash")
         if #cachelist ~= #playerlist or #cachelist == 0 then
             local ranksModeValue = ranks_mode:GetValue()
             for i, enemy in ipairs(cachelist) do
                 if not findthisguy(enemy, playerlist) then
-                    if money ~= nil and #money ~= 0 then
+                    if ingamestatus then
                         if ranksModeValue == 0 then
                             local message = "「Exit" .. string.gsub(": " .. enemy, "%s", "") .. "」"
                             panorama.RunScript(
@@ -88,6 +147,7 @@ callbacks.Register("CreateMove", function(cmd)
                                 message .. "');")
                         end
                         print("Defeat Exit" .. ": " .. enemy)
+                        ChatPrint("\04Defeat Exit" .. ": " .. enemy)
                     else
                         if ranksModeValue == 0 then
                             local message = "「WExit" .. string.gsub(": " .. enemy, "%s", "") .. "」"
@@ -96,6 +156,7 @@ callbacks.Register("CreateMove", function(cmd)
                                 message .. "');")
                         end
                         print("Warmup Escaped" .. ": " .. enemy)
+                        ChatPrint("\04Warmup Escaped" .. ": " .. enemy)
                     end
                 end
             end
@@ -112,5 +173,6 @@ callbacks.Register("FireGameEvent", function(e)
         cachelistpurchaseid = {}
         cachemoneylist = {}
         cachelist = {}
+        deadlist = {}
     end
 end)
