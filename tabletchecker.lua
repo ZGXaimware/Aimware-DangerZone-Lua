@@ -80,7 +80,7 @@ end
 
 callbacks.Register("CreateMove", function(cmd)
     local players = entities.FindByClass("CCSPlayer")
-    local ingamestatus = ingame()
+    ingamestatus = ingame()
 
     if players ~= nil then
         local moneylist = {}
@@ -176,3 +176,78 @@ callbacks.Register("FireGameEvent", function(e)
         deadlist = {}
     end
 end)
+
+
+
+
+
+
+local m_kg = gui.Button(gui.Reference("Misc", "General", "Extra"), "Check DZ Team", function()
+    if client.GetConVar("game_type") ~= "6" then return end
+    local playerdata = {}
+    local abuseteam = {}
+    local nonsingleteamout = {}
+
+
+    local players = entities.FindByClass("CCSPlayer")
+
+
+    if players ~= nil then
+        for i, player in ipairs(players) do
+            local playerName = player:GetName()
+            local playerIndex = player:GetIndex()
+            if playerName ~= "GOTV" then
+                local playerTeam = player:GetPropInt("m_nSurvivalTeam")
+                local teamstr = "team" .. playerTeam
+                if entities.GetPlayerResources():GetPropInt("m_bHasCommunicationAbuseMute", playerIndex) == 1 and teamstr ~= "team-1" then
+                    abuseteam[teamstr] = true
+                end
+                if playerdata[teamstr] == nil then
+                    playerdata[teamstr] = {}
+                end
+                table.insert(playerdata[teamstr],
+                    { playerIndex, playerName, playerTeam, player:IsAlive() })
+            end
+        end
+        print("--------------------------------------")
+        ChatPrint("--------------------------------------")
+        for i, player in ipairs(players) do
+            local teamstr = "team" .. player:GetPropInt("m_nSurvivalTeam")
+            local playerResources = entities.GetPlayerResources()
+            local communicationMute = playerResources:GetPropInt("m_bHasCommunicationAbuseMute", player:GetIndex())
+            local playerName = player:GetName()
+            if teamstr == "team-1" and playerName ~= "GOTV" then
+                if communicationMute == 1 then
+                    print(playerName .. " Cheater Solo")
+                    ChatPrint("\04" .. playerName .. " Cheater Solo")
+                else
+                    print(playerName .. " Solo")
+                    ChatPrint("\04" .. playerName .. " Solo")
+                end
+            else
+                local playerTeamData = playerdata[teamstr]
+                if playerTeamData ~= nil then
+                    for j, data in ipairs(playerTeamData) do
+                        if data[1] ~= player:GetIndex() then
+                            local teammateString = abuseteam[teamstr] and "Cheater Teammate:" or "Teammate:"
+                            nonsingleteamout[teamstr] = teamstr ..
+                                ": " .. player:GetName() .. " " .. teammateString .. data[2]
+                        end
+                    end
+                end
+            end
+        end
+        for i = 0, 11 do
+            local teamstr = "team" .. i
+            if nonsingleteamout[teamstr] then
+                print(nonsingleteamout[teamstr])
+                ChatPrint("\04" .. nonsingleteamout[teamstr])
+            end
+        end
+        print("Total: " .. #players - 1 .. " players")
+        print("-----------------END------------------")
+        ChatPrint("\04Total: " .. #players - 1 .. " players")
+        ChatPrint("-----------------END------------------")
+    end
+end)
+m_kg:SetWidth(268)
