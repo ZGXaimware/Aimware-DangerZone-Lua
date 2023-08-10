@@ -1,5 +1,8 @@
 # Aimware-DangerZone-Lua<br />
 Last Updated 2023/8/10 1.1.0
+
+[My Bilibili Profile](https://space.bilibili.com/3494352856812225) <br />
+
 Dont sell my code on NL/SK/Pri market.It is opensource<br />
 But you can transfer to another cheat as free version to spilit out is allowed<br />
 <br />
