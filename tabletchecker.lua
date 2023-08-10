@@ -39,7 +39,7 @@ local ingamestatus = false
 local cachelist = {}
 local cachelistpurchaseid = {}
 local cachemoneylist = {}
--- local deadlist = {}
+local deadlist = {}
 local tabletitemindex = {
     [-1] = "None",
     [0] = "Knief",
@@ -163,7 +163,7 @@ callbacks.Register("FireGameEvent", function(e)
         cachelistpurchaseid = {}
         cachemoneylist = {}
         cachelist = {}
-        -- deadlist = {}
+        deadlist = {}
     end
 end)
 
