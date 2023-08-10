@@ -56,7 +56,8 @@ local fasthop = gui.Keybox(switch_box, "danger.fasthop", "FastHop", 70)
 fasthop:SetDescription("DZ movement exploit that makes you hop super fast.")
 local f = 0
 local n = 0
-
+local iscommandattack1 = false
+local iscommandattack2 = false
 
 
 
@@ -144,7 +145,7 @@ client.AllowListener("client_disconnect");
 client.AllowListener("begin_new_match");
 
 local function setColors(x, y, z)
-    colorx, colory, colorz = x, y, z
+	colorx, colory, colorz = x, y, z
 end
 
 local function returnweaponstr(player)
@@ -403,7 +404,7 @@ local function smoothaim(Enemy, step)
 		gui.SetValue("rbot.aim.target.fov", 23);
 		if weaponClass == "shared" then return end
 		local enemyangle = nil
-		if weaponClass == "SHIELD" or weaponClass == "kniefetc" then
+		if weaponClass == "SHIELD" or weaponClass == "kniefetc" or weaponClass == "RemoteBomb" then
 			local Distance = math.abs((Enemy:GetAbsOrigin() - pLocal:GetAbsOrigin()):Length())
 			if Distance > 350 then return false end
 			enemyangle = (Enemy:GetHitboxPosition(3) - pLocal:GetHitboxPosition(1)):Angles()
@@ -824,6 +825,8 @@ callbacks.Register("CreateMove", function(ucmd)
 				if weaponClass == "SHIELD" or weaponClass == "kniefetc" then
 					if weaponClass == "SHIELD" then
 						gui.SetValue("esp.chams.localweapon.visible", 2)
+					elseif string.find(weaponstr, "shield") ~= nil and localhp <= 60 then
+						client.Command("use weapon_shield", true)
 					end
 					shieldhit = (BestDistance < 76)
 				else
@@ -967,19 +970,20 @@ callbacks.Register("CreateMove", function(ucmd)
 				end
 			else
 				enemyalive = 0
+				if engine.GetServerIP() ~= "loopback" then
+					shieldprotectenable = false
+				end
 			end
-			-- shieldname = {}
-			-- shieldistance = {}
+
 			needoffaim = false
 			local shieldids = {}
 			local bestShieldisUseShield = false
+			local hascalledattack1 = false
 			if #shieldguy ~= 0 and #shieldguyny ~= 0 then
 				for k, shield in pairs(shieldguy) do
 					local sDistance = (localabs - shield:GetAbsOrigin()):Length()
-					-- table.insert(shieldname, shield:GetName())
-					-- table.insert(shieldistance, math.floor(sDistance))
 					shieldids[shield:GetIndex()] = true
-					if sDistance < bestShieldDistance then
+					if sDistance < bestShieldDistance and (shield:GetWeaponID() ~= 37 or shield:GetProp('m_flDuckAmount') < 0.1) then
 						bestShieldName = shield:GetName()
 						bestShieldDistance = sDistance
 						bestShield = shield
@@ -1013,13 +1017,16 @@ callbacks.Register("CreateMove", function(ucmd)
 								if notshield:GetValue() then needoffaim = true end
 							end
 						end
-						if weaponHitable[weaponClass] and velo < 150 and not smoothon and (not bestShieldisUseShield or bestShield:GetProp('m_flDuckAmount') < 0.1) and autolock:GetValue() and bestShieldDistance < weaponHitable[weaponClass] and cshieldhit:GetValue() then
+						if weaponHitable[weaponClass] and velo < 150 and not smoothon and autolock:GetValue() and bestShieldDistance < weaponHitable[weaponClass] and cshieldhit:GetValue() then
+							hascalledattack1 = true
 							needoffaim = true
 							aimingleg = lockonitlegac(bestShield, leghitbox, smoothstep, bestShieldDistance)
 							if aimingleg then
 								client.Command("+attack", true);
+								iscommandattack1 = true
 							else
 								client.Command("-attack", true);
+								iscommandattack1 = false
 							end
 						end
 					end
@@ -1038,13 +1045,17 @@ callbacks.Register("CreateMove", function(ucmd)
 					gui.SetValue("misc.showspec", 0)
 				end
 			end
+			if iscommandattack1 and hascalledattack1 == false then
+				client.Command("-attack", true);
+				iscommandattack1 = false
+			end
 		end
 
 		if BestDistance <= math.floor(totaldistance / enemyalive) then
 			if BestDistance <= math.floor(((totaldistance / enemyalive) * 1) / 5) or BestDistance < 1000 or CBestDistance < 1000 or bestShieldDistance < 1000 then
-				setColors(220,20,60)
+				setColors(220, 20, 60)
 			elseif BestDistance < 2500 or CBestDistance < 2500 or bestShieldDistance < 3000 or enemyalive <= 5 then
-				setColors(255,215,0)
+				setColors(255, 215, 0)
 			else
 				setColors(0, 255, 0)
 			end
@@ -1176,7 +1187,7 @@ callbacks.Register("CreateMove", function(ucmd)
 			end
 		end
 		antiaim()
-
+		local hascalledattack2 = false
 		--print(step)
 		if weaponClass == "smg" then
 			if localweaponid == 17 or localweaponid == 26 then
@@ -1189,11 +1200,18 @@ callbacks.Register("CreateMove", function(ucmd)
 				gui.SetValue("rbot.hitscan.accuracy.smg.mindamage", 15)
 			end
 		elseif weaponClass == "SHIELD" or weaponClass == "kniefetc" then
+			hascalledattack2 = true
 			if shieldhit then
 				client.Command("+attack", true);
+				iscommandattack2 = true
 			else
 				client.Command("-attack", true);
+				iscommandattack2 = false
 			end
+		end
+		if iscommandattack2 and hascalledattack2 == false then
+			client.Command("-attack", true);
+			iscommandattack2 = false
 		end
 		if needshieldprotect then
 			if lowesthp >= localhp or lowesthp == 0 then
@@ -1403,11 +1421,11 @@ local function switch()
 				draw.SetFont(font);
 				if bestShieldName ~= nil then
 					draw.Text(screen_w / 2, screen_h / 2 - 300, math.floor(bestShieldDistance))
-					draw.Text(screen_w / 2 + 200, screen_h / 2 - 300, bestShieldName.. "(S)")
+					draw.Text(screen_w / 2 + 200, screen_h / 2 - 300, bestShieldName .. "(S)")
 					if sx ~= 0 then
 						draw.Line(sx, sy, screenCenterX, 0)
 					end
-		
+
 					-- if bestShieldDistance < 1500 and notshield:GetValue() then
 					-- 	draw.SetFont(fontA)
 					-- 	draw.Color(255, 0, 0, 255)

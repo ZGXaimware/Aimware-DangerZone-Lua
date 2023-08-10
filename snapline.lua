@@ -396,7 +396,7 @@ local function drawEspHook(builder)
                         local x, y = client.WorldToScreen(builder_entity:GetAbsOrigin());
                         if x ~= nil and y ~= nil then
                             --draw.Line(x, y, screenCenterX - 400, 0);
-                            table.insert(drawespxy, { x, y, screenCenterX - 400, 0, 255, 255, 0, 255 })
+                            table.insert(drawespxy, { x, y, screenCenterX - 500, 0, 255, 255, 0, 255 })
                         end
                     end
                 end
@@ -404,7 +404,7 @@ local function drawEspHook(builder)
                     local x, y = client.WorldToScreen(builder_entity:GetAbsOrigin());
                     if x ~= nil and y ~= nil then
                         --draw.Line(x, y, screenCenterX - 400, 0);
-                        table.insert(drawespxy, { x, y, screenCenterX - 400, 0, 255, 255, 0, 255 })
+                        table.insert(drawespxy, { x, y, screenCenterX - 500, 0, 255, 255, 0, 255 })
                     end
                 end
             end
@@ -415,7 +415,7 @@ local function drawEspHook(builder)
                 local x, y = client.WorldToScreen(builder_entity:GetAbsOrigin());
                 if x ~= nil and y ~= nil then
                     --draw.Line(x, y, screenCenterX + 400, screenH);
-                    table.insert(drawespxy, { x, y, screenCenterX + 400, screenH, 204, 153, 255, 255 })
+                    table.insert(drawespxy, { x, y, screenCenterX + 500, screenH, 204, 153, 255, 255 })
                 end
             end
             if Distance < 5000 and Distance ~= 0 then
@@ -426,7 +426,7 @@ local function drawEspHook(builder)
                         local x, y = client.WorldToScreen(builder_entity:GetAbsOrigin());
                         if x ~= nil and y ~= nil then
                             --draw.Line(x, y, screenCenterX + 400, 0);
-                            table.insert(drawespxy, { x, y, screenCenterX + 400, 0, 205,102,29, 255 })
+                            table.insert(drawespxy, { x, y, screenCenterX + 500, 0, 255,255,224, 255 })
                         end
                     end
                 else
@@ -435,8 +435,7 @@ local function drawEspHook(builder)
                         if player_weapon_class == "pistol" or player_weapon_class == "shotgun" or player_weapon_class == "kniefetc" then
                             local x, y = client.WorldToScreen(builder_entity:GetAbsOrigin());
                             if x ~= nil and y ~= nil then
-                                --draw.Line(x, y, screenCenterX + 400, 0);
-                                table.insert(drawespxy, { x, y, screenCenterX + 400, 0, 205,102,29, 255 })
+                                table.insert(drawespxy, { x, y, screenCenterX + 400, 0, 255,255,224, 255 })
                             end
                         end
                     end

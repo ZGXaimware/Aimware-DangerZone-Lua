@@ -1,5 +1,5 @@
 # Aimware-DangerZone-Lua<br />
-Last Updated 2023/8/9 1.0.9
+Last Updated 2023/8/10 1.1.0
 Dont sell my code on NL/SK/Pri market.It is opensource<br />
 But you can transfer to another cheat as free version to spilit out is allowed<br />
 <br />
@@ -102,5 +102,9 @@ Update 1.0.9:<br />
 (rage.lua) hitshield enable for rifle,piston,smg,lmg in different distance(experiment function)<br />
 (rage.lua) add new indicater show bestshield<br />
 (rage.lua) use new color set<br />
-(tablechecker.lua) use ffi print to chat windows instead of print to console<br />
 (tablechecker.lua) print out when game started(not warmup) enemy respawn<br />
+Update 1.1.0:<br />
+(rage.lua) fixed shieldprotect use and get kicked when no enemy alive
+(rage.lua) add new detector to prevent '+attack' command not stop when no target
+(snapline.lua) changed color set for piston/smg line
+(tablechechker.lua)disable ffi print due to crash 
