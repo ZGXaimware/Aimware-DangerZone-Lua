@@ -116,6 +116,7 @@ local lockatdrone = false
 local aimingleg = false
 local beshieldistance = 0
 local bestny = 0
+local bestduckny = 0
 local smoothon = false
 -- local shieldname = {}
 -- local shieldistance = {}
@@ -137,6 +138,8 @@ local bestShieldDistance = math.huge
 local bestShieldName = nil
 local beshieldidname = ""
 local velo = 0
+local bestduckShieldDistance = math.huge
+local bestduckShieldName = nil
 
 client.AllowListener("weapon_fire");
 client.AllowListener("bullet_impact");
@@ -646,6 +649,9 @@ callbacks.Register("CreateMove", function(ucmd)
 		local bestShield = nil
 		bestShieldDistance = math.huge
 		bestShieldName = nil
+		bestduckShieldDistance = math.huge
+		bestduckShieldName = nil
+		local bestduckShield = nil
 		bx = 0
 		by = 0
 		cx = 0
@@ -979,29 +985,64 @@ callbacks.Register("CreateMove", function(ucmd)
 			local shieldids = {}
 			local bestShieldisUseShield = false
 			local hascalledattack1 = false
+			local duckshield = {}
+			local duckshieldny = {}
 			if #shieldguy ~= 0 and #shieldguyny ~= 0 then
 				for k, shield in pairs(shieldguy) do
 					local sDistance = (localabs - shield:GetAbsOrigin()):Length()
 					shieldids[shield:GetIndex()] = true
-					if sDistance < bestShieldDistance and (shield:GetWeaponID() ~= 37 or shield:GetProp('m_flDuckAmount') < 0.1) then
-						bestShieldName = shield:GetName()
-						bestShieldDistance = sDistance
-						bestShield = shield
-						bestny = shieldguyny[k]
+					if (shield:GetWeaponID() ~= 37 or shield:GetProp('m_flDuckAmount') < 0.1) then
+						if sDistance < bestShieldDistance then
+							bestShieldName = shield:GetName()
+							bestShieldDistance = sDistance
+							bestShield = shield
+							bestny = shieldguyny[k]
+						end
+					else
+						table.insert(duckshield, shield)
+						table.insert(duckshieldny, shieldguyny[k])
 					end
 				end
-				bestShieldisUseShield = bestShield:GetWeaponID() == 37
-				sx, sy = client.WorldToScreen(bestShield:GetAbsOrigin())
 
-				if (shieldids[beshieldid] or false) and beshieldistance > bestShieldDistance and beshieldid ~= -1 and cshieldhit:GetValue() then
+				for k, shield in pairs(duckshield) do
+					local sDistance = (localabs - shield:GetAbsOrigin()):Length()
+					if sDistance < bestduckShieldDistance then
+						bestduckShieldName = shield:GetName()
+						bestduckShieldDistance = sDistance
+						bestduckShield = shield
+						bestduckny = duckshieldny[k]
+					end
+				end
+
+
+
+				bestShieldisUseShield = (bestShield ~= nil and bestShield:GetWeaponID() == 37) or #duckshield ~= 0
+				if bestShield ~= nil then
+					sx, sy = client.WorldToScreen(bestShield:GetAbsOrigin())
+				elseif bestduckShield ~= nil then
+					sx, sy = client.WorldToScreen(bestduckShield:GetAbsOrigin())
+				end
+				if (shieldids[beshieldid] or false) and (beshieldistance <= bestShieldDistance or beshieldistance <= bestduckShieldDistance) and beshieldid ~= -1 and cshieldhit:GetValue() then
 					if gui.GetValue("misc.showspec") == true then
 						gui.SetValue("misc.showspec", 0)
 					end
 				end
 				if bestShieldisUseShield then
-					beshieldistance = math.floor(bestShieldDistance)
-					beshieldid = bestShield:GetIndex()
-					beshieldidname = bestShield:GetName()
+					if bestShield ~= nil then
+						if bestduckShield ~= nil and bestShieldDistance >= bestduckShieldDistance then
+							beshieldistance = math.floor(bestduckShieldDistance)
+							beshieldid = bestduckShield:GetIndex()
+							beshieldidname = bestduckShield:GetName()
+						else
+							beshieldistance = math.floor(bestShieldDistance)
+							beshieldid = bestShield:GetIndex()
+							beshieldidname = bestShield:GetName()
+						end
+					elseif bestduckShield ~= nil then
+						beshieldistance = math.floor(bestduckShieldDistance)
+						beshieldid = bestduckShield:GetIndex()
+						beshieldidname = bestduckShield:GetName()
+					end
 				end
 				if bestShield ~= nil then
 					if bestShieldDistance < 500 then
@@ -1031,12 +1072,34 @@ callbacks.Register("CreateMove", function(ucmd)
 						end
 					end
 				end
+
+				if bestduckShield ~= nil then
+					if bestduckShieldDistance < 500 then
+						shieldprotectenable = false
+					end
+					needoffaim = false
+					if bestny < 50 or bestny > 100 then
+						local leghitbox = lockonitlegprecalc(bestShield)
+						if islook(bestShield, 1) or islook(bestShield, leghitbox) then
+							if Closedto and bestduckShieldDistance > BestDistance and #shieldguy ~= enemyalive then
+								needoffaim = false
+							else
+								if notshield:GetValue() then needoffaim = true end
+							end
+						end
+					end
+				end
+
+
+
+
+
 				if input.IsButtonDown(hitshieldleg:GetValue()) and bestShield ~= nil and not aimingleg then
 					local leghitbox = lockonitlegprecalc(bestShield)
 					aimingleg = lockonitlegac(bestShield, leghitbox, smoothstep, bestShieldDistance)
 					needoffaim = true
 				end
-				if bestShieldDistance < 130 and cshieldhit:GetValue() and bestShieldisUseShield and gui.GetValue("misc.showspec") == false then
+				if (bestShieldDistance < 130 or bestduckShieldDistance < 130) and cshieldhit:GetValue() and bestShieldisUseShield and gui.GetValue("misc.showspec") == false then
 					gui.SetValue("misc.showspec", 1)
 				end
 			elseif BestEnemy ~= nil and beshieldid == BestEnemy:GetIndex() then
@@ -1419,34 +1482,19 @@ local function switch()
 					draw.Text(screen_w / 2 - 400, screen_h / 2 - 300, "CBE aim me!")
 				end
 				draw.SetFont(font);
+
 				if bestShieldName ~= nil then
 					draw.Text(screen_w / 2, screen_h / 2 - 300, math.floor(bestShieldDistance))
 					draw.Text(screen_w / 2 + 200, screen_h / 2 - 300, bestShieldName .. "(S)")
-					if sx ~= 0 then
+					if sx ~= nil and sx ~= 0 then
 						draw.Line(sx, sy, screenCenterX, 0)
 					end
-
-					-- if bestShieldDistance < 1500 and notshield:GetValue() then
-					-- 	draw.SetFont(fontA)
-					-- 	draw.Color(255, 0, 0, 255)
-					-- else
-					-- 	draw.SetFont(font)
-					-- 	draw.Color(255, 255, 255, 255)
-					-- end
-					-- draw.Text(screen_w / 2 - 500, screen_h / 2 - 60, "Shieldguy:")
-					-- local drawstepa = 0
-					-- if notshield:GetValue() and bestShieldDistance < 1500 then
-					-- 	drawstepa = 50
-					-- end
-					-- for i = 1, #shieldname do
-					-- 	draw.Text(screen_w / 2 - 500, screen_h / 2 - 35 + drawstepa,
-					-- 		shieldname[i] .. " " .. shieldistance[i])
-					-- 	if notshield:GetValue() and bestShieldDistance < 1500 then
-					-- 		drawstepa = drawstepa + 100
-					-- 	else
-					-- 		drawstepa = drawstepa + 25
-					-- 	end
-					-- end
+				elseif bestduckShieldName ~= nil then
+					draw.Text(screen_w / 2, screen_h / 2 - 300, math.floor(bestduckShieldDistance))
+					draw.Text(screen_w / 2 + 200, screen_h / 2 - 300, bestduckShieldName .. "(Sd)")
+					if sx ~= nil and sx ~= 0 then
+						draw.Line(sx, sy, screenCenterX, 0)
+					end
 				end
 				if needCdisplay then
 					draw.Text(screen_w / 2, screen_h / 2 - 250, cdistance)
@@ -1468,8 +1516,10 @@ local function switch()
 		end
 
 		if notshield:GetValue() then
-			if math.floor(bestShieldDistance) < 2000 then
-				draw.Text(screen_w / 2 - 782, screen_h / 2 - 60, "NohitShield " .. math.floor(bestShieldDistance))
+			if math.floor(bestShieldDistance) < 2000 or math.floor(bestduckShieldDistance) < 2000 then
+				local outvalue = bestShieldDistance >= bestduckShieldDistance and math.floor(bestduckShieldDistance) or
+				math.floor(bestShieldDistance)
+				draw.Text(screen_w / 2 - 782, screen_h / 2 - 60, "NohitShield " .. outvalue)
 			else
 				draw.Text(screen_w / 2 - 782, screen_h / 2 - 60, "NohitShield")
 			end
