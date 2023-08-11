@@ -97,7 +97,7 @@ local function returnweaponstr(player)
 end
 
 local function DrawLine()
-    if not warning:GetValue() or not gui.GetValue("esp.master")  then return end
+    if not warning:GetValue() or not gui.GetValue("esp.master") then return end
 
     if isNeedW then
         if warning:GetValue() then
@@ -177,7 +177,7 @@ end)
 -- end
 
 local function SnapLines()
-    if not warning:GetValue() or not gui.GetValue("esp.master")  then return end
+    if not warning:GetValue() or not gui.GetValue("esp.master") then return end
 
     if isNeedW then
         hss = entities.FindByClass("CHostage")
@@ -370,7 +370,7 @@ local function SnapLines()
 end
 
 local function drawEspHook(builder)
-    if not warning:GetValue() or not gui.GetValue("esp.master")  then return end
+    if not warning:GetValue() or not gui.GetValue("esp.master") then return end
 
     if isNeedW then
         drawespxy = {}
@@ -426,7 +426,7 @@ local function drawEspHook(builder)
                         local x, y = client.WorldToScreen(builder_entity:GetAbsOrigin());
                         if x ~= nil and y ~= nil then
                             --draw.Line(x, y, screenCenterX + 400, 0);
-                            table.insert(drawespxy, { x, y, screenCenterX + 500, 0, 255,255,224, 255 })
+                            table.insert(drawespxy, { x, y, screenCenterX + 500, 0, 255, 255, 224, 255 })
                         end
                     end
                 else
@@ -435,7 +435,7 @@ local function drawEspHook(builder)
                         if player_weapon_class == "pistol" or player_weapon_class == "shotgun" or player_weapon_class == "kniefetc" then
                             local x, y = client.WorldToScreen(builder_entity:GetAbsOrigin());
                             if x ~= nil and y ~= nil then
-                                table.insert(drawespxy, { x, y, screenCenterX + 400, 0, 255,255,224, 255 })
+                                table.insert(drawespxy, { x, y, screenCenterX + 400, 0, 255, 255, 224, 255 })
                             end
                         end
                     end

@@ -21,7 +21,7 @@
 --     CHudChat_Printf(CHudChat, 0, 0, " " .. ChatPrefix .. msg)
 -- end
 
-local ranks_mode = gui.Combobox(gui.Reference("Misc", "General", "Extra"), "tablet.mode", "Message SendWay",
+local ranks_mode = gui.Combobox(gui.Reference("Misc", "General", "Extra"), "tablet.mode", "Tablet Message SendWay",
     "In Party chat", "Only Console")
 client.AllowListener("client_disconnect");
 client.AllowListener("begin_new_match");
@@ -67,19 +67,31 @@ local function ingame()
     return money ~= nil and #money ~= 0
 end
 
+local function partyapisay(message)
+    print(message)
+    if ranks_mode:GetValue() == 0 then
+        panorama.RunScript(
+            "PartyListAPI.SessionCommand('Game::Chat', 'run all xuid ' + MyPersonaAPI.GetXuid() + ' chat " ..
+            message .. "');")
+    end
+end
 
-callbacks.Register("CreateMove", function(cmd)
+
+
+callbacks.Register("CreateMove", function()
     local players = entities.FindByClass("CCSPlayer")
     ingamestatus = ingame()
 
     if players ~= nil then
         local moneylist = {}
         local playerlist = {}
+        local localindex = (entities.GetLocalPlayer()):GetIndex()
+        local localteamid = (entities.GetLocalPlayer()):GetPropInt("m_nSurvivalTeam")
         if ingamestatus then
-            for i, player in ipairs(players) do
+            for _, player in ipairs(players) do
                 local playername = player:GetName()
                 if player:IsAlive() and deadlist[playername] then
-                    print("Respawn" .. ": " .. playername)
+                    partyapisay("Respawn" .. ": " .. playername)
                     --ChatPrint("\04Respawn" .. ": " .. playername)
                 end
             end
@@ -87,11 +99,11 @@ callbacks.Register("CreateMove", function(cmd)
         end
         for i, player in ipairs(players) do
             local playerIndex = player:GetIndex()
-            local localindex = (entities.GetLocalPlayer()):GetIndex()
             local playername = player:GetName()
+            local playerteamid = player:GetPropInt("m_nSurvivalTeam")
 
             if player:GetName() ~= "GOTV" then
-                if localindex ~= playerIndex then
+                if localindex ~= playerIndex or (localteamid ~= -1 and playerteamid ~= localteamid) then
                     table.insert(playerlist, player:GetName())
                 end
                 if not player:IsAlive() and ingamestatus then
@@ -114,7 +126,8 @@ callbacks.Register("CreateMove", function(cmd)
 
                     if cachelistpurchaseid[playerIndex] ~= purchaseIndex then
                         if cachemoneylist[playerIndex] - playerMoney > 0 and purchaseIndex ~= -1 then
-                            print(player:GetName() .. " purchased " .. tabletitemindex[purchaseIndex])
+                            partyapisay(player:GetName() .. " purchased " .. tabletitemindex[purchaseIndex])
+
                             --ChatPrint("\04" .. player:GetName() .. " purchased " .. tabletitemindex[purchaseIndex])
                         end
 
@@ -126,26 +139,13 @@ callbacks.Register("CreateMove", function(cmd)
         cachemoneylist = moneylist
 
         if #cachelist ~= #playerlist or #cachelist == 0 then
-            local ranksModeValue = ranks_mode:GetValue()
             for i, enemy in ipairs(cachelist) do
                 if not findthisguy(enemy, playerlist) then
                     if ingamestatus then
-                        if ranksModeValue == 0 then
-                            local message = "「Exit" .. string.gsub(": " .. enemy, "%s", "") .. "」"
-                            panorama.RunScript(
-                                "PartyListAPI.SessionCommand('Game::Chat', 'run all xuid ' + MyPersonaAPI.GetXuid() + ' chat " ..
-                                message .. "');")
-                        end
-                        print("Defeat Exit" .. ": " .. enemy)
+                        partyapisay("Defeat Exit" .. ": " .. enemy)
                         --ChatPrint("\04Defeat Exit" .. ": " .. enemy)
                     else
-                        if ranksModeValue == 0 then
-                            local message = "「WExit" .. string.gsub(": " .. enemy, "%s", "") .. "」"
-                            panorama.RunScript(
-                                "PartyListAPI.SessionCommand('Game::Chat', 'run all xuid ' + MyPersonaAPI.GetXuid() + ' chat " ..
-                                message .. "');")
-                        end
-                        print("Warmup Escaped" .. ": " .. enemy)
+                        partyapisay("Warmup Escaped" .. ": " .. enemy)
                         --ChatPrint("\04Warmup Escaped" .. ": " .. enemy)
                     end
                 end
@@ -156,7 +156,8 @@ callbacks.Register("CreateMove", function(cmd)
 end)
 
 
-
+client.AllowListener("client_disconnect");
+client.AllowListener("begin_new_match");
 callbacks.Register("FireGameEvent", function(e)
     local eventName = e:GetName()
     if (eventName == "client_disconnect") or (eventName == "begin_new_match") then
@@ -199,7 +200,14 @@ local m_kg = gui.Button(gui.Reference("Misc", "General", "Extra"), "Check DZ Tea
                     { playerIndex, playerName, playerTeam, player:IsAlive() })
             end
         end
-        print("--------------------------------------")
+        partyapisay("--------------------------------------")
+
+        if ranks_mode:GetValue() == 0 then
+            local message = "--------------------------------------"
+            panorama.RunScript(
+                "PartyListAPI.SessionCommand('Game::Chat', 'run all xuid ' + MyPersonaAPI.GetXuid() + ' chat " ..
+                message .. "');")
+        end
         --ChatPrint("--------------------------------------")
         for i, player in ipairs(players) do
             local teamstr = "team" .. player:GetPropInt("m_nSurvivalTeam")
@@ -208,10 +216,10 @@ local m_kg = gui.Button(gui.Reference("Misc", "General", "Extra"), "Check DZ Tea
             local playerName = player:GetName()
             if teamstr == "team-1" and playerName ~= "GOTV" then
                 if communicationMute == 1 then
-                    print(playerName .. " Cheater Solo")
+                    partyapisay(playerName .. " Cheater Solo")
                     --ChatPrint("\04" .. playerName .. " Cheater Solo")
                 else
-                    print(playerName .. " Solo")
+                    partyapisay(playerName .. " Solo")
                     --ChatPrint("\04" .. playerName .. " Solo")
                 end
             else
@@ -230,14 +238,14 @@ local m_kg = gui.Button(gui.Reference("Misc", "General", "Extra"), "Check DZ Tea
         for i = 0, 11 do
             local teamstr = "team" .. i
             if nonsingleteamout[teamstr] then
-                print(nonsingleteamout[teamstr])
+                partyapisay(nonsingleteamout[teamstr])
                 --("\04" .. nonsingleteamout[teamstr])
             end
         end
-        print("Total: " .. #players - 1 .. " players")
-        print("-----------------END------------------")
+        partyapisay("Total: " .. #players .. " players")
+        partyapisay("-----------------END------------------")
         --ChatPrint("\04Total: " .. #players - 1 .. " players")
-       -- ChatPrint("-----------------END------------------")
+        -- ChatPrint("-----------------END------------------")
     end
 end)
 m_kg:SetWidth(268)

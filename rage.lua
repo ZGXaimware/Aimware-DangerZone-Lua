@@ -215,10 +215,10 @@ local weaponClasses = {
 }
 
 local weaponHitable = {
-	["rifle"] = 1000,
+	["rifle"] = 1200,
 	["smg"] = 900,
 	["shotgun"] = 500,
-	["lmg"] = 1500,
+	["lmg"] = 1800,
 	["pistol"] = 500,
 	["hpistol"] = 500
 }
