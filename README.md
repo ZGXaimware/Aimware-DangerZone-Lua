@@ -1,5 +1,5 @@
 # Aimware-DangerZone-Lua<br />
-Last Updated 2023/8/10 1.1.0
+Last Updated 2023/8/11 1.1.1
 
 [My Bilibili Profile](https://space.bilibili.com/3494352856812225) <br />
 
@@ -54,13 +54,16 @@ extraesp.lua:<br />
   （&nbsp;）Show Barrel,RemoteBomb on screen by draw extra photo on it<br />
 <br />
 tablechecker.lua:<br />
-  （&nbsp;）reveal player tablebuy event and print on cheat console (Example "菲尼克斯老张 has brought scout")<br />
+  （&nbsp;）reveal player tablebuy event and print on cheat console (Example "菲尼克斯老张 purchased scout")<br />
   （&nbsp;）check player who disconnected and print on cheat console (Example "Warmup Escaped 特训飓风JF" ,"Defeat Exit 尼古拉斯老王")<br />
-<br />
-teamchecker.lua: (once run script)<br />
+  （&nbsp;）Check Player who is respawn(Example Respawn: Bilibili主播风云错爱)<br />
   （&nbsp;）reveal player team and print it on cheat console (Same as ESP.lua righttext do)<br />
+<br />
+RandomNameChanger.lua:<br />
+  （&nbsp;）Get your name get random changed when get in game (then console command "status" cant check you are in game)<br />
+  （&nbsp;）IF USE THIS YOU MUST RUN autoname.py in background<br />
 
-
+<br />
 
 
 Update 1.0.1:<br />
@@ -111,3 +114,9 @@ Update 1.1.0:<br />
 (rage.lua) add new detector to prevent '+attack' command not stop when no target<br />
 (snapline.lua) changed color set for piston/smg line<br />
 (tablechechker.lua)disable ffi print due to crash <br />
+<br />
+Updated 1.1.1:<br />
+(tabletcheck.lua)huge updated for partyApi say<br />
+(RandomNameChanger.lua) new lua released<br />
+(rage.lua) update aimleg lmg -> 1800,rifle ->1200<br />
+<br />
