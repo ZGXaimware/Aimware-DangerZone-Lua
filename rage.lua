@@ -795,7 +795,7 @@ callbacks.Register("CreateMove", function(ucmd)
 							shieldjumper = true
 							shieldjumpername = shield:GetName()
 							shieldjumpernameDistance = Distance
-							if Distance < 2000 and Distance > 1000 then smoothon = smoothaim(shield, smoothstep) end
+							--if Distance < 2000 and Distance > 1000 then smoothon = smoothaim(shield, smoothstep) end
 						end
 					end
 				end
@@ -1518,7 +1518,7 @@ local function switch()
 		if notshield:GetValue() then
 			if math.floor(bestShieldDistance) < 2000 or math.floor(bestduckShieldDistance) < 2000 then
 				local outvalue = bestShieldDistance >= bestduckShieldDistance and math.floor(bestduckShieldDistance) or
-				math.floor(bestShieldDistance)
+					math.floor(bestShieldDistance)
 				draw.Text(screen_w / 2 - 782, screen_h / 2 - 60, "NohitShield " .. outvalue)
 			else
 				draw.Text(screen_w / 2 - 782, screen_h / 2 - 60, "NohitShield")
