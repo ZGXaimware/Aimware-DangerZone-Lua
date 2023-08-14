@@ -4,6 +4,9 @@ Last Updated 2023/8/14 1.1.2 (New Version)
 Tips:the lua with "DZe_" name is for new version config<br />
 if you need use old config from hvhbbs or aimware you need use branch named "oldversion"<br />
 
+Tips2:if your suffer performance issue you should consider turn off some function<br />
+Like part of snapline ,ESP,distance visual,etc <br />
+
 [My Bilibili Profile](https://space.bilibili.com/3494352856812225) <br />
 
 Dont sell my code on NL/SK/Pri market.It is opensource<br />
@@ -43,9 +46,9 @@ DZe.lua:<br />
   （&nbsp;）AimDrone(press key to autoaim recent Drone(Manual controlled or Has Cargo)<br />
   （&nbsp;）LegitAA(Desync) and roll AA switch<br />
   （&nbsp;）ShieldBot (function as kniefbot but support all dz items)<br />
-
-
-  <br />
+！[Alt text](/imgs/dze1.png)<br />
+！[Alt text](/imgs/dze2.png)<br />
+<br />
 DZe_visual.lua:<br />
   （&nbsp;）worldtoscreen Hostage,Boxes,Healthshot,Ammobox,Cash,Shield,Armor,Piston(include Boxes and p2000 and glock),light weapon box<br />
   （&nbsp;）show Endcircle Distance & worldtoscreen it<br />
@@ -55,6 +58,7 @@ DZe_visual.lua:<br />
   （&nbsp;）show Enemy's Teammate and between two guy's distance, if his auto muted (probably cheating) then add "(Cheating)" (Example "(M)(Cheater)  1000 will11801") in right<br />
   （&nbsp;）show ammo status on bottom<br />
   （&nbsp;）Show Barrel,RemoteBomb on screen by draw extra photo on it<br />
+！[Alt text](/imgs/dzev.png)<br />
 <br />
 DZe_sniffer.lua:<br />
   （&nbsp;）reveal player tablebuy event and print on cheat console or partyapi (Example "菲尼克斯老张 purchased scout")<br />
@@ -62,9 +66,10 @@ DZe_sniffer.lua:<br />
   （&nbsp;）Check Player who is respawnor partyapi (Example Respawn: Bilibili主播风云错爱)<br />
   （&nbsp;）reveal player team and print it on cheat console or partyapi <br />
 <br />
+！[Alt text](/imgs/dzes.png)<br />
 
 
-
+<br />
 Update 1.0.1:<br />
 (rage.lua)When aa 180 backward enable desync(some cheater (legit with ssg08) will shot you calf/foot when you back shield)
 
