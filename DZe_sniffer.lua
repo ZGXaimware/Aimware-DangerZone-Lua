@@ -26,10 +26,13 @@ local main_box = gui.Groupbox(tab, "Sniffer", 16, 16, 400, 0);
 local ranks_mode = gui.Combobox(main_box, "tablet.mode", "Message SendWay",
     "Only Console", "In Party chat")
 local messagemaster = gui.Checkbox(main_box, "tablet.master", "Master Switch", 1)
-local purchasemaster = gui.Checkbox(main_box, "tablet.master", "Purchase sniffer", 1)
-local respawnmaster = gui.Checkbox(main_box, "tablet.master", "Respawn sniffer", 1)
-local exitmaster = gui.Checkbox(main_box, "tablet.master", "Exit sniffer", 1)
+local purchasemaster = gui.Checkbox(main_box, "tablet.purchasemaster", "Purchase sniffer", 1)
+local respawnmaster = gui.Checkbox(main_box, "tablet.respawnmaster", "Respawn sniffer", 1)
+local exitmaster = gui.Checkbox(main_box, "tablet.exitmaster", "Exit sniffer", 1)
+local paradropmaster =  gui.Checkbox(main_box, "tablet.paradropmaster", "ParaDrop sniffer", 1)
+local dronedispatchmaster =  gui.Checkbox(main_box, "tablet.dronedispatchmaster", "Drone Dispatch sniffer", 1)
 
+gui.SetValue("misc.log.console",true)
 
 local function findthisguy(thisguy, tab)
     if tab == nil then return end
@@ -68,6 +71,15 @@ local tabletitemindex = {
     [21] = "Shield"
 }
 
+local pLocal = nil
+local localindex = 0
+local localteamid = 0
+
+
+
+
+
+
 local function ingame()
     local money = entities.FindByClass("CItemCash")
     return money ~= nil and #money ~= 0
@@ -85,6 +97,11 @@ end
 
 
 callbacks.Register("CreateMove", function()
+    pLocal = entities.GetLocalPlayer()
+    if pLocal == nil then return end
+    localindex = pLocal:GetIndex()
+    localteamid = pLocal:GetPropInt("m_nSurvivalTeam")
+    if localteamid == -1 then localteamid = -2 end
     if not messagemaster:GetValue() then return end
     local players = entities.FindByClass("CCSPlayer")
     ingamestatus = ingame()
@@ -99,9 +116,6 @@ callbacks.Register("CreateMove", function()
     if players ~= nil then
         local moneylist = {}
         local playerlist = {}
-        local localindex = (entities.GetLocalPlayer()):GetIndex()
-        local localteamid = (entities.GetLocalPlayer()):GetPropInt("m_nSurvivalTeam")
-        if localteamid == -1 then localteamid = -2 end
         if ingamestatus and respawnmaster:GetValue() then
             for _, player in ipairs(players) do
                 local playername = player:GetName()
@@ -166,6 +180,9 @@ end)
 
 client.AllowListener("client_disconnect");
 client.AllowListener("begin_new_match");
+client.AllowListener("survival_paradrop_spawn")
+client.AllowListener("survival_paradrop_break")
+client.AllowListener("drone_dispatched")
 callbacks.Register("FireGameEvent", function(e)
     local eventName = e:GetName()
     if (eventName == "client_disconnect") or (eventName == "begin_new_match") then
@@ -173,6 +190,17 @@ callbacks.Register("FireGameEvent", function(e)
         cachemoneylist = {}
         cachelist = {}
         deadlist = {}
+    end
+    if paradropmaster:GetValue() then
+        if eventName == "survival_paradrop_spawn" then
+            partyapisay("ParaDrop_has_created!")
+        elseif eventName == "survival_paradrop_break" then
+            partyapisay("ParaDrop_has_destoryed!")
+        end
+    end
+    if dronedispatchmaster:GetValue() and eventName == "drone_dispatched" and client.GetPlayerIndexByUserID(e:GetInt("userid")) ~= localindex and entities.GetByUserID(e:GetInt("userid")):GetPropInt("m_nSurvivalTeam") ~= localteamid then
+        local playername = string.gsub(entities.GetByUserID(e:GetInt("userid")):GetName(), '%s', '')
+        partyapisay(playername .. "_dispatched_Drone")
     end
 end)
 

@@ -290,7 +290,7 @@ local function eyetoneedyangle(enemy_x, enemy_y, own_eyex, own_eyey)
 		needy = needy + 360
 	end
 
-	return math.floor(needx), math.floor(needy)
+	return needx, needy
 end
 
 local function detectEnemydir(Enemy)
@@ -1303,7 +1303,9 @@ callbacks.Register("CreateMove", function(ucmd)
 		if not (velo < 169 and (math.abs(angle) > 135 and math.abs(angle) < 45)) and fasthop:GetValue() ~= nil and fasthop:GetValue() ~= 0 and input.IsButtonDown(fasthop:GetValue()) then
 			ucmd.buttons = f < 2 and (f == 0 and ucmd.buttons - 4 or (f == 1 and ucmd.buttons - 2 or ucmd.buttons)) or
 				(n and ucmd.buttons - 6 or ucmd.buttons);
-			local isTouchingGround = bit.band(pLocal:GetPropInt("m_fFlags"), 1) ~= 0;
+			local isTouchingGround = bit.band(pLocal:GetPropInt("m_fFlags"), 1) ~= 0
+			local rappeling = pLocal:GetProp("m_bIsSpawnRappelling") == 1 -- avoid auto strafe with spawn rappel
+			local in_water = pLocal:GetProp("m_nWaterLevel") ~= 0 -- avoid auto strafe in water because it reduces speed
 			local adpressed = false
 
 			if input.IsButtonDown(65) or input.IsButtonDown(68) then
@@ -1316,7 +1318,7 @@ callbacks.Register("CreateMove", function(ucmd)
 			end
 
 			f, n = f + 1, isTouchingGround;
-			gui.SetValue("misc.strafe.air", not isTouchingGround);
+			gui.SetValue("misc.strafe.air", not isTouchingGround and not rappeling and not in_water);
 			gui.SetValue("misc.fakelag.enable", false);
 			steptotargetangle(angle, stargetangle, aastep:GetValue())
 		else
