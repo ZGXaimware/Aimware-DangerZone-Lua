@@ -1,46 +1,17 @@
--- local callbacks = 0
--- local draw = 0
--- local gui = 0
--- local client = 0
--- local engine = 0
--- local Vector3 = 0
--- local entities = 0
--- local input = 0
--- local EulerAngles = 0
--- local bit = 0
--- local globals = 0
-gui.SetValue("rbot.antiaim.base", "0 Desync")
-local font = draw.CreateFont("Microsoft Tai Le", 30, 1000);
-local fontA = draw.CreateFont("Microsoft Tai Le", 80, 1000);
-local font1 = draw.CreateFont("Verdana", 22, 400);
-
-local ref = gui.Reference("Ragebot");
-local tab = gui.Tab(ref, "DZe", "DangerZone Elite");
-
+local tab = gui.Tab(gui.Reference("Ragebot"), "DZe", "DangerZone Elite");
 
 local main_box = gui.Groupbox(tab, "Main", 16, 16, 200, 0);
-local legit_aa_box = gui.Groupbox(tab, "(Desync) Legit Anti-Aim", 232, 16, 200, 0);
-local switch_box = gui.Groupbox(tab, "Switch", 448, 16, 174, 0);
-
-local legit_aa_type = gui.Combobox(legit_aa_box, "aa.type", "DeSync Type", "Default", "Low");
-local legit_aa_key = gui.Keybox(legit_aa_box, "aa.inverter", "Inverter", 0);
-local switch_awall_key = gui.Keybox(switch_box, "switch.autowall", "Auto Wall", 0);
-local legit_aa_switch = gui.Checkbox(legit_aa_box, "aa.switch", "Master Switch", 1);
 
 local smooth = gui.Checkbox(main_box, "main.aimsmooth", "AimSmooth", 1)
-smooth:SetDescription("Aimstep like function, turn off will use fov based")
-local autoshield = gui.Checkbox(main_box, "main.autoshield", "Autoshield", 1)
+smooth:SetDescription("Aimstep like function, turn off will use fov based(Unsafe)")
+local aimsmoothstep = gui.Slider(main_box, "main.aimstepsmooth", "AimSmoothStep", 15, 5, 25, 1)
+local aastep        = gui.Slider(main_box, "main.aastep", "AAStep", 15, 5, 25, 1)
+local autoshield    = gui.Checkbox(main_box, "main.autoshield", "Autoshield", 1)
 autoshield:SetDescription("Auto inject healthshot when you have shield and low hp")
 local notshield = gui.Checkbox(main_box, "main.notshield", "NoHitShield", 0)
 notshield:SetDescription("off aimbot when enemy who covered by shield")
-local hitshieldleg = gui.Keybox(switch_box, "main.hitshieldleg", "HitShieldguyLeg", 81)
-hitshieldleg:SetDescription("Press key to lock you viewangle to shieldguy's foot or calf")
 local autolock = gui.Checkbox(main_box, "main.autolock", "Autolock", 1)
 autolock:SetDescription("Auto switch to Enemy who close to you and visible (by Aimsmooth) ")
-local lockmdrone = gui.Keybox(switch_box, "main.lockmdrone", "LockOnManualDrone", 17)
-lockmdrone:SetDescription("lock viewangle to closet manual drone")
-local lockcdrone = gui.Keybox(switch_box, "main.lockndrone", "LockOnCargoDrone", 18)
-lockcdrone:SetDescription("lock viewangle to closet cargo drone")
 local shieldreturn = gui.Checkbox(main_box, "main.shieldreturn", "shieldreturn", 1)
 shieldreturn:SetDescription("when weapon reload auto switch to 180 backward and when done auto reset")
 local cshieldhit = gui.Checkbox(main_box, "main.shieldhit", "ShieldHit", 1)
@@ -50,25 +21,36 @@ local disabledistancevis = gui.Checkbox(main_box, "main.disabledisvis", "Disable
 disabledistancevis:SetDescription("disable distance visual function supply by che@t")
 local disablevisual = gui.Checkbox(main_box, "main.disablevisual", "DisableVisual", 0)
 disablevisual:SetDescription("disable all visual function supply by che@t")
-local disablesetprop = gui.Checkbox(main_box, "main.disablevisual", "DisableProp", 1)
+local disablesetprop = gui.Checkbox(main_box, "main.disablevisual", "DisableProp", 0)
 disablesetprop:SetDescription("disable all visual by setprop")
+local debugaimstep = gui.Checkbox(main_box, "main.debug_reallyaimstep", "(Very Unsafe)LowDistanceaimstep", 0)
+
+local legit_aa_box = gui.Groupbox(tab, "(Desync) Legit Anti-Aim", 232, 16, 200, 0);
+
+local legit_aa_switch = gui.Checkbox(legit_aa_box, "aa.switch", "Master Switch", 1);
+local legit_aa_type = gui.Combobox(legit_aa_box, "aa.type", "DeSync Type", "Default", "Low");
+local legit_aa_key = gui.Keybox(legit_aa_box, "aa.inverter", "Inverter", 0);
+local roll_aa_switch = gui.Checkbox(legit_aa_box, "aa.switch", "Roll Switch(Very Unsafe)", 0);
+
+local switch_box = gui.Groupbox(tab, "Switch", 448, 16, 174, 0);
+
+local switch_awall_key = gui.Keybox(switch_box, "switch.autowall", "Auto Wall", 0);
+local lockmdrone = gui.Keybox(switch_box, "main.lockmdrone", "LockOnManualDrone", 17)
+lockmdrone:SetDescription("lock viewangle to closet manual drone")
+local lockcdrone = gui.Keybox(switch_box, "main.lockndrone", "LockOnCargoDrone", 18)
+lockcdrone:SetDescription("lock viewangle to closet cargo drone")
 local fasthop = gui.Keybox(switch_box, "danger.fasthop", "FastHop", 70)
 fasthop:SetDescription("DZ movement exploit that makes you hop super fast.")
-local f = 0
-local n = 0
-local iscommandattack1 = false
-local iscommandattack2 = false
+local hitshieldleg = gui.Keybox(switch_box, "main.hitshieldleg", "HitShieldguyLeg", 81)
+hitshieldleg:SetDescription("Press key to lock you viewangle to shieldguy's foot or calf")
 
 
 
--- local ui, f, n, aa =
--- 	{ danger = { fasthop = gui.Keybox(main_box, "danger.fasthop", "FastHop", 70), }, },
--- 	0; ui
--- 	.danger.fasthop:SetDescription("DZ movement exploit that makes you hop super fast.");
 
 
-
-local aastep = 30
+local font = draw.CreateFont("Microsoft Tai Le", 30, 1000);
+local fontA = draw.CreateFont("Microsoft Tai Le", 80, 1000);
+local font1 = draw.CreateFont("Verdana", 22, 400);
 local needesync = true
 local attacker = nil
 local beaimme = false
@@ -118,8 +100,6 @@ local beshieldistance = 0
 local bestny = 0
 local bestduckny = 0
 local smoothon = false
--- local shieldname = {}
--- local shieldistance = {}
 local needoffaim = false
 local aimstatus = ""
 local bx = 0
@@ -133,22 +113,25 @@ local loadback = false
 local enemydir = true
 local beshieldid = -1
 local legit_aa_key_value = true
-local smoothstep = 15
 local bestShieldDistance = math.huge
 local bestShieldName = nil
 local beshieldidname = ""
 local velo = 0
 local bestduckShieldDistance = math.huge
 local bestduckShieldName = nil
-
-client.AllowListener("weapon_fire");
-client.AllowListener("bullet_impact");
-client.Command("unbind mouse3;unbind shift;unbind q", true)
-client.AllowListener("client_disconnect");
-client.AllowListener("begin_new_match");
+local calledsny = false
+local enemydirangle = 0
+local f = 0
+local n = 0
+local iscommandattack1 = false
+local iscommandattack2 = false
 
 local function setColors(x, y, z)
 	colorx, colory, colorz = x, y, z
+end
+local function ingame()
+	local money = entities.FindByClass("CItemCash")
+	return money ~= nil and #money ~= 0
 end
 
 local function returnweaponstr(player)
@@ -207,8 +190,6 @@ local weaponClasses = {
 	[75] = "kniefetc",
 	[74] = "kniefetc",
 	[76] = "kniefetc",
-	-- [59] = "kniefetc",
-	-- [42] = "kniefetc",
 	[78] = "kniefetc",
 	[80] = "kniefetc",
 	[70] = "RemoteBomb"
@@ -243,10 +224,10 @@ local localteamid = -2
 
 callbacks.Register("CreateMove", function()
 	pLocal = entities.GetLocalPlayer()
-	if pLocal ~= nil then plocallive = false end
+	if pLocal == nil then plocallive = false end
 	weaponstr = returnweaponstr(pLocal)
 
-	if weaponstr ~= "weapon_fists " and pLocal:IsAlive() then
+	if weaponstr ~= "weapon_fists " and pLocal:IsAlive() and ingame() then
 		plocallive = true
 		local rab = string.sub(gui.GetValue("rbot.antiaim.base"), 2, -2)
 		local r1, _ = string.find(rab, " ")
@@ -313,6 +294,7 @@ local function eyetoneedyangle(enemy_x, enemy_y, own_eyex, own_eyey)
 end
 
 local function detectEnemydir(Enemy)
+	if Enemy == nil then return false, 180 end
 	local enemy_y = ((Enemy:GetHitboxPosition(1) - pLocal:GetHitboxPosition(1)):Angles()).y
 	local own_eyey = (engine.GetViewAngles()).y
 	local needy = 0
@@ -337,7 +319,10 @@ local function detectEnemydir(Enemy)
 			end
 		end
 	end
-	return needy >= 0
+	local backwardangle = 0
+	if needy < 0 then backwardangle = needy + 180 else backwardangle = needy - 180 end
+
+	return needy >= 0, backwardangle
 end
 
 local function stepchangeviewanglemain(own_eyex, enemy_x, own_eyey, enemy_y, step)
@@ -401,7 +386,7 @@ end
 
 
 local function smoothaim(Enemy, step)
-	if angle ~= 0 then return end
+	if angle ~= 0 or Enemy == nil then return end
 	if weaponClass == "shared" then return false end
 	if (smooth:GetValue()) then
 		gui.SetValue("rbot.aim.target.fov", 23);
@@ -459,6 +444,7 @@ end
 
 
 local function enemyislook(Enemy)
+	if Enemy == nil then return false end
 	local targetDirection = localheadbox - Enemy:GetHitboxPosition(1);
 	local targetAngles = targetDirection:Angles();
 	local enemyeye = Enemy:GetProp("m_angEyeAngles")
@@ -474,6 +460,7 @@ end
 
 
 local function islook(Enemy, hitboxnum)
+	if Enemy == nil then return false end
 	local targetDirection = Enemy:GetHitboxPosition(hitboxnum) - localheadbox
 	local targetDistance = targetDirection:Length()
 	local targetAngles = targetDirection:Angles()
@@ -492,6 +479,7 @@ end
 
 
 local function lockonitlegprecalc(Enemy)
+	if Enemy == nil then return 1 end
 	if angle ~= 0 or get_weapon_class(localweaponid) == "shared" or get_weapon_class(localweaponid) == "SHIELD" then
 		return 1
 	end
@@ -538,7 +526,7 @@ local function lockonitlegprecalc(Enemy)
 end
 
 local function lockonitlegac(Enemy, hitboxnumber, step, distance)
-	if hitboxnumber ~= 1 then
+	if hitboxnumber ~= 1 or Enemy == nil then
 		if get_weapon_class(pLocal:GetWeaponID()) == "shared" or get_weapon_class(pLocal:GetWeaponID()) == "SHIELD" then return end
 		local enemyangle = (Enemy:GetHitboxPosition(hitboxnumber) - pLocal:GetHitboxPosition(1)):Angles()
 		local enemy_x = enemyangle.x
@@ -603,13 +591,17 @@ end
 
 
 
-local function autoreloadback()
+local function autoreloadback(bedistance)
 	local weaponvalid = weapons_table[weaponClass]
 	if weaponvalid == nil or not shieldreturn:GetValue() or input.IsButtonDown(69) then
 		return false
 	end
 	local pwentitie = pLocal:GetPropEntity("m_hActiveWeapon")
-	if weaponClass ~= "sniper" and weaponClass ~= "scout" then
+	if bedistance ~= nil and debugaimstep:GetValue() then
+		if bedistance < 600 then
+			return pwentitie:GetPropFloat("LocalActiveWeaponData", "m_flNextPrimaryAttack") - globals.CurTime() > -0.3
+		end
+	elseif weaponClass ~= "sniper" and weaponClass ~= "scout" then
 		return pwentitie:GetPropFloat("LocalActiveWeaponData", "m_flNextPrimaryAttack") - globals.CurTime() > 0.9
 	else
 		return pwentitie:GetPropFloat("LocalActiveWeaponData", "m_flNextPrimaryAttack") - globals.CurTime() > 1.3
@@ -631,6 +623,7 @@ callbacks.Register("CreateMove", function(ucmd)
 		shieldhit = false
 		local Enemies = entities.FindByClass("CCSPlayer")
 		if Enemies == nil then return end
+		local TBestEnemy = nil
 		local BestEnemy = nil
 		local owner = nil
 		local BestDistance = math.huge
@@ -662,19 +655,20 @@ callbacks.Register("CreateMove", function(ucmd)
 
 		if client.GetConVar("game_type") == "6" and lockmdrone:GetValue() ~= nil and lockmdrone:GetValue() ~= 0 and lockcdrone:GetValue() ~= nil and lockcdrone:GetValue() ~= 0 then
 			local Drones = entities.FindByClass("CDrone")
-
-			for i, Drone in pairs(Drones) do
-				local Distance = (Drone:GetAbsOrigin() - localabs):Length()
-				if Distance < 2500 then
-					if Drone:GetProp("m_hCurrentPilot") ~= -1 then
-						if Distance < BestMDDistance then
-							BestMDDistance = Distance
-							BestMD = Drone
-						end
-					elseif Drone:GetProp("m_hDeliveryCargo") ~= -1 then
-						if Distance < BestDDistance then
-							BestDDistance = Distance
-							BestD = Drone
+			if Drones ~= nil then
+				for i, Drone in pairs(Drones) do
+					local Distance = (Drone:GetAbsOrigin() - localabs):Length()
+					if Distance < 2500 then
+						if Drone:GetProp("m_hCurrentPilot") ~= -1 then
+							if Distance < BestMDDistance then
+								BestMDDistance = Distance
+								BestMD = Drone
+							end
+						elseif Drone:GetProp("m_hDeliveryCargo") ~= -1 then
+							if Distance < BestDDistance then
+								BestDDistance = Distance
+								BestD = Drone
+							end
 						end
 					end
 				end
@@ -715,21 +709,25 @@ callbacks.Register("CreateMove", function(ucmd)
 						end
 					end
 					totaldistance = totaldistance + Distance
-					if returnweaponstr(Enemy) == "weapon_fists " or Enemy:GetIndex() == localindex then
-						pass = true
-					end
-					if Enemy:GetPropInt("m_nSurvivalTeam") ~= localteamid and not pass then
-						enemyalive = enemyalive + 1
-						if Distance < CBestDistance then
-							CBestDistance = Distance
-							CBestEnemy = Enemy
-							Cowner = Enemy:GetName()
-						end
-						local btrace = engine.TraceLine(Enemy:GetHitboxPosition(1), localheadbox)
-						if Distance < BestDistance and btrace.fraction > 0.95 and Distance < 5999 then
-							BestDistance = Distance
-							BestEnemy = Enemy
-							owner = Enemy:GetName()
+					if returnweaponstr(Enemy) ~= "weapon_fists " and Enemy:GetIndex() ~= localindex then
+						if Enemy:GetPropInt("m_nSurvivalTeam") ~= localteamid then
+							if not pass then
+								enemyalive = enemyalive + 1
+								if Distance < CBestDistance then
+									CBestDistance = Distance
+									CBestEnemy = Enemy
+									Cowner = Enemy:GetName()
+								end
+							end
+							local btrace = engine.TraceLine(Enemy:GetHitboxPosition(1), localheadbox)
+							if Distance < BestDistance and btrace.fraction > 0.99 and Distance < 5999 then
+								TBestEnemy = Enemy
+								if not pass then
+									BestDistance = Distance
+									BestEnemy = Enemy
+									owner = Enemy:GetName()
+								end
+							end
 						end
 					end
 				end
@@ -767,18 +765,12 @@ callbacks.Register("CreateMove", function(ucmd)
 				BestEnemy = CBestEnemy
 				owner = Cowner
 				Nobest = true
+			end
+			if TBestEnemy ~= nil then
+				enemydir, enemydirangle = detectEnemydir(TBestEnemy)
 			else
-				enemydir = detectEnemydir(BestEnemy)
+				enemydirangle = 180
 			end
-			local needtoswitchbaim = false
-			if #shieldguy ~= 0 and #shieldguyny ~= 0 and notshield:GetValue() then
-				for k, shield in pairs(shieldguy) do
-					if shield:GetIndex() == BestEnemy:GetIndex() and shieldguyny[k] > 50 and shieldguyny[k] < 100 then
-						needtoswitchbaim = true
-					end
-				end
-			end
-			switchtobaim(needtoswitchbaim)
 			if CBestEnemy ~= nil or BestEnemy ~= nil then
 				shieldjumper = false
 				if shieldguy then
@@ -795,7 +787,6 @@ callbacks.Register("CreateMove", function(ucmd)
 							shieldjumper = true
 							shieldjumpername = shield:GetName()
 							shieldjumpernameDistance = Distance
-							--if Distance < 2000 and Distance > 1000 then smoothon = smoothaim(shield, smoothstep) end
 						end
 					end
 				end
@@ -831,7 +822,7 @@ callbacks.Register("CreateMove", function(ucmd)
 				if weaponClass == "SHIELD" or weaponClass == "kniefetc" then
 					if weaponClass == "SHIELD" then
 						gui.SetValue("esp.chams.localweapon.visible", 2)
-					elseif string.find(weaponstr, "shield") ~= nil and localhp <= 60 then
+					elseif string.find(weaponstr, "shield") ~= nil and localhp <= 60 and CBestDistance < 1000 then
 						client.Command("use weapon_shield", true)
 					end
 					shieldhit = (BestDistance < 76)
@@ -849,7 +840,6 @@ callbacks.Register("CreateMove", function(ucmd)
 						end
 					end
 				end
-				-----print(enemyalive)
 				Closedto = islook(BestEnemy, 1)
 				local cvelocity = 0
 				local bvelocity = 0
@@ -870,10 +860,6 @@ callbacks.Register("CreateMove", function(ucmd)
 				nvelocity = cvbest and cvelocity or bvelocity
 
 
-				smoothstep = 15
-				if beaimme == true or cbeaimme == true then
-					smoothstep = 30
-				end
 				autolockmessage = ""
 				if autolock:GetValue() then
 					if localhp <= 90 and localweaponid ~= 37 then
@@ -886,7 +872,7 @@ callbacks.Register("CreateMove", function(ucmd)
 									gui.SetValue("rbot.aim.target.selection", 2)
 
 									if not Closedto and not smoothon then
-										smoothon = smoothaim(attacker, smoothstep + 5)
+										smoothon = smoothaim(attacker, aimsmoothstep:GetValue() + 5)
 									end
 								end
 							end
@@ -902,12 +888,12 @@ callbacks.Register("CreateMove", function(ucmd)
 
 							if localhp <= 109 then
 								if BestDistance < 1750 and not Closedto and not smoothon then
-									smoothon = smoothaim(BestEnemy, smoothstep)
+									smoothon = smoothaim(BestEnemy, aimsmoothstep:GetValue())
 									autolockmessage = "Too Close and Low HP " .. localhp
 								end
 							else
 								if BestDistance < 1250 and not Closedto and not smoothon then
-									smoothon = smoothaim(BestEnemy, smoothstep)
+									smoothon = smoothaim(BestEnemy, aimsmoothstep:GetValue())
 									autolockmessage = "Extremely Close"
 								end
 							end
@@ -916,7 +902,7 @@ callbacks.Register("CreateMove", function(ucmd)
 					normaljumper = false
 					if ((CBestDistance < 3000 or BestDistance < 3000) and nvelocity > 399 and Closedto ~= true) and not shieldjumper then
 						if Cowner == owner and autolock:GetValue() and not smoothon then
-							smoothon = smoothaim(BestEnemy, smoothstep)
+							smoothon = smoothaim(BestEnemy, aimsmoothstep:GetValue())
 						end
 						normaljumper = true
 
@@ -936,7 +922,6 @@ callbacks.Register("CreateMove", function(ucmd)
 				bevisible = false
 				benoscreen = false
 				if bx ~= nil and by ~= nil then
-					-- draw.Line(x, y, screenCenterX, 0)
 					if isVisible(BestEnemy) then
 						bevisible = true
 					end
@@ -956,7 +941,6 @@ callbacks.Register("CreateMove", function(ucmd)
 					cx, cy = client.WorldToScreen(CBestEnemy:GetAbsOrigin())
 
 					if cx ~= nil and cy ~= nil then
-						-- draw.Line(x, y, screenCenterX, 0)
 						if isVisible(CBestEnemy) then
 							cvisible = true
 						end
@@ -966,11 +950,6 @@ callbacks.Register("CreateMove", function(ucmd)
 				end
 				bedistance = math.floor(BestDistance)
 				bename = owner
-				if (angle == 180 or (healthshotinject or localweaponid == 37)) and (math.abs(angle) ~= 45 and math.abs(angle) ~= 135) then
-					gui.SetValue("rbot.antiaim.condition.autodir.targets", 1);
-				else
-					gui.SetValue("rbot.antiaim.condition.autodir.targets", 0)
-				end
 				if BestDistance < 500 then
 					shieldprotectenable = false
 				end
@@ -1022,7 +1001,7 @@ callbacks.Register("CreateMove", function(ucmd)
 				elseif bestduckShield ~= nil then
 					sx, sy = client.WorldToScreen(bestduckShield:GetAbsOrigin())
 				end
-				if (shieldids[beshieldid] or false) and (beshieldistance <= bestShieldDistance or beshieldistance <= bestduckShieldDistance) and beshieldid ~= -1 and cshieldhit:GetValue() then
+				if (shieldids[beshieldid] ~= true) and (beshieldistance <= bestShieldDistance or beshieldistance <= bestduckShieldDistance) and beshieldid ~= -1 and cshieldhit:GetValue() then
 					if gui.GetValue("misc.showspec") == true then
 						gui.SetValue("misc.showspec", 0)
 					end
@@ -1052,6 +1031,7 @@ callbacks.Register("CreateMove", function(ucmd)
 					if bestny < 50 or bestny > 100 then
 						local leghitbox = lockonitlegprecalc(bestShield)
 						if islook(bestShield, 1) or islook(bestShield, leghitbox) then
+							calledsny = false
 							if Closedto and bestShieldDistance > BestDistance and #shieldguy ~= enemyalive then
 								needoffaim = false
 							else
@@ -1061,7 +1041,7 @@ callbacks.Register("CreateMove", function(ucmd)
 						if weaponHitable[weaponClass] and velo < 150 and not smoothon and autolock:GetValue() and bestShieldDistance < weaponHitable[weaponClass] and cshieldhit:GetValue() then
 							hascalledattack1 = true
 							needoffaim = true
-							aimingleg = lockonitlegac(bestShield, leghitbox, smoothstep, bestShieldDistance)
+							aimingleg = lockonitlegac(bestShield, leghitbox, aimsmoothstep:GetValue(), bestShieldDistance)
 							if aimingleg then
 								client.Command("+attack", true);
 								iscommandattack1 = true
@@ -1078,9 +1058,10 @@ callbacks.Register("CreateMove", function(ucmd)
 						shieldprotectenable = false
 					end
 					needoffaim = false
-					if bestny < 50 or bestny > 100 then
-						local leghitbox = lockonitlegprecalc(bestShield)
-						if islook(bestShield, 1) or islook(bestShield, leghitbox) then
+					if bestduckny < 50 or bestduckny > 100 then
+						local leghitbox = lockonitlegprecalc(bestduckShield)
+						if islook(bestduckShield, 1) or islook(bestduckShield, leghitbox) then
+							calledsny = true
 							if Closedto and bestduckShieldDistance > BestDistance and #shieldguy ~= enemyalive then
 								needoffaim = false
 							else
@@ -1090,23 +1071,34 @@ callbacks.Register("CreateMove", function(ucmd)
 					end
 				end
 
-
-
-
-
 				if input.IsButtonDown(hitshieldleg:GetValue()) and bestShield ~= nil and not aimingleg then
 					local leghitbox = lockonitlegprecalc(bestShield)
-					aimingleg = lockonitlegac(bestShield, leghitbox, smoothstep, bestShieldDistance)
+					aimingleg = lockonitlegac(bestShield, leghitbox, aimsmoothstep:GetValue(), bestShieldDistance)
 					needoffaim = true
 				end
 				if (bestShieldDistance < 130 or bestduckShieldDistance < 130) and cshieldhit:GetValue() and bestShieldisUseShield and gui.GetValue("misc.showspec") == false then
 					gui.SetValue("misc.showspec", 1)
 				end
+
+				local needtoswitchbaim = false
+				if notshield:GetValue() then
+					if calledsny and bestduckny > 50 and bestduckny < 100 then
+						needtoswitchbaim = true
+					end
+					if not calledsny and bestny > 50 and bestny < 100 then
+						needtoswitchbaim = true
+					end
+				end
+				switchtobaim(needtoswitchbaim)
 			elseif BestEnemy ~= nil and beshieldid == BestEnemy:GetIndex() then
+				switchtobaim(false)
+
 				beshieldid = -1
 				if gui.GetValue("misc.showspec") == true and cshieldhit:GetValue() then
 					gui.SetValue("misc.showspec", 0)
 				end
+			else
+				switchtobaim(false)
 			end
 			if iscommandattack1 and hascalledattack1 == false then
 				client.Command("-attack", true);
@@ -1126,8 +1118,6 @@ callbacks.Register("CreateMove", function(ucmd)
 			setColors(255, 255, 255)
 		end
 
-
-
 		if angle ~= 0 or smoothon or needoffaim then
 			gui.SetValue("rbot.antiaim.condition.use", 0)
 
@@ -1144,7 +1134,6 @@ callbacks.Register("CreateMove", function(ucmd)
 			if aimstatus ~= '"Off"' and not smoothon and not needoffaim and gui.GetValue("esp.master") then
 				client.Command("play training/light_on", true)
 			end
-
 			gui.SetValue("rbot.aim.enable", "Off")
 		else
 			client.Command("bind mouse1 +attack", true)
@@ -1166,7 +1155,7 @@ callbacks.Register("CreateMove", function(ucmd)
 		end
 		needshieldprotect = localhp <= 75 and string.find(weaponstr, "shield") ~= nil and
 			autoshield:GetValue() and shieldprotectenable
-		needesync = (aimstatus == '"Automatic"' or angle == 180) and
+		needesync = not input.IsButtonDown(fasthop:GetValue()) and
 			(weaponClass ~= "kniefetc" and weaponClass ~= "SHIELD" and localweaponid ~= 69) and
 			legit_aa_switch:GetValue()
 	end
@@ -1202,41 +1191,6 @@ local function steptotargetangle(angle, targetangle, aimstep)
 	gui.SetValue("rbot.antiaim.base", state)
 end
 
-local function antiaim()
-	--local needesync_value = needesync
-	local legit_aa_type_value = legit_aa_type:GetValue()
-
-	if needesync then
-		if not aa_side then
-			if legit_aa_type_value == 0 then
-				targetde = -58
-				roll = -25
-			elseif legit_aa_type_value == 1 then
-				targetde = -25
-				roll = -10
-			end
-		else
-			if legit_aa_type_value == 0 then
-				targetde = 58
-				roll = 25
-			elseif legit_aa_type_value == 1 then
-				targetde = 25
-				roll = 10
-			end
-		end
-	end
-
-	if needesync then
-		if gui.GetValue("rbot.antiaim.base.rotation") ~= targetde then
-			gui.SetValue("rbot.antiaim.base.rotation", targetde)
-			--cmd.viewangles = EulerAngles(cmd.viewangles.x, cmd.viewangles.y, roll)
-		end
-	elseif gui.GetValue("rbot.antiaim.base.rotation") ~= 0 then
-		targetde = 0
-		gui.SetValue("rbot.antiaim.base.rotation", targetde)
-	end
-end
-
 callbacks.Register("CreateMove", function(ucmd)
 	if plocallive then
 		if not disablesetprop:GetValue() then
@@ -1249,9 +1203,42 @@ callbacks.Register("CreateMove", function(ucmd)
 				end
 			end
 		end
-		antiaim()
+		if roll_aa_switch:GetValue() then
+			gui.SetValue("misc.antiuntrusted", 0)
+			gui.SetValue("rbot.antiaim.advanced.roll", 1)
+		else
+			gui.SetValue("misc.antiuntrusted", 1)
+			gui.SetValue("rbot.antiaim.advanced.roll", 0)
+		end
+		if needesync then
+			if not aa_side then
+				if legit_aa_type:GetValue() == 0 then
+					targetde = -58
+					roll = -40
+				elseif legit_aa_type:GetValue() == 1 then
+					targetde = -30
+					roll = -25
+				end
+			else
+				if legit_aa_type:GetValue() == 0 then
+					targetde = 58
+					roll = 40
+				elseif legit_aa_type:GetValue() == 1 then
+					targetde = 30
+					roll = 20
+				end
+			end
+
+			if gui.GetValue("rbot.antiaim.base.rotation") ~= targetde then
+				gui.SetValue("rbot.antiaim.base.rotation", targetde)
+				if roll_aa_switch:GetValue() then
+					ucmd.viewangles = EulerAngles(ucmd.viewangles.x, ucmd.viewangles.y, roll)
+				end
+			end
+		elseif gui.GetValue("rbot.antiaim.base.rotation") ~= 0 then
+			gui.SetValue("rbot.antiaim.base.rotation", 0)
+		end
 		local hascalledattack2 = false
-		--print(step)
 		if weaponClass == "smg" then
 			if localweaponid == 17 or localweaponid == 26 then
 				gui.SetValue("rbot.hitscan.accuracy.smg.hitchance", 10)
@@ -1323,17 +1310,15 @@ callbacks.Register("CreateMove", function(ucmd)
 				adpressed = true
 			end
 			if velo > 399 and adpressed == false then
-				--ucmd.buttons = 4
 				client.Command("+duck", true);
 			else
 				client.Command("-duck", true);
-				---stargetangle = math.abs(stargetangle)
 			end
 
 			f, n = f + 1, isTouchingGround;
-			--gui.SetValue("misc.strafe.air", not isTouchingGround);
+			gui.SetValue("misc.strafe.air", not isTouchingGround);
 			gui.SetValue("misc.fakelag.enable", false);
-			steptotargetangle(angle, stargetangle, aastep)
+			steptotargetangle(angle, stargetangle, aastep:GetValue())
 		else
 			if not input.IsButtonDown(17) then
 				client.Command("-duck", true);
@@ -1341,21 +1326,20 @@ callbacks.Register("CreateMove", function(ucmd)
 			if localweaponid ~= 9 and not disablefakelag:GetValue() then
 				gui.SetValue("misc.fakelag.enable", true);
 			end
-			loadback = autoreloadback()
-			--if globals.TickCount() % 5 == 0 then gui.SetValue("misc.fakelag.factor", math.random(4, 8)) end
+			loadback = autoreloadback(bedistance)
 			if (gui.GetValue("misc.showspec") == true or loadback) and (string.find(weaponstr, "shield") ~= nil and localweaponid ~= 37) then
-				if angle ~= 180 then
-					steptotargetangle(angle, 180, aastep)
-					if not loadback then
+				if angle ~= enemydirangle then
+					if not loadback and angle == 0 then
 						gui.SetValue("esp.world.thirdperson", 1)
 					end
+					steptotargetangle(angle, enemydirangle, aastep:GetValue())
 				end
 			else
 				if gui.GetValue("misc.showspec") == true then
 					gui.SetValue("misc.showspec", 0)
 				end
 				if angle ~= 0 then
-					steptotargetangle(angle, 0, aastep)
+					steptotargetangle(angle, 0, aastep:GetValue())
 				end
 			end
 		end
@@ -1545,6 +1529,9 @@ local function switch()
 			draw.Text(screen_w / 2 - 782, screen_h / 2 - 140,
 				beshieldid == -1 and "ShieldHit" or "ShieldHit " .. beshieldidname)
 		end
+		if roll_aa_switch:GetValue() then
+			draw.Text(screen_w / 2 - 782, screen_h / 2 - 160, "Roll(Very Unsafe)")
+		end
 
 
 		draw.SetFont(fontA);
@@ -1555,8 +1542,9 @@ local function switch()
 				"AimLeg! " .. math.floor(bestShieldDistance))
 		elseif smoothon then
 			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160, "AimLOCK!")
-		elseif needoffaim and bestny then
-			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160, "AimShield! angle: " .. bestny)
+		elseif needoffaim and (bestny or bestduckny) then
+			local ny = calledsny and bestduckny or bestny
+			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160, "AimShield! angle: " .. ny)
 		end
 		if aimstatus == '"Off"' and not needoffaim then
 			if loadback then
@@ -1588,6 +1576,14 @@ local function switch()
 end
 
 callbacks.Register("Draw", "switch", switch);
+
+
+
+client.AllowListener("weapon_fire");
+client.AllowListener("bullet_impact");
+client.Command("unbind mouse3;unbind shift;unbind q", true)
+client.AllowListener("client_disconnect");
+client.AllowListener("begin_new_match");
 callbacks.Register("FireGameEvent", function(e)
 	local eventName = e:GetName()
 	local weaponEvents = {
@@ -1603,7 +1599,10 @@ callbacks.Register("FireGameEvent", function(e)
 		if (eventName == "client_disconnect") or (eventName == "begin_new_match") then
 			plocallive = false
 			beshieldid = -1
+			gui.SetValue("rbot.antiaim.base", "0 Desync")
+			gui.SetValue("rbot.antiaim.condition.autodir.targets", 0)
+			gui.SetValue("rbot.aim.enable", "Off")
+			gui.SetValue("rbot.antiaim.base.rotation", 0)
 		end
 	end
-	-- return attacker
 end)

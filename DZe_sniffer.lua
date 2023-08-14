@@ -21,10 +21,16 @@
 --     CHudChat_Printf(CHudChat, 0, 0, " " .. ChatPrefix .. msg)
 -- end
 
-local ranks_mode = gui.Combobox(gui.Reference("Misc", "General", "Extra"), "tablet.mode", "Tablet Message SendWay",
-    "In Party chat", "Only Console")
-client.AllowListener("client_disconnect");
-client.AllowListener("begin_new_match");
+local tab = gui.Tab(gui.Reference("Misc"), "DZesniffer", "DangerZone Elite Sniffer");
+local main_box = gui.Groupbox(tab, "Sniffer", 16, 16, 400, 0);
+local ranks_mode = gui.Combobox(main_box, "tablet.mode", "Message SendWay",
+    "Only Console", "In Party chat")
+local messagemaster = gui.Checkbox(main_box, "tablet.master", "Master Switch", 1)
+local purchasemaster = gui.Checkbox(main_box, "tablet.master", "Purchase sniffer", 1)
+local respawnmaster = gui.Checkbox(main_box, "tablet.master", "Respawn sniffer", 1)
+local exitmaster = gui.Checkbox(main_box, "tablet.master", "Exit sniffer", 1)
+
+
 local function findthisguy(thisguy, tab)
     if tab == nil then return end
     for i, guy in ipairs(tab) do
@@ -69,7 +75,7 @@ end
 
 local function partyapisay(message)
     print(message)
-    if ranks_mode:GetValue() == 0 then
+    if ranks_mode:GetValue() == 1 then
         panorama.RunScript(
             "PartyListAPI.SessionCommand('Game::Chat', 'run all xuid ' + MyPersonaAPI.GetXuid() + ' chat " ..
             message .. "');")
@@ -79,39 +85,45 @@ end
 
 
 callbacks.Register("CreateMove", function()
+    if not messagemaster:GetValue() then return end
     local players = entities.FindByClass("CCSPlayer")
     ingamestatus = ingame()
-
+    if not exitmaster:GetValue() then cachelist = {} end
+    if not purchasemaster:GetValue() then
+        cachemoneylist = {}
+        cachelistpurchaseid = {}
+    end
+    if not respawnmaster:GetValue() then
+        deadlist = {}
+    end
     if players ~= nil then
         local moneylist = {}
         local playerlist = {}
         local localindex = (entities.GetLocalPlayer()):GetIndex()
         local localteamid = (entities.GetLocalPlayer()):GetPropInt("m_nSurvivalTeam")
-        if ingamestatus then
+        if localteamid == -1 then localteamid = -2 end
+        if ingamestatus and respawnmaster:GetValue() then
             for _, player in ipairs(players) do
                 local playername = player:GetName()
                 if player:IsAlive() and deadlist[playername] then
-                    partyapisay("Respawn" .. ": " .. playername)
-                    --ChatPrint("\04Respawn" .. ": " .. playername)
+                    partyapisay("Respawn" .. string.gsub(': ' .. playername, '%s', ''))
                 end
             end
             deadlist = {}
         end
-        for i, player in ipairs(players) do
+        for _, player in ipairs(players) do
             local playerIndex = player:GetIndex()
             local playername = player:GetName()
-            local playerteamid = player:GetPropInt("m_nSurvivalTeam")
 
             if player:GetName() ~= "GOTV" then
-                if localindex ~= playerIndex or (localteamid ~= -1 and playerteamid ~= localteamid) then
+                local playerteamid = player:GetPropInt("m_nSurvivalTeam")
+                if localindex ~= playerIndex and playerteamid ~= localteamid and exitmaster:GetValue() then
                     table.insert(playerlist, player:GetName())
                 end
-                if not player:IsAlive() and ingamestatus then
+                if not player:IsAlive() and ingamestatus and respawnmaster:GetValue() then
                     deadlist[playername] = true
                 end
-
-
-                if player:GetWeaponID() == 72 then
+                if player:GetWeaponID() == 72 and ingamestatus and purchasemaster:GetValue() then
                     local playerMoney = player:GetPropInt("m_iAccount")
                     local purchaseIndex = (player:GetPropEntity("m_hActiveWeapon")):GetPropInt("m_nLastPurchaseIndex")
                     moneylist[playerIndex] = playerMoney
@@ -126,9 +138,8 @@ callbacks.Register("CreateMove", function()
 
                     if cachelistpurchaseid[playerIndex] ~= purchaseIndex then
                         if cachemoneylist[playerIndex] - playerMoney > 0 and purchaseIndex ~= -1 then
-                            partyapisay(player:GetName() .. " purchased " .. tabletitemindex[purchaseIndex])
-
-                            --ChatPrint("\04" .. player:GetName() .. " purchased " .. tabletitemindex[purchaseIndex])
+                            partyapisay(string.gsub(player:GetName(), '%s', '') ..
+                                "_purchased_" .. tabletitemindex[purchaseIndex])
                         end
 
                         cachelistpurchaseid[playerIndex] = purchaseIndex
@@ -136,17 +147,15 @@ callbacks.Register("CreateMove", function()
                 end
             end
         end
-        cachemoneylist = moneylist
+        if ingamestatus and purchasemaster:GetValue() then cachemoneylist = moneylist end
 
-        if #cachelist ~= #playerlist or #cachelist == 0 then
+        if (#cachelist ~= #playerlist or #cachelist == 0) and exitmaster:GetValue() then
             for i, enemy in ipairs(cachelist) do
                 if not findthisguy(enemy, playerlist) then
                     if ingamestatus then
-                        partyapisay("Defeat Exit" .. ": " .. enemy)
-                        --ChatPrint("\04Defeat Exit" .. ": " .. enemy)
+                        partyapisay("Defeat_Exit" .. ":" .. string.gsub(enemy, '%s', ''))
                     else
-                        partyapisay("Warmup Escaped" .. ": " .. enemy)
-                        --ChatPrint("\04Warmup Escaped" .. ": " .. enemy)
+                        partyapisay("Warmup_Escaped" .. ":" .. string.gsub(enemy, '%s', ''))
                     end
                 end
             end
@@ -154,7 +163,6 @@ callbacks.Register("CreateMove", function()
         end
     end
 end)
-
 
 client.AllowListener("client_disconnect");
 client.AllowListener("begin_new_match");
@@ -168,21 +176,15 @@ callbacks.Register("FireGameEvent", function(e)
     end
 end)
 
-
-
-
-
-
-local m_kg = gui.Button(gui.Reference("Misc", "General", "Extra"), "Check DZ Team", function()
-    if client.GetConVar("game_type") ~= "6" then return end
+local m_kg = gui.Button(main_box, "Check DZ Team", function()
+    if client.GetConVar("game_type") ~= "6" then
+        partyapisay("Not_DangerZone_Mode!")
+        return
+    end
     local playerdata = {}
     local abuseteam = {}
     local nonsingleteamout = {}
-
-
     local players = entities.FindByClass("CCSPlayer")
-
-
     if players ~= nil then
         for i, player in ipairs(players) do
             local playerName = player:GetName()
@@ -200,15 +202,8 @@ local m_kg = gui.Button(gui.Reference("Misc", "General", "Extra"), "Check DZ Tea
                     { playerIndex, playerName, playerTeam, player:IsAlive() })
             end
         end
-        partyapisay("--------------------------------------")
 
-        if ranks_mode:GetValue() == 0 then
-            local message = "--------------------------------------"
-            panorama.RunScript(
-                "PartyListAPI.SessionCommand('Game::Chat', 'run all xuid ' + MyPersonaAPI.GetXuid() + ' chat " ..
-                message .. "');")
-        end
-        --ChatPrint("--------------------------------------")
+        partyapisay("--------------------------------------")
         for i, player in ipairs(players) do
             local teamstr = "team" .. player:GetPropInt("m_nSurvivalTeam")
             local playerResources = entities.GetPlayerResources()
@@ -216,36 +211,45 @@ local m_kg = gui.Button(gui.Reference("Misc", "General", "Extra"), "Check DZ Tea
             local playerName = player:GetName()
             if teamstr == "team-1" and playerName ~= "GOTV" then
                 if communicationMute == 1 then
-                    partyapisay(playerName .. " Cheater Solo")
-                    --ChatPrint("\04" .. playerName .. " Cheater Solo")
+                    partyapisay(string.gsub(playerName, '%s', '') .. "=Cheater_Solo")
                 else
-                    partyapisay(playerName .. " Solo")
-                    --ChatPrint("\04" .. playerName .. " Solo")
+                    partyapisay(string.gsub(playerName, '%s', '') .. "=Solo")
                 end
             else
                 local playerTeamData = playerdata[teamstr]
                 if playerTeamData ~= nil then
-                    for j, data in ipairs(playerTeamData) do
-                        if data[1] ~= player:GetIndex() then
-                            local teammateString = abuseteam[teamstr] and "Cheater Teammate:" or "Teammate:"
-                            nonsingleteamout[teamstr] = teamstr ..
-                                ": " .. player:GetName() .. " " .. teammateString .. data[2]
+                    if #playerTeamData ~= 1 then
+                        for j, data in ipairs(playerTeamData) do
+                            if data[1] ~= player:GetIndex() then
+                                local teammateString = abuseteam[teamstr] and "Cheater_Teammate:" or "Teammate:"
+                                nonsingleteamout[teamstr] = teamstr ..
+                                    ":" ..
+                                    string.gsub(player:GetName(), '%s', '') ..
+                                    "_" .. teammateString .. string.gsub(data[2], '%s', '')
+                            end
+                        end
+                    else
+                        for j, data in ipairs(playerTeamData) do
+                            local teammateString = abuseteam[teamstr] and "Cheater_Teammate:" or "Teammate:"
+                            if communicationMute == 1 then
+                                nonsingleteamout[teamstr] = string.gsub(player:GetName(), '%s', '') ..
+                                    "=Might_Cheater_Solo"
+                            else
+                                nonsingleteamout[teamstr] = string.gsub(player:GetName(), '%s', '') .. "=Might_Solo"
+                            end
                         end
                     end
                 end
             end
         end
-        for i = 0, 11 do
+        for i = 0, 12 do
             local teamstr = "team" .. i
             if nonsingleteamout[teamstr] then
                 partyapisay(nonsingleteamout[teamstr])
-                --("\04" .. nonsingleteamout[teamstr])
             end
         end
-        partyapisay("Total: " .. #players .. " players")
+        partyapisay("Total:_" .. #players .. "_players")
         partyapisay("-----------------END------------------")
-        --ChatPrint("\04Total: " .. #players - 1 .. " players")
-        -- ChatPrint("-----------------END------------------")
     end
 end)
 m_kg:SetWidth(268)
