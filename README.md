@@ -8,6 +8,10 @@ Last Updated 2023/8/14 1.1.2 (New Version)
 （&nbsp;）Like part of snapline ,ESP,distance visual,etc <br />
 
 [My Bilibili Profile](https://space.bilibili.com/3494352856812225) <br />
+![Alt text](/imgs/biliprofile.png)
+
+
+
 
 Dont sell my code on NL/SK/Pri market.It is opensource<br />
 But you can transfer to another cheat as free version to spilit out is allowed<br />
@@ -35,6 +39,8 @@ part of function showcase:<br />
 
 
 DZe.lua:<br />
+![Alt text](/imgs/dze1.png)
+![Alt text](/imgs/dze2.png)
   （&nbsp;）Aimstep by Distance(AutoLock & SmoothAim)<br />
   （&nbsp;）Anti-Aim step by step (For safety)<br />
   （&nbsp;）NotHitShield(by detect shieldguy's eyeangle)<br />
@@ -46,10 +52,10 @@ DZe.lua:<br />
   （&nbsp;）AimDrone(press key to autoaim recent Drone(Manual controlled or Has Cargo)<br />
   （&nbsp;）LegitAA(Desync) and roll AA switch<br />
   （&nbsp;）ShieldBot (function as kniefbot but support all dz items)<br />
-![Alt text](/imgs/dze1.png)
-![Alt text](/imgs/dze2.png)
 <br />
 DZe_visual.lua:<br />
+![Alt text](/imgs/dzev.png)
+
   （&nbsp;）worldtoscreen Hostage,Boxes,Healthshot,Ammobox,Cash,Shield,Armor,Piston(include Boxes and p2000 and glock),light weapon box<br />
   （&nbsp;）show Endcircle Distance & worldtoscreen it<br />
   （&nbsp;）show Recent Drone (will show Manual Drone Distance in screen,and Draw text on it entity) <br />
@@ -58,15 +64,14 @@ DZe_visual.lua:<br />
   （&nbsp;）show Enemy's Teammate and between two guy's distance, if his auto muted (probably cheating) then add "(Cheating)" (Example "(M)(Cheater)  1000 will11801") in right<br />
   （&nbsp;）show ammo status on bottom<br />
   （&nbsp;）Show Barrel,RemoteBomb on screen by draw extra photo on it<br />
-![Alt text](/imgs/dzev.png)
 <br />
 DZe_sniffer.lua:<br />
+![Alt text](/imgs/dzes.png)
   （&nbsp;）reveal player tablebuy event and print on cheat console or partyapi (Example "菲尼克斯老张 purchased scout")<br />
   （&nbsp;）check player who disconnected and print on cheat console or partyapi(Example "Warmup Escaped 特训飓风JF" ,"Defeat Exit 尼古拉斯老王")<br />
   （&nbsp;）Check Player who is respawnor partyapi (Example Respawn: Bilibili主播风云错爱)<br />
   （&nbsp;）reveal player team and print it on cheat console or partyapi <br />
 <br />
-![Alt text](/imgs/dzes.png)
 
 
 <br />
