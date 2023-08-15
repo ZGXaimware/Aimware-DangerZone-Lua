@@ -1,5 +1,5 @@
 # Aimware-DangerZone-Lua<br />
-Last Updated 2023/8/14 1.1.2 (New Version)
+Last Updated 2023/8/15 1.1.3 (New Version)
 
 （&nbsp;）Tips:the lua with "DZe_" name is for new version config<br />
 （&nbsp;）if you need use old config from hvhbbs or aimware you need use branch named "oldversion"<br />
@@ -75,6 +75,22 @@ DZe_sniffer.lua:<br />
 
 
 <br />
+
+
+Updated 1.1.2:<br />
+(ALL)lua set merged<br />
+<DZe.lua>add some new function,Updated GUI,fixed potential bugs<br />
+<DZe_visual.lua>Updated GUI controller,fixed bug<br />
+<DZe_sniffer.lua>Updated GUI controller,fixed bug<br />
+<br />
+
+Updated 1.1.3:<br />
+<DZe_visual.lua>add glass remove<br />
+<DZe_sniffer.lua>add paradrop sniffer<br />
+<DZe_sniffer.lua>add dronedispatch sniffer<br />
+
+
+OLDVERSION Update:<br />
 Update 1.0.1:<br />
 (rage.lua)When aa 180 backward enable desync(some cheater (legit with ssg08) will shot you calf/foot when you back shield)
 
@@ -128,11 +144,4 @@ Updated 1.1.1:<br />
 (tabletcheck.lua)huge updated for partyApi say<br />
 (RandomNameChanger.lua) new lua released<br />
 (rage.lua) update aimleg lmg -> 1800,rifle ->1200<br />
-<br />
-
-Updated 1.1.2:<br />
-(ALL)lua set merged<br />
-<DZe.lua>add some new function,Updated GUI,fixed potential bugs<br />
-<DZe_visual.lua>Updated GUI controller,fixed bug<br />
-<DZe_sniffer>Updated GUI controller,fixed bug<br />
 <br />

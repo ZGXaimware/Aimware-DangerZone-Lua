@@ -30,7 +30,7 @@ local purchasemaster = gui.Checkbox(main_box, "tablet.purchasemaster", "Purchase
 local respawnmaster = gui.Checkbox(main_box, "tablet.respawnmaster", "Respawn sniffer", 1)
 local exitmaster = gui.Checkbox(main_box, "tablet.exitmaster", "Exit sniffer", 1)
 local paradropmaster =  gui.Checkbox(main_box, "tablet.paradropmaster", "ParaDrop sniffer", 1)
-local dronedispatchmaster =  gui.Checkbox(main_box, "tablet.dronedispatchmaster", "Drone Dispatch sniffer", 1)
+local dronedispatchmaster =  gui.Checkbox(main_box, "tablet.dronedispatchmaster", "Drone Dispatch sniffer", 0)
 
 gui.SetValue("misc.log.console",true)
 
