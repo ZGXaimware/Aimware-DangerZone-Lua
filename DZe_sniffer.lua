@@ -1,25 +1,5 @@
---took ffi funktions from FFIChatVoteReveal.lua
--- local CHudChat_Printf_Index = 27
--- local ChatPrefix = "\02[\07Table\02] "
--- local function FindHudElement(name)
---     local m_Table = mem.FindPattern("client.dll", "B9 ?? ?? ?? ?? 68 ?? ?? ?? ?? E8 ?? ?? ?? ?? 89 46 24")
---     local m_Function = mem.FindPattern("client.dll", "55 8B EC 53 8B 5D 08 56 57 8B F9 33 F6 39")
-
---     if m_Table ~= nil and m_Function ~= nil then
---         return ffi.cast("void*(__thiscall*)(void*, const char*)", m_Function)(ffi.cast("void**", m_Table + 0x1)[0], name)
---     end
-
---     return nil
--- end
--- local CHudChat = FindHudElement("CHudChat")
--- if CHudChat == nil then
---     error("CHudChat is nullptr.")
--- end
--- local CHudChat_Printf = ffi.cast("void(__cdecl*)(void*, int, int, const char*, ...)",
---     ffi.cast("void***", CHudChat)[0][CHudChat_Printf_Index])
--- local function ChatPrint(msg)
---     CHudChat_Printf(CHudChat, 0, 0, " " .. ChatPrefix .. msg)
--- end
+-- Aimware-DangerZone-Lua
+--Last Updated 2023/8/15 1.1.4 (New Version)
 
 local tab = gui.Tab(gui.Reference("Misc"), "DZesniffer", "DangerZone Elite Sniffer");
 local main_box = gui.Groupbox(tab, "Sniffer", 16, 16, 400, 0);
@@ -29,10 +9,12 @@ local messagemaster = gui.Checkbox(main_box, "tablet.master", "Master Switch", 1
 local purchasemaster = gui.Checkbox(main_box, "tablet.purchasemaster", "Purchase sniffer", 1)
 local respawnmaster = gui.Checkbox(main_box, "tablet.respawnmaster", "Respawn sniffer", 1)
 local exitmaster = gui.Checkbox(main_box, "tablet.exitmaster", "Exit sniffer", 1)
-local paradropmaster =  gui.Checkbox(main_box, "tablet.paradropmaster", "ParaDrop sniffer", 1)
-local dronedispatchmaster =  gui.Checkbox(main_box, "tablet.dronedispatchmaster", "Drone Dispatch sniffer", 0)
+local paradropmaster = gui.Checkbox(main_box, "tablet.paradropmaster", "ParaDrop sniffer", 1)
+local dronedispatchmaster = gui.Checkbox(main_box, "tablet.dronedispatchmaster", "Drone Dispatch sniffer", 0)
+local gotvswitch = gui.Combobox(main_box, "tablet.gotvswitch", "GOTV Selection", "Off", "Disable on GOTV",
+    "Force Enable on GOTV");
 
-gui.SetValue("misc.log.console",true)
+gui.SetValue("misc.log.console", true)
 
 local function findthisguy(thisguy, tab)
     if tab == nil then return end
@@ -75,10 +57,29 @@ local pLocal = nil
 local localindex = 0
 local localteamid = 0
 
+local function GOTVstatus()
+    local spLocal = entities.GetLocalPlayer()
+    if gotvswitch:GetValue() == 0 then
+        return spLocal
+    end
+    if spLocal == nil then return nil end
 
+    if gotvswitch:GetValue() == 1 then
+        if (spLocal:GetPropEntity("m_hObserverTarget")):IsPlayer() then
+            return nil
+        else
+            return spLocal
+        end
+    end
 
-
-
+    if gotvswitch:GetValue() == 2 then
+        if (spLocal:GetPropEntity("m_hObserverTarget")):IsPlayer() then
+            return spLocal:GetPropEntity("m_hObserverTarget")
+        else
+            return spLocal
+        end
+    end
+end
 
 local function ingame()
     local money = entities.FindByClass("CItemCash")
@@ -97,7 +98,7 @@ end
 
 
 callbacks.Register("CreateMove", function()
-    pLocal = entities.GetLocalPlayer()
+    pLocal = GOTVstatus()
     if pLocal == nil then return end
     localindex = pLocal:GetIndex()
     localteamid = pLocal:GetPropInt("m_nSurvivalTeam")

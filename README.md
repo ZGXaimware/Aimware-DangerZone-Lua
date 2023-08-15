@@ -1,5 +1,5 @@
 # Aimware-DangerZone-Lua<br />
-Last Updated 2023/8/15 1.1.3 (New Version)
+Last Updated 2023/8/15 1.1.4 (New Version)<br />
 
 （&nbsp;）Tips:the lua with "DZe_" name is for new version config<br />
 （&nbsp;）if you need use old config from hvhbbs or aimware you need use branch named "oldversion"<br />
@@ -79,15 +79,21 @@ DZe_sniffer.lua:<br />
 
 Updated 1.1.2:<br />
 (ALL)lua set merged<br />
-<DZe.lua>add some new function,Updated GUI,fixed potential bugs<br />
+<DZe_rage.lua>add some new function,Updated GUI,fixed potential bugs<br />
 <DZe_visual.lua>Updated GUI controller,fixed bug<br />
 <DZe_sniffer.lua>Updated GUI controller,fixed bug<br />
 <br />
 
 Updated 1.1.3:<br />
-<DZe_visual.lua>add glass remove<br />
+<DZe_visual.lua>add grass remove<br />
 <DZe_sniffer.lua>add paradrop sniffer<br />
 <DZe_sniffer.lua>add dronedispatch sniffer<br />
+<br />
+Updated 1.1.4:<br />
+<DZe_rage.lua>add GotvSwitch(will sync with another two scripts<br />
+<DZe_visual.lua>add GotvSwitch<br />
+<DZe_sniffer.lua>add GotvSwitch<br />
+<br />
 
 
 OLDVERSION Update:<br />

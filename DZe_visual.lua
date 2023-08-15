@@ -1,3 +1,7 @@
+-- Aimware-DangerZone-Lua
+--Last Updated 2023/8/15 1.1.4 (New Version)
+
+
 local tab = gui.Tab(gui.Reference("Visuals"), "DZevis", "DangerZone Elite Visual");
 local main_box = gui.Groupbox(tab, "ESP", 16, 16, 200, 0);
 local visual_box = gui.Groupbox(tab, "SnapLine", 232, 16, 200, 0);
@@ -12,9 +16,10 @@ local showteamstatus = gui.Checkbox(main_box, "vis.showteamstatus", "Show TeamSt
 local showguntype = gui.Checkbox(main_box, "vis.showguntype", "Show GunType", 1)
 local barrelmaster = gui.Checkbox(main_box, "vis.barrelmaster", "Show Barrel ESP", 1)
 local remotebombmaster = gui.Checkbox(main_box, "vis.remotebombmaster", "Show RemoteBomb ESP", 1)
-local removeglassmaster = gui.Checkbox(main_box, "vis.removeglassmaster", "Remove Glass", 1)
-removeglassmaster:SetDescription("It will only makes change on game start")
-
+local removegrassmaster = gui.Checkbox(main_box, "vis.removegrassmaster", "Remove Grass", 1)
+removegrassmaster:SetDescription("It will only makes change on game start")
+local gotvswitch = gui.Combobox(main_box, "vis.gotvswitch", "GOTV Selection", "Off", "Disable on GOTV",
+	"Force Enable on GOTV");
 
 
 local linemaster = gui.Checkbox(visual_box, "vis.dzespmaster", "Line Master Switch", 1)
@@ -518,8 +523,34 @@ callbacks.Register("Draw", "DrawLine", DrawLine)
 
 
 
+
+local function GOTVstatus()
+	local spLocal = entities.GetLocalPlayer()
+	if gotvswitch:GetValue() == 0 then
+		return spLocal
+	end
+	if spLocal == nil then return nil end
+
+	if gotvswitch:GetValue() == 1 then
+		if (spLocal:GetPropEntity("m_hObserverTarget")):IsPlayer() then
+			return nil
+		else
+			return spLocal
+		end
+	end
+
+	if gotvswitch:GetValue() == 2 then
+		if (spLocal:GetPropEntity("m_hObserverTarget")):IsPlayer() then
+			return spLocal:GetPropEntity("m_hObserverTarget")
+		else
+			return spLocal
+		end
+	end
+end
+
+
 callbacks.Register("CreateMove", function()
-	pLocal = entities.GetLocalPlayer()
+	pLocal = GOTVstatus()
 	if pLocal == nil then
 		plocallive = false
 		isNeedW = false
@@ -656,7 +687,7 @@ callbacks.Register("FireGameEvent", function(e)
 	elseif eventName == "round_prestart" or eventName == "round_poststart" or eventName == "round_start" then
 		local map_name = engine.GetMapName()
 		if mapglassplace[map_name] then
-			materials.Find(mapglassplace[map_name]):SetMaterialVarFlag(4, removeglassmaster:GetValue())
+			materials.Find(mapglassplace[map_name]):SetMaterialVarFlag(4, removegrassmaster:GetValue())
 		end
 	end
 end)

@@ -1,3 +1,9 @@
+-- Aimware-DangerZone-Lua
+--Last Updated 2023/8/15 1.1.4 (New Version)
+
+
+
+
 local tab = gui.Tab(gui.Reference("Ragebot"), "DZe", "DangerZone Elite");
 
 local main_box = gui.Groupbox(tab, "Main", 16, 16, 200, 0);
@@ -21,9 +27,14 @@ local disabledistancevis = gui.Checkbox(main_box, "main.disabledisvis", "Disable
 disabledistancevis:SetDescription("disable distance visual function supply by che@t")
 local disablevisual = gui.Checkbox(main_box, "main.disablevisual", "DisableVisual", 0)
 disablevisual:SetDescription("disable all visual function supply by che@t")
-local disablesetprop = gui.Checkbox(main_box, "main.disablevisual", "DisableProp", 0)
+local disablesetprop = gui.Checkbox(main_box, "main.disableprop", "DisableProp", 0)
 disablesetprop:SetDescription("disable all visual by setprop")
 local debugaimstep = gui.Checkbox(main_box, "main.debug_reallyaimstep", "(Very Unsafe)LowDistanceaimstep", 0)
+local gotvswitch = gui.Combobox(main_box, "main.gotvswitch", "GOTV Selection", "Off", "Disable on GOTV",
+	"Force Enable on GOTV");
+
+
+
 
 local legit_aa_box = gui.Groupbox(tab, "(Desync) Legit Anti-Aim", 232, 16, 200, 0);
 
@@ -126,6 +137,8 @@ local n = 0
 local iscommandattack1 = false
 local iscommandattack2 = false
 
+
+gui.SetValue("rbot.master",true)
 local function setColors(x, y, z)
 	colorx, colory, colorz = x, y, z
 end
@@ -222,11 +235,40 @@ local localheadbox = nil
 local localhp = 0
 local localteamid = -2
 
+local function GOTVstatus()
+	if gui.GetValue("esp.DZevis.vis.gotvswitch") and gui.GetValue("esp.DZevis.vis.gotvswitch") ~= gui.GetValue("rbot.DZe.main.gotvswitch") then
+		gui.SetValue("rbot.DZe.main.gotvswitch",gui.GetValue("rbot.DZe.main.gotvswitch"))
+	end
+	if gui.GetValue("misc.DZesniffer.tablet.gotvswitch") and gui.GetValue("misc.DZesniffer.tablet.gotvswitch") ~= gui.GetValue("rbot.DZe.main.gotvswitch") then
+		gui.SetValue("rbot.DZe.main.gotvswitch",gui.GetValue("rbot.DZe.main.gotvswitch"))
+	end
+	local spLocal = entities.GetLocalPlayer()
+	if gotvswitch:GetValue() == 0 then
+		return spLocal
+	end
+	if spLocal == nil then return nil end
+
+	if gotvswitch:GetValue() == 1 then
+		if (spLocal:GetPropEntity("m_hObserverTarget")):IsPlayer() then
+			return nil
+		else
+			return spLocal
+		end
+	end
+
+	if gotvswitch:GetValue() == 2 then
+		if (spLocal:GetPropEntity("m_hObserverTarget")):IsPlayer() then
+			return spLocal:GetPropEntity("m_hObserverTarget")
+		else
+			return spLocal
+		end
+	end
+end
+
 callbacks.Register("CreateMove", function()
-	pLocal = entities.GetLocalPlayer()
+	pLocal = GOTVstatus()
 	if pLocal == nil then plocallive = false end
 	weaponstr = returnweaponstr(pLocal)
-
 	if weaponstr ~= "weapon_fists " and pLocal:IsAlive() and ingame() then
 		plocallive = true
 		local rab = string.sub(gui.GetValue("rbot.antiaim.base"), 2, -2)
