@@ -96,6 +96,9 @@ Updated 1.1.4:<br />
 <br />
 Updated 1.1.5:<br />
 <DZe_rage.lua>Now lua script will not set force HeadShot,removed rifle hardcode<br />
+<DZe_rage.lua>Cut down desync angle when backward mode<br />
+<DZe_rage.lua>Removed desync mode selector (Useless)<br />
+<DZe_rage.lua>Fixed AimShield angle is not int<br />
 <DZe_visual.lua>Drone Detecter fixed<br />
 GOTVswitch is unavaible due to some reason,wait for next version fix up
 <br />
