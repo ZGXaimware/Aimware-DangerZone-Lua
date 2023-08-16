@@ -1,5 +1,5 @@
 # Aimware-DangerZone-Lua<br />
-Last Updated 2023/8/15 1.1.4 (New Version)<br />
+Last Updated 2023/8/16 1.1.5 (New Version)<br />
 
 （&nbsp;）Tips:the lua with "DZe_" name is for new version config<br />
 （&nbsp;）if you need use old config from hvhbbs or aimware you need use branch named "oldversion"<br />
@@ -93,6 +93,10 @@ Updated 1.1.4:<br />
 <DZe_rage.lua>add GotvSwitch(will sync with another two scripts<br />
 <DZe_visual.lua>add GotvSwitch<br />
 <DZe_sniffer.lua>add GotvSwitch<br />
+<br />
+Updated 1.1.5:<br />
+<DZe_visual.lua>Drone Detecter fixed<br />
+GOTVswitch is unavaible due to some reason,wait for next version fix up
 <br />
 
 

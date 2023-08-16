@@ -1,5 +1,5 @@
 -- Aimware-DangerZone-Lua
---Last Updated 2023/8/15 1.1.4 (New Version)
+--Last Updated 2023/8/15 1.1.5 (New Version)
 
 
 
@@ -39,7 +39,6 @@ local gotvswitch = gui.Combobox(main_box, "main.gotvswitch", "GOTV Selection", "
 local legit_aa_box = gui.Groupbox(tab, "(Desync) Legit Anti-Aim", 232, 16, 200, 0);
 
 local legit_aa_switch = gui.Checkbox(legit_aa_box, "aa.switch", "Master Switch", 1);
-local legit_aa_type = gui.Combobox(legit_aa_box, "aa.type", "DeSync Type", "Default", "Low");
 local legit_aa_key = gui.Keybox(legit_aa_box, "aa.inverter", "Inverter", 0);
 local roll_aa_switch = gui.Checkbox(legit_aa_box, "aa.switch", "Roll Switch(Very Unsafe)", 0);
 
@@ -136,9 +135,34 @@ local f = 0
 local n = 0
 local iscommandattack1 = false
 local iscommandattack2 = false
+local backward = false
 
+gui.SetValue("rbot.master", true)
+gui.SetValue("misc.strafe.enable", true)
+local weapons_table = {
+	["asniper"] = true,
+	["hpistol"] = true,
+	["lmg"] = true,
+	["pistol"] = true,
+	["rifle"] = true,
+	["scout"] = true,
+	["smg"] = true,
+	["shotgun"] = true,
+	["sniper"] = true
+}
 
-gui.SetValue("rbot.master",true)
+local cache_weapontable = {}
+
+for v, _ in ipairs(weapons_table) do
+	if v ~= "shotgun" and v ~= "sniper" then
+		cache_weapontable[v] = gui.GetValue("rbot.hitscan.hitbox." .. v .. ".head.priority")
+	end
+end
+gui.SetValue("rbot.hitscan.hitbox.shotgun.head.priority", 0)
+gui.SetValue("rbot.hitscan.hitbox.sniper.head.priority", 0)
+gui.SetValue("rbot.hitscan.hitbox.shotgun.body.priority", 1)
+gui.SetValue("rbot.hitscan.hitbox.sniper.body.priority", 1)
+
 local function setColors(x, y, z)
 	colorx, colory, colorz = x, y, z
 end
@@ -205,7 +229,8 @@ local weaponClasses = {
 	[76] = "kniefetc",
 	[78] = "kniefetc",
 	[80] = "kniefetc",
-	[70] = "RemoteBomb"
+	[70] = "RemoteBomb",
+	[72] = "Tablet"
 }
 
 local weaponHitable = {
@@ -236,11 +261,15 @@ local localhp = 0
 local localteamid = -2
 
 local function GOTVstatus()
-	if gui.GetValue("esp.DZevis.vis.gotvswitch") and gui.GetValue("esp.DZevis.vis.gotvswitch") ~= gui.GetValue("rbot.DZe.main.gotvswitch") then
-		gui.SetValue("rbot.DZe.main.gotvswitch",gui.GetValue("rbot.DZe.main.gotvswitch"))
+	if gui.GetValue("esp.DZevis.vis.gotvswitch") then
+		if gui.GetValue("esp.DZevis.vis.gotvswitch") ~= gui.GetValue("rbot.DZe.main.gotvswitch") then
+			gui.SetValue("esp.DZevis.vis.gotvswitch", gui.GetValue("rbot.DZe.main.gotvswitch"))
+		end
 	end
-	if gui.GetValue("misc.DZesniffer.tablet.gotvswitch") and gui.GetValue("misc.DZesniffer.tablet.gotvswitch") ~= gui.GetValue("rbot.DZe.main.gotvswitch") then
-		gui.SetValue("rbot.DZe.main.gotvswitch",gui.GetValue("rbot.DZe.main.gotvswitch"))
+	if gui.GetValue("misc.DZesniffer.tablet.gotvswitch") then
+		if gui.GetValue("misc.DZesniffer.tablet.gotvswitch") ~= gui.GetValue("rbot.DZe.main.gotvswitch") then
+			gui.SetValue("misc.DZesniffer.tablet.gotvswitch", gui.GetValue("rbot.DZe.main.gotvswitch"))
+		end
 	end
 	local spLocal = entities.GetLocalPlayer()
 	if gotvswitch:GetValue() == 0 then
@@ -289,6 +318,7 @@ callbacks.Register("CreateMove", function()
 		if vx ~= nil then
 			velo = math.floor(math.min(10000, math.sqrt(vx * vx + vy * vy) + 0.5))
 		end
+		backward = gui.GetValue("misc.showspec")
 	else
 		plocallive = false
 	end
@@ -603,21 +633,11 @@ local function lockdrone(Drone, step)
 	end
 end
 
-local weapons_table = {
-	["asniper"] = true,
-	["hpistol"] = true,
-	["lmg"] = true,
-	["pistol"] = true,
-	["rifle"] = true,
-	["scout"] = true,
-	["smg"] = true,
-	["shotgun"] = true,
-	["sniper"] = true
-}
 
+local cacheswitch = false
 local function switchtobaim(switch)
-	if switch == nil then return end
-
+	if switch == nil or switch == cacheswitch then return end
+	cacheswitch = switch
 	for v, _ in ipairs(weapons_table) do
 		if v ~= "shotgun" and v ~= "sniper" then
 			if switch then
@@ -625,7 +645,7 @@ local function switchtobaim(switch)
 				gui.SetValue("rbot.hitscan.hitbox." .. v .. ".head.priority", 0)
 			else
 				gui.SetValue("rbot.hitscan.hitbox." .. v .. ".body.priority", 0)
-				gui.SetValue("rbot.hitscan.hitbox." .. v .. ".head.priority", 1)
+				gui.SetValue("rbot.hitscan.hitbox." .. v .. ".head.priority", cache_weapontable[v])
 			end
 		end
 	end
@@ -870,17 +890,17 @@ callbacks.Register("CreateMove", function(ucmd)
 					shieldhit = (BestDistance < 76)
 				else
 					gui.SetValue("esp.chams.localweapon.visible", 0)
-					if weaponClass == "rifle" then
-						if BestDistance <= 2800 then
-							gui.SetValue("rbot.hitscan.accuracy.rifle.hitchance", 50)
-							gui.SetValue("rbot.hitscan.accuracy.rifle.hitchanceburst", 50)
-							gui.SetValue("rbot.hitscan.accuracy.rifle.mindamage", 10)
-						else
-							gui.SetValue("rbot.hitscan.accuracy.rifle.hitchance", 85)
-							gui.SetValue("rbot.hitscan.accuracy.rifle.hitchanceburst", 85)
-							gui.SetValue("rbot.hitscan.accuracy.rifle.mindamage", 21)
-						end
-					end
+					-- if weaponClass == "rifle" then
+					-- 	if BestDistance <= 2800 then
+					-- 		gui.SetValue("rbot.hitscan.accuracy.rifle.hitchance", 50)
+					-- 		gui.SetValue("rbot.hitscan.accuracy.rifle.hitchanceburst", 50)
+					-- 		gui.SetValue("rbot.hitscan.accuracy.rifle.mindamage", 10)
+					-- 	else
+					-- 		gui.SetValue("rbot.hitscan.accuracy.rifle.hitchance", 85)
+					-- 		gui.SetValue("rbot.hitscan.accuracy.rifle.hitchanceburst", 85)
+					-- 		gui.SetValue("rbot.hitscan.accuracy.rifle.mindamage", 21)
+					-- 	end
+					-- end
 				end
 				Closedto = islook(BestEnemy, 1)
 				local cvelocity = 0
@@ -1044,7 +1064,7 @@ callbacks.Register("CreateMove", function(ucmd)
 					sx, sy = client.WorldToScreen(bestduckShield:GetAbsOrigin())
 				end
 				if (shieldids[beshieldid] ~= true) and (beshieldistance <= bestShieldDistance or beshieldistance <= bestduckShieldDistance) and beshieldid ~= -1 and cshieldhit:GetValue() then
-					if gui.GetValue("misc.showspec") == true then
+					if backward == true then
 						gui.SetValue("misc.showspec", 0)
 					end
 				end
@@ -1118,16 +1138,17 @@ callbacks.Register("CreateMove", function(ucmd)
 					aimingleg = lockonitlegac(bestShield, leghitbox, aimsmoothstep:GetValue(), bestShieldDistance)
 					needoffaim = true
 				end
-				if (bestShieldDistance < 130 or bestduckShieldDistance < 130) and cshieldhit:GetValue() and bestShieldisUseShield and gui.GetValue("misc.showspec") == false then
+				if (bestShieldDistance < 130 or bestduckShieldDistance < 130) and cshieldhit:GetValue() and bestShieldisUseShield and backward == false then
 					gui.SetValue("misc.showspec", 1)
 				end
 
 				local needtoswitchbaim = false
 				if notshield:GetValue() then
-					if calledsny and bestduckny > 50 and bestduckny < 100 then
-						needtoswitchbaim = true
-					end
-					if not calledsny and bestny > 50 and bestny < 100 then
+					if not calledsny then
+						if islook(bestShield, 3) or islook(bestShield, 1) then
+							needtoswitchbaim = true
+						end
+					elseif islook(bestduckShield, 3) or islook(bestduckShield, 1) then
 						needtoswitchbaim = true
 					end
 				end
@@ -1136,7 +1157,7 @@ callbacks.Register("CreateMove", function(ucmd)
 				switchtobaim(false)
 
 				beshieldid = -1
-				if gui.GetValue("misc.showspec") == true and cshieldhit:GetValue() then
+				if backward == true and cshieldhit:GetValue() then
 					gui.SetValue("misc.showspec", 0)
 				end
 			else
@@ -1254,137 +1275,136 @@ callbacks.Register("CreateMove", function(ucmd)
 		end
 		if needesync then
 			if not aa_side then
-				if legit_aa_type:GetValue() == 0 then
+				roll = -40
+				if backward == false then
 					targetde = -58
-					roll = -40
-				elseif legit_aa_type:GetValue() == 1 then
-					targetde = -30
-					roll = -25
+				else
+					targetde = -40
 				end
 			else
-				if legit_aa_type:GetValue() == 0 then
-					targetde = 58
-					roll = 40
-				elseif legit_aa_type:GetValue() == 1 then
-					targetde = 30
-					roll = 20
-				end
-			end
+				roll = 40
 
-			if gui.GetValue("rbot.antiaim.base.rotation") ~= targetde then
-				gui.SetValue("rbot.antiaim.base.rotation", targetde)
-				if roll_aa_switch:GetValue() then
-					ucmd.viewangles = EulerAngles(ucmd.viewangles.x, ucmd.viewangles.y, roll)
+				if backward == false then
+					targetde = 58
+				else
+					targetde = 40
 				end
 			end
-		elseif gui.GetValue("rbot.antiaim.base.rotation") ~= 0 then
-			gui.SetValue("rbot.antiaim.base.rotation", 0)
 		end
-		local hascalledattack2 = false
-		if weaponClass == "smg" then
-			if localweaponid == 17 or localweaponid == 26 then
-				gui.SetValue("rbot.hitscan.accuracy.smg.hitchance", 10)
-				gui.SetValue("rbot.hitscan.accuracy.smg.hitchanceburst", 10)
-				gui.SetValue("rbot.hitscan.accuracy.smg.mindamage", 5)
-			else
-				gui.SetValue("rbot.hitscan.accuracy.smg.hitchance", 40)
-				gui.SetValue("rbot.hitscan.accuracy.smg.hitchanceburst", 40)
-				gui.SetValue("rbot.hitscan.accuracy.smg.mindamage", 15)
-			end
-		elseif weaponClass == "SHIELD" or weaponClass == "kniefetc" then
-			hascalledattack2 = true
-			if shieldhit then
-				client.Command("+attack", true);
-				iscommandattack2 = true
-			else
-				client.Command("-attack", true);
-				iscommandattack2 = false
+
+		if gui.GetValue("rbot.antiaim.base.rotation") ~= targetde then
+			gui.SetValue("rbot.antiaim.base.rotation", targetde)
+			if roll_aa_switch:GetValue() then
+				ucmd.viewangles = EulerAngles(ucmd.viewangles.x, ucmd.viewangles.y, roll)
 			end
 		end
-		if iscommandattack2 and hascalledattack2 == false then
+	elseif gui.GetValue("rbot.antiaim.base.rotation") ~= 0 then
+		gui.SetValue("rbot.antiaim.base.rotation", 0)
+	end
+	local hascalledattack2 = false
+	if weaponClass == "smg" then
+		if localweaponid == 17 or localweaponid == 26 then
+			gui.SetValue("rbot.hitscan.accuracy.smg.hitchance", 10)
+			gui.SetValue("rbot.hitscan.accuracy.smg.hitchanceburst", 10)
+			gui.SetValue("rbot.hitscan.accuracy.smg.mindamage", 5)
+		else
+			gui.SetValue("rbot.hitscan.accuracy.smg.hitchance", 40)
+			gui.SetValue("rbot.hitscan.accuracy.smg.hitchanceburst", 40)
+			gui.SetValue("rbot.hitscan.accuracy.smg.mindamage", 15)
+		end
+	elseif weaponClass == "SHIELD" or weaponClass == "kniefetc" then
+		hascalledattack2 = true
+		if shieldhit then
+			client.Command("+attack", true);
+			iscommandattack2 = true
+		else
 			client.Command("-attack", true);
 			iscommandattack2 = false
 		end
-		if needshieldprotect then
-			if lowesthp >= localhp or lowesthp == 0 then
-				if string.find(weaponstr, "healthshot") ~= nil then
-					healthshotinject = true
-					gui.SetValue("misc.showspec", 1)
-					if localweaponid ~= 57 and not input.IsButtonDown(69) then
-						client.Command("use weapon_healthshot", true)
-					elseif (pLocal:GetPropEntity("m_hActiveWeapon")):GetPropInt("m_iIronSightMode") ~= 2 then
-						ucmd.buttons = 1
-						lowesthp = localhp
-					end
-				end
-			else
-				healthshotinject = false
-				if lowesthp ~= 0 and localhp - lowesthp > 45 then
-					lowesthp = 0
+	end
+	if iscommandattack2 and hascalledattack2 == false then
+		client.Command("-attack", true);
+		iscommandattack2 = false
+	end
+	if needshieldprotect then
+		if lowesthp >= localhp or lowesthp == 0 then
+			if string.find(weaponstr, "healthshot") ~= nil then
+				healthshotinject = true
+				gui.SetValue("misc.showspec", 1)
+				if localweaponid ~= 57 and not input.IsButtonDown(69) then
+					client.Command("use weapon_healthshot", true)
+				elseif (pLocal:GetPropEntity("m_hActiveWeapon")):GetPropInt("m_iIronSightMode") ~= 2 then
+					ucmd.buttons = 1
+					lowesthp = localhp
 				end
 			end
 		else
 			healthshotinject = false
-			lowesthp = 0
-			if localweaponid > 71 or (localweaponid > 41 and localweaponid < 50) then
-				gui.SetValue("esp.world.thirdperson", 0)
+			if lowesthp ~= 0 and localhp - lowesthp > 45 then
+				lowesthp = 0
 			end
 		end
-		if string.find(weaponstr, "shield") then
-			if enemydir then
-				stargetangle = benoscreen and (weaponClass == "SHIELD" and 135 or -45) or
-					(weaponClass == "SHIELD" and 45 or -135)
-			else
-				stargetangle = benoscreen and (weaponClass == "SHIELD" and -135 or 45) or
-					(weaponClass == "SHIELD" and -45 or 135)
-			end
-		else
-			stargetangle = enemydir and 45 or -45
+	else
+		healthshotinject = false
+		lowesthp = 0
+		if localweaponid > 71 or (localweaponid > 41 and localweaponid < 50) then
+			gui.SetValue("esp.world.thirdperson", 0)
 		end
-		loadback = false
-		if not (velo < 169 and (math.abs(angle) > 135 and math.abs(angle) < 45)) and fasthop:GetValue() ~= nil and fasthop:GetValue() ~= 0 and input.IsButtonDown(fasthop:GetValue()) then
-			ucmd.buttons = f < 2 and (f == 0 and ucmd.buttons - 4 or (f == 1 and ucmd.buttons - 2 or ucmd.buttons)) or
-				(n and ucmd.buttons - 6 or ucmd.buttons);
-			local isTouchingGround = bit.band(pLocal:GetPropInt("m_fFlags"), 1) ~= 0
-			local rappeling = pLocal:GetProp("m_bIsSpawnRappelling") == 1 -- avoid auto strafe with spawn rappel
-			local in_water = pLocal:GetProp("m_nWaterLevel") ~= 0 -- avoid auto strafe in water because it reduces speed
-			local adpressed = false
-
-			if input.IsButtonDown(65) or input.IsButtonDown(68) then
-				adpressed = true
-			end
-			if velo > 399 and adpressed == false then
-				client.Command("+duck", true);
-			else
-				client.Command("-duck", true);
-			end
-
-			f, n = f + 1, isTouchingGround;
-			gui.SetValue("misc.strafe.air", not isTouchingGround and not rappeling and not in_water);
-			gui.SetValue("misc.fakelag.enable", false);
-			steptotargetangle(angle, stargetangle, aastep:GetValue())
+	end
+	if string.find(weaponstr, "shield") then
+		if enemydir then
+			stargetangle = benoscreen and (weaponClass == "SHIELD" and 135 or -45) or
+				(weaponClass == "SHIELD" and 45 or -135)
 		else
-			if not input.IsButtonDown(17) then
-				client.Command("-duck", true);
+			stargetangle = benoscreen and (weaponClass == "SHIELD" and -135 or 45) or
+				(weaponClass == "SHIELD" and -45 or 135)
+		end
+	else
+		stargetangle = enemydir and 45 or -45
+	end
+	loadback = false
+	if not (velo < 169 and (math.abs(angle) > 135 and math.abs(angle) < 45)) and fasthop:GetValue() ~= nil and fasthop:GetValue() ~= 0 and input.IsButtonDown(fasthop:GetValue()) then
+		ucmd.buttons = f < 2 and (f == 0 and ucmd.buttons - 4 or (f == 1 and ucmd.buttons - 2 or ucmd.buttons)) or
+			(n and ucmd.buttons - 6 or ucmd.buttons);
+		local isTouchingGround = bit.band(pLocal:GetPropInt("m_fFlags"), 1) ~= 0
+		local rappeling = pLocal:GetProp("m_bIsSpawnRappelling") == 1 -- avoid auto strafe with spawn rappel
+		local in_water = pLocal:GetProp("m_nWaterLevel") ~= 0   -- avoid auto strafe in water because it reduces speed
+		local adpressed = false
+
+		if input.IsButtonDown(65) or input.IsButtonDown(68) then
+			adpressed = true
+		end
+		if velo > 399 and adpressed == false then
+			client.Command("+duck", true);
+		else
+			client.Command("-duck", true);
+		end
+
+		f, n = f + 1, isTouchingGround;
+		gui.SetValue("misc.strafe.air", not isTouchingGround and not rappeling and not in_water);
+		gui.SetValue("misc.fakelag.enable", false);
+		steptotargetangle(angle, stargetangle, aastep:GetValue())
+	else
+		if not input.IsButtonDown(17) then
+			client.Command("-duck", true);
+		end
+		if localweaponid ~= 9 and not disablefakelag:GetValue() then
+			gui.SetValue("misc.fakelag.enable", true);
+		end
+		loadback = autoreloadback(bedistance)
+		if (backward == true or loadback) and (string.find(weaponstr, "shield") ~= nil and localweaponid ~= 37) then
+			if angle ~= enemydirangle then
+				if not loadback and angle == 0 then
+					gui.SetValue("esp.world.thirdperson", 1)
+				end
+				steptotargetangle(angle, enemydirangle, aastep:GetValue())
 			end
-			if localweaponid ~= 9 and not disablefakelag:GetValue() then
-				gui.SetValue("misc.fakelag.enable", true);
+		else
+			if backward == true then
+				gui.SetValue("misc.showspec", 0)
 			end
-			loadback = autoreloadback(bedistance)
-			if (gui.GetValue("misc.showspec") == true or loadback) and (string.find(weaponstr, "shield") ~= nil and localweaponid ~= 37) then
-				if angle ~= enemydirangle then
-					if not loadback and angle == 0 then
-						gui.SetValue("esp.world.thirdperson", 1)
-					end
-					steptotargetangle(angle, enemydirangle, aastep:GetValue())
-				end
-			else
-				if gui.GetValue("misc.showspec") == true then
-					gui.SetValue("misc.showspec", 0)
-				end
-				if angle ~= 0 then
-					steptotargetangle(angle, 0, aastep:GetValue())
-				end
+			if angle ~= 0 then
+				steptotargetangle(angle, 0, aastep:GetValue())
 			end
 		end
 	end
@@ -1588,7 +1608,7 @@ local function switch()
 			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160, "AimLOCK!")
 		elseif needoffaim and (bestny or bestduckny) then
 			local ny = calledsny and bestduckny or bestny
-			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160, "AimShield! angle: " .. ny)
+			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160, "AimShield! angle: " .. math.floor(ny))
 		end
 		if aimstatus == '"Off"' and not needoffaim then
 			if loadback then

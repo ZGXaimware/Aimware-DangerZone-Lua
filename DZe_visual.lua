@@ -1,5 +1,5 @@
 -- Aimware-DangerZone-Lua
---Last Updated 2023/8/15 1.1.4 (New Version)
+--Last Updated 2023/8/15 1.1.5 (New Version)
 
 
 local tab = gui.Tab(gui.Reference("Visuals"), "DZevis", "DangerZone Elite Visual");
@@ -128,7 +128,8 @@ local weaponClasses = {
 	[42] = "kniefetc",
 	[78] = "kniefetc",
 	[80] = "kniefetc",
-	[70] = "RemoteBomb"
+	[70] = "RemoteBomb",
+	[72] = "Tablet"
 }
 
 local function get_weapon_class(weapon_id)
