@@ -95,6 +95,7 @@ Updated 1.1.4:<br />
 <DZe_sniffer.lua>add GotvSwitch<br />
 <br />
 Updated 1.1.5:<br />
+<DZe_rage.lua>Now lua script will not set force HeadShot,removed rifle hardcode<br />
 <DZe_visual.lua>Drone Detecter fixed<br />
 GOTVswitch is unavaible due to some reason,wait for next version fix up
 <br />
