@@ -1367,8 +1367,7 @@ callbacks.Register("CreateMove", function(ucmd)
 				(n and ucmd.buttons - 6 or ucmd.buttons);
 			local isTouchingGround = bit.band(pLocal:GetPropInt("m_fFlags"), 1) ~= 0
 			local rappeling = pLocal:GetProp("m_bIsSpawnRappelling") == 1 -- avoid auto strafe with spawn rappel
-			local in_water = pLocal:GetProp("m_nWaterLevel") ~=
-				0                                                -- avoid auto strafe in water because it reduces speed
+			local in_water = pLocal:GetProp("m_nWaterLevel") ~= 0                                                    -- avoid auto strafe in water because it reduces speed
 			local adpressed = false
 
 			if input.IsButtonDown(65) or input.IsButtonDown(68) then
