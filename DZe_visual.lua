@@ -71,6 +71,7 @@ local dronetable = {}
 local drawespxy = {}
 local isNeedW = false
 local Teamcalled = false
+local player_respawn_times = {}
 local function returnweaponstr(player)
 	if player:IsPlayer() and player:IsAlive() then
 		local recstr = ""
@@ -212,19 +213,28 @@ local function drawEspHookESP(builder)
 			if playerdata[teamstr] ~= nil and #playerdata[teamstr] > 1 then
 				for i, data in ipairs(playerdata[teamstr]) do
 					if data[1] ~= builder_entity:GetIndex() then
+						local respawntime = 0.00
+						if not data[4] then
+							if player_respawn_times[teamstr] then
+								respawntime = player_respawn_times[teamstr][1] + player_respawn_times[teamstr][2] -
+								globals.CurTime()
+								if respawntime < 0 then respawntime = 0 end
+							end
+						end
 						if abuseteam[teamstr] then
 							if ischeater == 1 then
 								righttext = data[4] and
 									"(M)(Cheater) " .. math.floor((lpabs - data[3]):Length()) .. " " .. data[2] or
-									"(M)(Cheater)(Dead) " .. data[2]
+									"(M)(Cheater)(Dead) " .. data[2] .. " R:" .. string.format("%.1f", respawntime) ..
+									"s"
 							else
 								righttext = data[4] and
 									"(Cheater) " .. math.floor((lpabs - data[3]):Length()) .. " " .. data[2] or
-									"(Cheater)(Dead) " .. data[2]
+									"(Cheater)(Dead) " .. data[2] .. " R:" .. string.format("%.1f", respawntime) .. "s"
 							end
 						else
 							righttext = data[4] and math.floor((lpabs - data[3]):Length()) .. " " .. data[2] or
-								"(Dead) " .. data[2]
+								"(Dead) " .. data[2] .. " R:" .. string.format("%.1f", respawntime) .. "s"
 						end
 					end
 				end
@@ -676,6 +686,8 @@ client.AllowListener("begin_new_match");
 client.AllowListener("round_prestart")
 client.AllowListener("round_poststart")
 client.AllowListener("round_start")
+client.AllowListener("player_death")
+client.AllowListener("survival_no_respawns_final")
 callbacks.Register("FireGameEvent", function(e)
 	local eventName = e:GetName()
 	if (eventName == "client_disconnect") or (eventName == "begin_new_match") then
@@ -685,10 +697,22 @@ callbacks.Register("FireGameEvent", function(e)
 		ENDdistance = 0
 		BestMDistance = math.huge
 		plocallive = false
+		player_respawn_times = {}
 	elseif eventName == "round_prestart" or eventName == "round_poststart" or eventName == "round_start" then
 		local map_name = engine.GetMapName()
 		if mapglassplace[map_name] then
 			materials.Find(mapglassplace[map_name]):SetMaterialVarFlag(4, removegrassmaster:GetValue())
 		end
+	elseif eventName == "player_death" and ingame() then
+		local teamid = client.GetPlayerIndexByUserID(e:GetInt("userid")):GetPropInt("m_nSurvivalTeam")
+		if teamid == -1 then return end
+		local teamstr = "team" .. teamid
+		if player_respawn_times[teamstr] then
+			player_respawn_times[teamstr] = { globals.CurTime(), player_respawn_times[teamstr][2] + 10 }
+		else
+			player_respawn_times[teamstr] = { globals.CurTime(), 10 }
+		end
+	elseif eventName == "player_death" and ingame() then
+		player_respawn_times = {}
 	end
 end)
