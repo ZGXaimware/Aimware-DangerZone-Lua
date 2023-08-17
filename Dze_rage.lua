@@ -1297,114 +1297,116 @@ callbacks.Register("CreateMove", function(ucmd)
 			if roll_aa_switch:GetValue() then
 				ucmd.viewangles = EulerAngles(ucmd.viewangles.x, ucmd.viewangles.y, roll)
 			end
+		elseif gui.GetValue("rbot.antiaim.base.rotation") ~= 0 then
+			gui.SetValue("rbot.antiaim.base.rotation", 0)
 		end
-	elseif gui.GetValue("rbot.antiaim.base.rotation") ~= 0 then
-		gui.SetValue("rbot.antiaim.base.rotation", 0)
-	end
-	local hascalledattack2 = false
-	if weaponClass == "smg" then
-		if localweaponid == 17 or localweaponid == 26 then
-			gui.SetValue("rbot.hitscan.accuracy.smg.hitchance", 10)
-			gui.SetValue("rbot.hitscan.accuracy.smg.hitchanceburst", 10)
-			gui.SetValue("rbot.hitscan.accuracy.smg.mindamage", 5)
-		else
-			gui.SetValue("rbot.hitscan.accuracy.smg.hitchance", 40)
-			gui.SetValue("rbot.hitscan.accuracy.smg.hitchanceburst", 40)
-			gui.SetValue("rbot.hitscan.accuracy.smg.mindamage", 15)
+		local hascalledattack2 = false
+		if weaponClass == "smg" then
+			if localweaponid == 17 or localweaponid == 26 then
+				gui.SetValue("rbot.hitscan.accuracy.smg.hitchance", 10)
+				gui.SetValue("rbot.hitscan.accuracy.smg.hitchanceburst", 10)
+				gui.SetValue("rbot.hitscan.accuracy.smg.mindamage", 5)
+			else
+				gui.SetValue("rbot.hitscan.accuracy.smg.hitchance", 40)
+				gui.SetValue("rbot.hitscan.accuracy.smg.hitchanceburst", 40)
+				gui.SetValue("rbot.hitscan.accuracy.smg.mindamage", 15)
+			end
+		elseif weaponClass == "SHIELD" or weaponClass == "kniefetc" then
+			hascalledattack2 = true
+			if shieldhit then
+				client.Command("+attack", true);
+				iscommandattack2 = true
+			else
+				client.Command("-attack", true);
+				iscommandattack2 = false
+			end
 		end
-	elseif weaponClass == "SHIELD" or weaponClass == "kniefetc" then
-		hascalledattack2 = true
-		if shieldhit then
-			client.Command("+attack", true);
-			iscommandattack2 = true
-		else
+		if iscommandattack2 and hascalledattack2 == false then
 			client.Command("-attack", true);
 			iscommandattack2 = false
 		end
-	end
-	if iscommandattack2 and hascalledattack2 == false then
-		client.Command("-attack", true);
-		iscommandattack2 = false
-	end
-	if needshieldprotect then
-		if lowesthp >= localhp or lowesthp == 0 then
-			if string.find(weaponstr, "healthshot") ~= nil then
-				healthshotinject = true
-				gui.SetValue("misc.showspec", 1)
-				if localweaponid ~= 57 and not input.IsButtonDown(69) then
-					client.Command("use weapon_healthshot", true)
-				elseif (pLocal:GetPropEntity("m_hActiveWeapon")):GetPropInt("m_iIronSightMode") ~= 2 then
-					ucmd.buttons = 1
-					lowesthp = localhp
+		if needshieldprotect then
+			if lowesthp >= localhp or lowesthp == 0 then
+				if string.find(weaponstr, "healthshot") ~= nil then
+					healthshotinject = true
+					gui.SetValue("misc.showspec", 1)
+					if localweaponid ~= 57 and not input.IsButtonDown(69) then
+						client.Command("use weapon_healthshot", true)
+					elseif (pLocal:GetPropEntity("m_hActiveWeapon")):GetPropInt("m_iIronSightMode") ~= 2 then
+						ucmd.buttons = 1
+						lowesthp = localhp
+					end
+				end
+			else
+				healthshotinject = false
+				if lowesthp ~= 0 and localhp - lowesthp > 45 then
+					lowesthp = 0
 				end
 			end
 		else
 			healthshotinject = false
-			if lowesthp ~= 0 and localhp - lowesthp > 45 then
-				lowesthp = 0
+			lowesthp = 0
+			if localweaponid > 71 or (localweaponid > 41 and localweaponid < 50) then
+				gui.SetValue("esp.world.thirdperson", 0)
 			end
 		end
-	else
-		healthshotinject = false
-		lowesthp = 0
-		if localweaponid > 71 or (localweaponid > 41 and localweaponid < 50) then
-			gui.SetValue("esp.world.thirdperson", 0)
-		end
-	end
-	if string.find(weaponstr, "shield") then
-		if enemydir then
-			stargetangle = benoscreen and (weaponClass == "SHIELD" and 135 or -45) or
-				(weaponClass == "SHIELD" and 45 or -135)
+		if string.find(weaponstr, "shield") then
+			if enemydir then
+				stargetangle = benoscreen and (weaponClass == "SHIELD" and 135 or -45) or
+					(weaponClass == "SHIELD" and 45 or -135)
+			else
+				stargetangle = benoscreen and (weaponClass == "SHIELD" and -135 or 45) or
+					(weaponClass == "SHIELD" and -45 or 135)
+			end
 		else
-			stargetangle = benoscreen and (weaponClass == "SHIELD" and -135 or 45) or
-				(weaponClass == "SHIELD" and -45 or 135)
+			stargetangle = enemydir and 45 or -45
 		end
-	else
-		stargetangle = enemydir and 45 or -45
-	end
-	loadback = false
-	if not (velo < 169 and (math.abs(angle) > 135 and math.abs(angle) < 45)) and fasthop:GetValue() ~= nil and fasthop:GetValue() ~= 0 and input.IsButtonDown(fasthop:GetValue()) then
-		ucmd.buttons = f < 2 and (f == 0 and ucmd.buttons - 4 or (f == 1 and ucmd.buttons - 2 or ucmd.buttons)) or
-			(n and ucmd.buttons - 6 or ucmd.buttons);
-		local isTouchingGround = bit.band(pLocal:GetPropInt("m_fFlags"), 1) ~= 0
-		local rappeling = pLocal:GetProp("m_bIsSpawnRappelling") == 1 -- avoid auto strafe with spawn rappel
-		local in_water = pLocal:GetProp("m_nWaterLevel") ~= 0   -- avoid auto strafe in water because it reduces speed
-		local adpressed = false
+		loadback = false
+		if not (velo < 169 and (math.abs(angle) > 135 and math.abs(angle) < 45)) and fasthop:GetValue() ~= nil and fasthop:GetValue() ~= 0 and input.IsButtonDown(fasthop:GetValue()) then
+			ucmd.buttons = f < 2 and (f == 0 and ucmd.buttons - 4 or (f == 1 and ucmd.buttons - 2 or ucmd.buttons)) or
+				(n and ucmd.buttons - 6 or ucmd.buttons);
+			local isTouchingGround = bit.band(pLocal:GetPropInt("m_fFlags"), 1) ~= 0
+			local rappeling = pLocal:GetProp("m_bIsSpawnRappelling") == 1 -- avoid auto strafe with spawn rappel
+			local in_water = pLocal:GetProp("m_nWaterLevel") ~=
+			0                                                   -- avoid auto strafe in water because it reduces speed
+			local adpressed = false
 
-		if input.IsButtonDown(65) or input.IsButtonDown(68) then
-			adpressed = true
-		end
-		if velo > 399 and adpressed == false then
-			client.Command("+duck", true);
+			if input.IsButtonDown(65) or input.IsButtonDown(68) then
+				adpressed = true
+			end
+			if velo > 399 and adpressed == false then
+				client.Command("+duck", true);
+			else
+				client.Command("-duck", true);
+			end
+
+			f, n = f + 1, isTouchingGround;
+			gui.SetValue("misc.strafe.air",
+				not isTouchingGround and not rappeling and not in_water and angle == stargetangle);
+			gui.SetValue("misc.fakelag.enable", false);
+			steptotargetangle(angle, stargetangle, aastep:GetValue())
 		else
-			client.Command("-duck", true);
-		end
-
-		f, n = f + 1, isTouchingGround;
-		gui.SetValue("misc.strafe.air", not isTouchingGround and not rappeling and not in_water);
-		gui.SetValue("misc.fakelag.enable", false);
-		steptotargetangle(angle, stargetangle, aastep:GetValue())
-	else
-		if not input.IsButtonDown(17) then
-			client.Command("-duck", true);
-		end
-		if localweaponid ~= 9 and not disablefakelag:GetValue() then
-			gui.SetValue("misc.fakelag.enable", true);
-		end
-		loadback = autoreloadback(bedistance)
-		if (backward == true or loadback) and (string.find(weaponstr, "shield") ~= nil and localweaponid ~= 37) then
-			if angle ~= enemydirangle then
-				if not loadback and angle == 0 then
-					gui.SetValue("esp.world.thirdperson", 1)
+			if not input.IsButtonDown(17) then
+				client.Command("-duck", true);
+			end
+			if localweaponid ~= 9 and not disablefakelag:GetValue() then
+				gui.SetValue("misc.fakelag.enable", true);
+			end
+			loadback = autoreloadback(bedistance)
+			if (backward == true or loadback) and (string.find(weaponstr, "shield") ~= nil and localweaponid ~= 37) then
+				if angle ~= enemydirangle then
+					if not loadback and angle == 0 then
+						gui.SetValue("esp.world.thirdperson", 1)
+					end
+					steptotargetangle(angle, enemydirangle, aastep:GetValue())
 				end
-				steptotargetangle(angle, enemydirangle, aastep:GetValue())
-			end
-		else
-			if backward == true then
-				gui.SetValue("misc.showspec", 0)
-			end
-			if angle ~= 0 then
-				steptotargetangle(angle, 0, aastep:GetValue())
+			else
+				if backward == true then
+					gui.SetValue("misc.showspec", 0)
+				end
+				if angle ~= 0 then
+					steptotargetangle(angle, 0, aastep:GetValue())
+				end
 			end
 		end
 	end
