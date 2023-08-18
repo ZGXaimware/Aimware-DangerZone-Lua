@@ -704,15 +704,15 @@ callbacks.Register("FireGameEvent", function(e)
 			materials.Find(mapglassplace[map_name]):SetMaterialVarFlag(4, removegrassmaster:GetValue())
 		end
 	elseif eventName == "player_death" and ingame() then
-		local teamid = client.GetPlayerIndexByUserID(e:GetInt("userid")):GetPropInt("m_nSurvivalTeam")
-		if teamid == -1 then return end
+		local teamid = (entities.GetByUserID(e:GetInt("userid"))):GetPropInt("m_nSurvivalTeam")
+		if teamid == -1 or teamid == nil then return end
 		local teamstr = "team" .. teamid
 		if player_respawn_times[teamstr] then
 			player_respawn_times[teamstr] = { globals.CurTime(), player_respawn_times[teamstr][2] + 10 }
 		else
 			player_respawn_times[teamstr] = { globals.CurTime(), 10 }
 		end
-	elseif eventName == "player_death" and ingame() then
+	elseif eventName == "survival_no_respawns_final" and ingame() then
 		player_respawn_times = {}
 	end
 end)

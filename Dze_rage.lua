@@ -1218,9 +1218,8 @@ callbacks.Register("CreateMove", function(ucmd)
 		end
 		needshieldprotect = localhp <= 75 and string.find(weaponstr, "shield") ~= nil and
 			autoshield:GetValue() and shieldprotectenable
-		needesync = not input.IsButtonDown(fasthop:GetValue()) and
-			(weaponClass ~= "kniefetc" and weaponClass ~= "SHIELD" and localweaponid ~= 69) and
-			legit_aa_switch:GetValue()
+		needesync = not input.IsButtonDown(fasthop:GetValue()) and (weaponClass ~= "kniefetc" and weaponClass ~= "SHIELD" and localweaponid ~= 69) and
+		legit_aa_switch:GetValue()
 	end
 end)
 
@@ -1292,7 +1291,7 @@ callbacks.Register("CreateMove", function(ucmd)
 			end
 		end
 
-		if gui.GetValue("rbot.antiaim.base.rotation") ~= targetde then
+		if gui.GetValue("rbot.antiaim.base.rotation") ~= targetde and needesync then
 			gui.SetValue("rbot.antiaim.base.rotation", targetde)
 			if roll_aa_switch:GetValue() then
 				ucmd.viewangles = EulerAngles(ucmd.viewangles.x, ucmd.viewangles.y, roll)
@@ -1367,7 +1366,8 @@ callbacks.Register("CreateMove", function(ucmd)
 				(n and ucmd.buttons - 6 or ucmd.buttons);
 			local isTouchingGround = bit.band(pLocal:GetPropInt("m_fFlags"), 1) ~= 0
 			local rappeling = pLocal:GetProp("m_bIsSpawnRappelling") == 1 -- avoid auto strafe with spawn rappel
-			local in_water = pLocal:GetProp("m_nWaterLevel") ~= 0                                                    -- avoid auto strafe in water because it reduces speed
+			local in_water = pLocal:GetProp("m_nWaterLevel") ~=
+				0                                                -- avoid auto strafe in water because it reduces speed
 			local adpressed = false
 
 			if input.IsButtonDown(65) or input.IsButtonDown(68) then
