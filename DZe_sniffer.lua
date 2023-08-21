@@ -229,9 +229,9 @@ callbacks.Register("FireGameEvent", function(e)
         if teamid == -1 or teamid == nil then return end
         local playername = (entities.GetByUserID(e:GetInt("userid"))):GetName()
         if player_respawn_times[playername] then
-            player_respawn_times[playername] = { globals.CurTime(), player_respawn_times[playername][2] + 10 }
+            player_respawn_times[playername] = player_respawn_times[playername] + 10
         else
-            player_respawn_times[playername] = { globals.CurTime(), 10 }
+            player_respawn_times[playername] = 10
         end
     end
 end)
