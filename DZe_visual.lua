@@ -211,13 +211,12 @@ local function drawEspHookESP(builder)
 			end
 		else
 			if playerdata[teamstr] ~= nil and #playerdata[teamstr] > 1 then
-				for i, data in ipairs(playerdata[teamstr]) do
-					if data[1] ~= builder_entity:GetIndex() then
+				for _, data in ipairs(playerdata[teamstr]) do
+					if data[2] ~= builder_entity:GetName() then
 						local respawntime = 0.00
 						if not data[4] then
-							if player_respawn_times[data[1]] then
-								respawntime = player_respawn_times[data[1]][1] + player_respawn_times[data[1]][2] -
-								globals.CurTime()
+							if player_respawn_times[data[2]] then
+								respawntime = player_respawn_times[data[2]][1] + player_respawn_times[data[2]][2] - globals.CurTime()
 								if respawntime < 0 then respawntime = 0 end
 							end
 						end
@@ -706,11 +705,11 @@ callbacks.Register("FireGameEvent", function(e)
 	elseif eventName == "player_death" and ingame() then
 		local teamid = (entities.GetByUserID(e:GetInt("userid"))):GetPropInt("m_nSurvivalTeam")
 		if teamid == -1 or teamid == nil then return end
-		local teamstr = "team" .. teamid
-		if player_respawn_times[e:GetInt("userid")] then
-			player_respawn_times[e:GetInt("userid")] = { globals.CurTime(), player_respawn_times[e:GetInt("userid")][2] + 10 }
+		local playername = (entities.GetByUserID(e:GetInt("userid"))):GetName()
+		if player_respawn_times[playername] then
+			player_respawn_times[playername] = { globals.CurTime(), player_respawn_times[playername][2] + 10 }
 		else
-			player_respawn_times[e:GetInt("userid")] = { globals.CurTime(), 10 }
+			player_respawn_times[playername] = { globals.CurTime(), 10 }
 		end
 	elseif eventName == "survival_no_respawns_final" and ingame() then
 		player_respawn_times = {}

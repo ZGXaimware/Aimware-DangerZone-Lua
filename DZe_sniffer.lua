@@ -56,6 +56,8 @@ local tabletitemindex = {
 local pLocal = nil
 local localindex = 0
 local localteamid = 0
+local lastcssplayernumber = 0
+
 
 local function GOTVstatus()
     local spLocal = entities.GetLocalPlayer()
@@ -117,20 +119,24 @@ callbacks.Register("CreateMove", function()
     if players ~= nil then
         local moneylist = {}
         local playerlist = {}
+        local needupdatecssplayer = false
+        if lastcssplayernumber  ~= #players then
+            needupdatecssplayer = true
+        end
         for _, player in ipairs(players) do
             local playerIndex = player:GetIndex()
             local playername = player:GetName()
 
             if player:GetName() ~= "GOTV" then
                 if ingamestatus and respawnmaster:GetValue() then
-                    if player:IsAlive() and deadlist[playerIndex] then
+                    if player:IsAlive() and deadlist[playername] then
                         partyapisay("Respawn" .. string.gsub(': ' .. playername, '%s', ''))
-                        deadlist[playerIndex] = false
+                        deadlist[playername] = nil
                     end
                     -- deadlist = {}
                 end
                 local playerteamid = player:GetPropInt("m_nSurvivalTeam")
-                if localindex ~= playerIndex and playerteamid ~= localteamid and exitmaster:GetValue() then
+                if localindex ~= playerIndex and playerteamid ~= localteamid and exitmaster:GetValue() and  needupdatecssplayer then
                     table.insert(playerlist, player:GetName())
                 end
                 -- if not player:IsAlive() and ingamestatus and respawnmaster:GetValue() then
@@ -171,6 +177,7 @@ callbacks.Register("CreateMove", function()
             end
             cachelist = playerlist
         end
+        lastcssplayernumber = #players
     end
 end)
 
@@ -187,6 +194,7 @@ callbacks.Register("FireGameEvent", function(e)
         cachemoneylist = {}
         cachelist = {}
         deadlist = {}
+        lastcssplayernumber = 0
     end
     if paradropmaster:GetValue() then
         if eventName == "survival_paradrop_spawn" then
@@ -203,11 +211,11 @@ callbacks.Register("FireGameEvent", function(e)
             if purchaseIndex ~= -1 then
                 partyapisay(playername .. "_purchased_" .. tabletitemindex[purchaseIndex])
             end
-            partyapisay(playername .. "_dispatched_Drone")
+            --partyapisay(playername .. "_dispatched_Drone")
         end
     end
-    if eventName == "player_death" and ingame() then
-        deadlist[e:GetInt("userid")] = true
+    if eventName == "player_death" and ingamestatus then
+        deadlist[(entities.GetByUserID(e:GetInt("userid"))):GetName()] = true
     end
 end)
 

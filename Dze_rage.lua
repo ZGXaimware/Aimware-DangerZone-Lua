@@ -12,7 +12,7 @@ local smooth = gui.Checkbox(main_box, "main.aimsmooth", "AimSmooth", 1)
 smooth:SetDescription("Aimstep like function, turn off will use fov based(Unsafe)")
 local aimsmoothstep = gui.Slider(main_box, "main.aimstepsmooth", "AimSmoothStep", 8, 5, 25, 1)
 local aastep        = gui.Slider(main_box, "main.aastep", "AAStep", 8, 5, 25, 1)
-local aimsmoothfov  = gui.Slider(main_box, "main.fov", "AAStep", 15, 5, 20, 1)
+local aimsmoothfov  = gui.Slider(main_box, "main.fov", "AimStep Fov", 15, 5, 20, 1)
 local autoshield    = gui.Checkbox(main_box, "main.autoshield", "Autoshield", 1)
 autoshield:SetDescription("Auto inject healthshot when you have shield and low hp")
 local notshield = gui.Checkbox(main_box, "main.notshield", "NoHitShield", 0)
@@ -139,7 +139,6 @@ local iscommandattack2 = false
 local backward = false
 
 gui.SetValue("rbot.master", true)
-gui.SetValue("misc.strafe.enable", true)
 local weapons_table = {
 	["asniper"] = true,
 	["hpistol"] = true,
@@ -262,16 +261,16 @@ local localhp = 0
 local localteamid = -2
 
 local function GOTVstatus()
-	if gui.GetValue("esp.DZevis.vis.gotvswitch") then
-		if gui.GetValue("esp.DZevis.vis.gotvswitch") ~= gui.GetValue("rbot.DZe.main.gotvswitch") then
-			gui.SetValue("esp.DZevis.vis.gotvswitch", gui.GetValue("rbot.DZe.main.gotvswitch"))
-		end
-	end
-	if gui.GetValue("misc.DZesniffer.tablet.gotvswitch") then
-		if gui.GetValue("misc.DZesniffer.tablet.gotvswitch") ~= gui.GetValue("rbot.DZe.main.gotvswitch") then
-			gui.SetValue("misc.DZesniffer.tablet.gotvswitch", gui.GetValue("rbot.DZe.main.gotvswitch"))
-		end
-	end
+	-- if gui.GetValue("esp.DZevis.vis.gotvswitch") then
+	-- 	if gui.GetValue("esp.DZevis.vis.gotvswitch") ~= gui.GetValue("rbot.DZe.main.gotvswitch") then
+	-- 		gui.SetValue("esp.DZevis.vis.gotvswitch", gui.GetValue("rbot.DZe.main.gotvswitch"))
+	-- 	end
+	-- end
+	-- if gui.GetValue("misc.DZesniffer.tablet.gotvswitch") then
+	-- 	if gui.GetValue("misc.DZesniffer.tablet.gotvswitch") ~= gui.GetValue("rbot.DZe.main.gotvswitch") then
+	-- 		gui.SetValue("misc.DZesniffer.tablet.gotvswitch", gui.GetValue("rbot.DZe.main.gotvswitch"))
+	-- 	end
+	-- end
 	local spLocal = entities.GetLocalPlayer()
 	if gotvswitch:GetValue() == 0 then
 		return spLocal
@@ -470,6 +469,7 @@ local function smoothaim(Enemy, step)
 			if Distance > 350 then return false end
 			enemyangle = (Enemy:GetHitboxPosition(3) - pLocal:GetHitboxPosition(1)):Angles()
 		else
+			if velo > 260 then return false end
 			enemyangle = (Enemy:GetHitboxPosition(1) - pLocal:GetHitboxPosition(1)):Angles()
 		end
 		local enemy_x = enemyangle.x
@@ -1187,7 +1187,11 @@ callbacks.Register("CreateMove", function(ucmd)
 			gui.SetValue("rbot.antiaim.condition.use", 0)
 
 			if angle ~= 0 or needshieldprotect then
-				client.Command("unbind mouse1", true)
+				if weaponClass == "SHIELD" or weaponClass == "kniefetc" then
+					client.Command("unbind mouse1", true)
+				else
+					client.Command("unbind mouse1;-attack", true)
+				end
 			else
 				client.Command("bind mouse1 +attack", true)
 			end
@@ -1198,13 +1202,16 @@ callbacks.Register("CreateMove", function(ucmd)
 			gui.SetValue("rbot.aim.enable", "Off")
 		else
 			client.Command("bind mouse1 +attack", true)
-			--gui.SetValue("rbot.antiaim.condition.use", 1)
+			gui.SetValue("rbot.antiaim.condition.use", 1)
 
 			local killsoundcmd = ""
 			if aimstatus ~= '"Automatic"' then
 				gui.SetValue("rbot.aim.enable", "Automatic")
-				if backward then
-					killsoundcmd = "play ui/item_drop2_uncommon"
+				if weaponClass ~= "SHIELD" and weaponClass ~= "kniefetc" then
+					killsoundcmd = "-attack"
+					if gui.GetValue("esp.master") then
+						killsoundcmd = killsoundcmd .. ";play ui/item_drop2_uncommon"
+					end
 				end
 			end
 			if killsoundcmd ~= "" then
@@ -1269,21 +1276,13 @@ callbacks.Register("CreateMove", function(ucmd)
 			gui.SetValue("rbot.antiaim.advanced.roll", 0)
 		end
 		if needesync then
-			if not aa_side then
-				roll = -40
-				if not backward then
-					targetde = -58
-				else
-					targetde = -40
-				end
-			else
-				roll = 40
+			local sign = aa_side and 1 or -1
+			roll = 40 * sign
+			targetde = 58 * sign
 
-				if not backward then
-					targetde = 58
-				else
-					targetde = 40
-				end
+			if backward then
+				roll = 40 * sign
+				targetde = 40 * sign
 			end
 		end
 
@@ -1363,25 +1362,28 @@ callbacks.Register("CreateMove", function(ucmd)
 			local isTouchingGround = bit.band(pLocal:GetPropInt("m_fFlags"), 1) ~= 0
 			local rappeling = pLocal:GetProp("m_bIsSpawnRappelling") == 1 -- avoid auto strafe with spawn rappel
 			local in_water = pLocal:GetProp("m_nWaterLevel") ~=
-				0                                                -- avoid auto strafe in water because it reduces speed
+			0                                                    -- avoid auto strafe in water because it reduces speed
 			local adpressed = false
 
 			if input.IsButtonDown(65) or input.IsButtonDown(68) then
 				adpressed = true
 			end
-			if velo > 399 and adpressed == false then
+			if velo > 399 and not adpressed then
 				client.Command("+duck", true);
 			else
 				client.Command("-duck", true);
 			end
 
 			f, n = f + 1, isTouchingGround;
+			gui.SetValue("misc.strafe.enable", true)
 			gui.SetValue("misc.strafe.air",
 				not isTouchingGround and not rappeling and not in_water and angle == stargetangle);
 			gui.SetValue("misc.fakelag.enable", false);
 			steptotargetangle(angle, stargetangle, aastep:GetValue())
 		else
-			if not input.IsButtonDown(17) then
+			gui.SetValue("misc.strafe.enable", false)
+
+			if not input.IsButtonDown(17) and pLocal:GetProp('m_flDuckAmount') >= 0.1 then
 				client.Command("-duck", true);
 			end
 			if localweaponid ~= 9 and not disablefakelag:GetValue() then
