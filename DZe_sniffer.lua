@@ -4,7 +4,7 @@
 local tab = gui.Tab(gui.Reference("Misc"), "DZesniffer", "DangerZone Elite Sniffer");
 local main_box = gui.Groupbox(tab, "Sniffer", 16, 16, 400, 0);
 local ranks_mode = gui.Combobox(main_box, "tablet.mode", "Message SendWay",
-    "Only Console", "In Party chat")
+    "Only Console", "In Party chat","In Team Chat")
 local messagemaster = gui.Checkbox(main_box, "tablet.master", "Master Switch", 1)
 local purchasemaster = gui.Checkbox(main_box, "tablet.purchasemaster", "Purchase sniffer", 1)
 local respawnmaster = gui.Checkbox(main_box, "tablet.respawnmaster", "Respawn sniffer", 1)
@@ -31,6 +31,7 @@ local cachelist = {}
 local cachelistpurchaseid = {}
 local cachemoneylist = {}
 local deadlist = {}
+local player_respawn_times = {}
 local tabletitemindex = {
     [-1] = "None",
     [0] = "Knief",
@@ -94,6 +95,8 @@ local function partyapisay(message)
         panorama.RunScript(
             "PartyListAPI.SessionCommand('Game::Chat', 'run all xuid ' + MyPersonaAPI.GetXuid() + ' chat " ..
             message .. "');")
+    elseif ranks_mode:GetValue() == 2 then
+        client.ChatTeamSay(message)
     end
 end
 
@@ -130,7 +133,11 @@ callbacks.Register("CreateMove", function()
             if player:GetName() ~= "GOTV" then
                 if ingamestatus and respawnmaster:GetValue() then
                     if player:IsAlive() and deadlist[playername] then
-                        partyapisay("Respawn" .. string.gsub(': ' .. playername, '%s', ''))
+                        local addstr = ""
+                        if player_respawn_times[playername] then addstr = "Next_Time:" ..
+                            math.floor(player_respawn_times[playername]) end
+                        partyapisay("Respawn" ..
+                            string.gsub(': ' .. playername, '%s', '') .. addstr)
                         deadlist[playername] = nil
                     end
                     -- deadlist = {}
@@ -195,6 +202,7 @@ callbacks.Register("FireGameEvent", function(e)
         cachelist = {}
         deadlist = {}
         lastcssplayernumber = 0
+        player_respawn_times = {}
     end
     if paradropmaster:GetValue() then
         if eventName == "survival_paradrop_spawn" then
@@ -216,6 +224,15 @@ callbacks.Register("FireGameEvent", function(e)
     end
     if eventName == "player_death" and ingamestatus then
         deadlist[(entities.GetByUserID(e:GetInt("userid"))):GetName()] = true
+
+        local teamid = (entities.GetByUserID(e:GetInt("userid"))):GetPropInt("m_nSurvivalTeam")
+        if teamid == -1 or teamid == nil then return end
+        local playername = (entities.GetByUserID(e:GetInt("userid"))):GetName()
+        if player_respawn_times[playername] then
+            player_respawn_times[playername] = { globals.CurTime(), player_respawn_times[playername][2] + 10 }
+        else
+            player_respawn_times[playername] = { globals.CurTime(), 10 }
+        end
     end
 end)
 
@@ -272,14 +289,11 @@ local m_kg = gui.Button(main_box, "Check DZ Team", function()
                             end
                         end
                     else
-                        for j, data in ipairs(playerTeamData) do
-                            local teammateString = abuseteam[teamstr] and "Cheater_Teammate:" or "Teammate:"
-                            if communicationMute == 1 then
-                                nonsingleteamout[teamstr] = string.gsub(player:GetName(), '%s', '') ..
-                                    "=Might_Cheater_Solo"
-                            else
-                                nonsingleteamout[teamstr] = string.gsub(player:GetName(), '%s', '') .. "=Might_Solo"
-                            end
+                        if communicationMute == 1 then
+                            nonsingleteamout[teamstr] = string.gsub(player:GetName(), '%s', '') ..
+                                "=Might_Cheater_Solo"
+                        else
+                            nonsingleteamout[teamstr] = string.gsub(player:GetName(), '%s', '') .. "=Might_Solo"
                         end
                     end
                 end
