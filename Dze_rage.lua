@@ -1283,7 +1283,7 @@ callbacks.Register("CreateMove", function(ucmd)
 				roll = 40 * sign
 				targetde = 40 * sign
 			end
-			if gui.GetValue("rbot.antiaim.base.rotation") ~= targetde and needesync then
+			if gui.GetValue("rbot.antiaim.base.rotation") ~= targetde then
 				gui.SetValue("rbot.antiaim.base.rotation", targetde)
 				if roll_aa_switch:GetValue() then
 					ucmd.viewangles = EulerAngles(ucmd.viewangles.x, ucmd.viewangles.y, roll)
