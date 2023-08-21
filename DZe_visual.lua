@@ -215,8 +215,8 @@ local function drawEspHookESP(builder)
 					if data[1] ~= builder_entity:GetIndex() then
 						local respawntime = 0.00
 						if not data[4] then
-							if player_respawn_times[teamstr] then
-								respawntime = player_respawn_times[teamstr][1] + player_respawn_times[teamstr][2] -
+							if player_respawn_times[data[1]] then
+								respawntime = player_respawn_times[data[1]][1] + player_respawn_times[data[1]][2] -
 								globals.CurTime()
 								if respawntime < 0 then respawntime = 0 end
 							end
@@ -707,10 +707,10 @@ callbacks.Register("FireGameEvent", function(e)
 		local teamid = (entities.GetByUserID(e:GetInt("userid"))):GetPropInt("m_nSurvivalTeam")
 		if teamid == -1 or teamid == nil then return end
 		local teamstr = "team" .. teamid
-		if player_respawn_times[teamstr] then
-			player_respawn_times[teamstr] = { globals.CurTime(), player_respawn_times[teamstr][2] + 10 }
+		if player_respawn_times[e:GetInt("userid")] then
+			player_respawn_times[e:GetInt("userid")] = { globals.CurTime(), player_respawn_times[e:GetInt("userid")][2] + 10 }
 		else
-			player_respawn_times[teamstr] = { globals.CurTime(), 10 }
+			player_respawn_times[e:GetInt("userid")] = { globals.CurTime(), 10 }
 		end
 	elseif eventName == "survival_no_respawns_final" and ingame() then
 		player_respawn_times = {}

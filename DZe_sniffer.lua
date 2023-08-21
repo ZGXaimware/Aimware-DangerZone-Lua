@@ -10,7 +10,7 @@ local purchasemaster = gui.Checkbox(main_box, "tablet.purchasemaster", "Purchase
 local respawnmaster = gui.Checkbox(main_box, "tablet.respawnmaster", "Respawn sniffer", 1)
 local exitmaster = gui.Checkbox(main_box, "tablet.exitmaster", "Exit sniffer", 1)
 local paradropmaster = gui.Checkbox(main_box, "tablet.paradropmaster", "ParaDrop sniffer", 1)
-local dronedispatchmaster = gui.Checkbox(main_box, "tablet.dronedispatchmaster", "Drone Dispatch sniffer", 0)
+local dronedispatchmaster = gui.Checkbox(main_box, "tablet.dronedispatchmaster", "Drone Dispatch sniffer(Purchase)", 0)
 local gotvswitch = gui.Combobox(main_box, "tablet.gotvswitch", "GOTV Selection", "Off", "Disable on GOTV",
     "Force Enable on GOTV");
 
@@ -111,33 +111,31 @@ callbacks.Register("CreateMove", function()
         cachemoneylist = {}
         cachelistpurchaseid = {}
     end
-    if not respawnmaster:GetValue() then
-        deadlist = {}
-    end
+    -- if not respawnmaster:GetValue() then
+    --     deadlist = {}
+    -- end
     if players ~= nil then
         local moneylist = {}
         local playerlist = {}
-        if ingamestatus and respawnmaster:GetValue() then
-            for _, player in ipairs(players) do
-                local playername = player:GetName()
-                if player:IsAlive() and deadlist[playername] then
-                    partyapisay("Respawn" .. string.gsub(': ' .. playername, '%s', ''))
-                end
-            end
-            deadlist = {}
-        end
         for _, player in ipairs(players) do
             local playerIndex = player:GetIndex()
             local playername = player:GetName()
 
             if player:GetName() ~= "GOTV" then
+                if ingamestatus and respawnmaster:GetValue() then
+                    if player:IsAlive() and deadlist[playerIndex] then
+                        partyapisay("Respawn" .. string.gsub(': ' .. playername, '%s', ''))
+                        deadlist[playerIndex] = false
+                    end
+                    -- deadlist = {}
+                end
                 local playerteamid = player:GetPropInt("m_nSurvivalTeam")
                 if localindex ~= playerIndex and playerteamid ~= localteamid and exitmaster:GetValue() then
                     table.insert(playerlist, player:GetName())
                 end
-                if not player:IsAlive() and ingamestatus and respawnmaster:GetValue() then
-                    deadlist[playername] = true
-                end
+                -- if not player:IsAlive() and ingamestatus and respawnmaster:GetValue() then
+                --     deadlist[playername] = true
+                -- end
                 if player:GetWeaponID() == 72 and ingamestatus and purchasemaster:GetValue() then
                     local playerMoney = player:GetPropInt("m_iAccount")
                     local purchaseIndex = (player:GetPropEntity("m_hActiveWeapon")):GetPropInt("m_nLastPurchaseIndex")
@@ -149,14 +147,11 @@ callbacks.Register("CreateMove", function()
                     if cachemoneylist[playerIndex] == nil then
                         cachemoneylist[playerIndex] = playerMoney
                     end
-
-
                     if cachelistpurchaseid[playerIndex] ~= purchaseIndex then
                         if cachemoneylist[playerIndex] - playerMoney > 0 and purchaseIndex ~= -1 then
                             partyapisay(string.gsub(player:GetName(), '%s', '') ..
                                 "_purchased_" .. tabletitemindex[purchaseIndex])
                         end
-
                         cachelistpurchaseid[playerIndex] = purchaseIndex
                     end
                 end
@@ -184,6 +179,7 @@ client.AllowListener("begin_new_match");
 client.AllowListener("survival_paradrop_spawn")
 client.AllowListener("survival_paradrop_break")
 client.AllowListener("drone_dispatched")
+client.AllowListener("player_death")
 callbacks.Register("FireGameEvent", function(e)
     local eventName = e:GetName()
     if (eventName == "client_disconnect") or (eventName == "begin_new_match") then
@@ -199,9 +195,19 @@ callbacks.Register("FireGameEvent", function(e)
             partyapisay("ParaDrop_has_destoryed!")
         end
     end
-    if dronedispatchmaster:GetValue() and eventName == "drone_dispatched" and client.GetPlayerIndexByUserID(e:GetInt("userid")) ~= localindex and entities.GetByUserID(e:GetInt("userid")):GetPropInt("m_nSurvivalTeam") ~= localteamid then
+    if dronedispatchmaster:GetValue() and eventName == "drone_dispatched" then --and client.GetPlayerIndexByUserID(e:GetInt("userid")) ~= localindex and entities.GetByUserID(e:GetInt("userid")):GetPropInt("m_nSurvivalTeam") ~= localteamid then
+        local player = entities.GetByUserID(e:GetInt("userid"))
         local playername = string.gsub(entities.GetByUserID(e:GetInt("userid")):GetName(), '%s', '')
-        partyapisay(playername .. "_dispatched_Drone")
+        if player:GetWeaponID() == 72 and ingamestatus then
+            local purchaseIndex = (player:GetPropEntity("m_hActiveWeapon")):GetPropInt("m_nLastPurchaseIndex")
+            if purchaseIndex ~= -1 then
+                partyapisay(playername .. "_purchased_" .. tabletitemindex[purchaseIndex])
+            end
+            partyapisay(playername .. "_dispatched_Drone")
+        end
+    end
+    if eventName == "player_death" and ingame() then
+        deadlist[e:GetInt("userid")] = true
     end
 end)
 
