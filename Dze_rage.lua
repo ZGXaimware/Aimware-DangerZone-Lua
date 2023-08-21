@@ -462,7 +462,6 @@ local function smoothaim(Enemy, step)
 	if weaponClass == "shared" then return false end
 	if (smooth:GetValue()) then
 		gui.SetValue("rbot.aim.target.fov", aimsmoothfov:GetValue());
-		if weaponClass == "shared" then return end
 		local enemyangle = nil
 		if weaponClass == "SHIELD" or weaponClass == "kniefetc" or weaponClass == "RemoteBomb" then
 			local Distance = math.abs((Enemy:GetAbsOrigin() - pLocal:GetAbsOrigin()):Length())
