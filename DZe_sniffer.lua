@@ -118,10 +118,10 @@ callbacks.Register("CreateMove", function()
     -- end
     if players ~= nil then
         local moneylist = {}
-        local playerlist = {}
         local needupdatecssplayer = false
-        if lastcssplayernumber  ~= #players then
+        if lastcssplayernumber ~= #players then
             needupdatecssplayer = true
+            playerlist = {}
         end
         for _, player in ipairs(players) do
             local playerIndex = player:GetIndex()
@@ -136,7 +136,7 @@ callbacks.Register("CreateMove", function()
                     -- deadlist = {}
                 end
                 local playerteamid = player:GetPropInt("m_nSurvivalTeam")
-                if localindex ~= playerIndex and playerteamid ~= localteamid and exitmaster:GetValue() and  needupdatecssplayer then
+                if localindex ~= playerIndex and playerteamid ~= localteamid and exitmaster:GetValue() and needupdatecssplayer then
                     table.insert(playerlist, player:GetName())
                 end
                 -- if not player:IsAlive() and ingamestatus and respawnmaster:GetValue() then
@@ -165,7 +165,7 @@ callbacks.Register("CreateMove", function()
         end
         if ingamestatus and purchasemaster:GetValue() then cachemoneylist = moneylist end
 
-        if (#cachelist ~= #playerlist or #cachelist == 0) and exitmaster:GetValue() then
+        if (#cachelist ~= #playerlist or #cachelist == 0) and exitmaster:GetValue() and #playerlist ~= 0 then
             for i, enemy in ipairs(cachelist) do
                 if not findthisguy(enemy, playerlist) then
                     if ingamestatus then
