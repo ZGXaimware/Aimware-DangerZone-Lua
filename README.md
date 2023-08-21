@@ -1,5 +1,5 @@
 # Aimware-DangerZone-Lua<br />
-Last Updated 2023/8/18 1.1.5(bugfix2)(BETA) (New Version)<br />
+Last Updated 2023/8/21 1.1.5(bugfix3)(BETA) (New Version)<br />
 
 （&nbsp;）Tips:the lua with "DZe_" name is not consider as a stable release, if you need use it safety please use branch oldversion<br />
 （&nbsp;）Tips:the lua with "DZe_" name is for new version config<br />
