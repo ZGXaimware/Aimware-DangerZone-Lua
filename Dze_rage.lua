@@ -1283,12 +1283,11 @@ callbacks.Register("CreateMove", function(ucmd)
 				roll = 40 * sign
 				targetde = 40 * sign
 			end
-		end
-
-		if gui.GetValue("rbot.antiaim.base.rotation") ~= targetde and needesync then
-			gui.SetValue("rbot.antiaim.base.rotation", targetde)
-			if roll_aa_switch:GetValue() then
-				ucmd.viewangles = EulerAngles(ucmd.viewangles.x, ucmd.viewangles.y, roll)
+			if gui.GetValue("rbot.antiaim.base.rotation") ~= targetde and needesync then
+				gui.SetValue("rbot.antiaim.base.rotation", targetde)
+				if roll_aa_switch:GetValue() then
+					ucmd.viewangles = EulerAngles(ucmd.viewangles.x, ucmd.viewangles.y, roll)
+				end
 			end
 		elseif gui.GetValue("rbot.antiaim.base.rotation") ~= 0 then
 			gui.SetValue("rbot.antiaim.base.rotation", 0)
@@ -1361,7 +1360,7 @@ callbacks.Register("CreateMove", function(ucmd)
 			local isTouchingGround = bit.band(pLocal:GetPropInt("m_fFlags"), 1) ~= 0
 			local rappeling = pLocal:GetProp("m_bIsSpawnRappelling") == 1 -- avoid auto strafe with spawn rappel
 			local in_water = pLocal:GetProp("m_nWaterLevel") ~=
-			0                                                    -- avoid auto strafe in water because it reduces speed
+				0                                                -- avoid auto strafe in water because it reduces speed
 			local adpressed = false
 
 			if input.IsButtonDown(65) or input.IsButtonDown(68) then
