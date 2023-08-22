@@ -8,6 +8,14 @@ Last Updated 2023/8/21 1.1.5(bugfix3)(BETA) (New Version)<br />
 （&nbsp;）Tips2:if your suffer performance issue you should consider turn off some function<br />
 （&nbsp;）Like part of snapline ,ESP,distance visual,etc <br />
 
+EZ KILLED NOOB Bilibili Streamer
+![Alt text](/imgs/punchkill.png)
+
+
+
+
+
+
 [My Bilibili Profile](https://space.bilibili.com/3494352856812225) <br />
 ![Alt text](/imgs/biliprofile.png)
 
@@ -110,6 +118,13 @@ Updated 1.1.5(bugfix):<br />
 Updated 1.1.5(bugfix2):<br />
 <DZe_rage.lua>Fixed for speedhack direction error<br />
 <DZe_visual.lua>Fixed for Survivial team respawn time not correct<br />
+<br />
+
+
+Updated 1.1.5(bugfix3):<br />
+<DZe_rage.lua>Fixed for desync error<br />
+<DZe_visual.lua>Fixed for Survival team respawn time not correct<br />
+<DZe_sniffer.lua>Updated for new purchase sniffer,Respawn got next time<br />
 <br />
 
 
