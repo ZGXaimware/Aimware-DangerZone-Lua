@@ -231,7 +231,7 @@ callbacks.Register("FireGameEvent", function(e)
         if player_respawn_times[playername] then
             player_respawn_times[playername] = player_respawn_times[playername] + 10
         else
-            player_respawn_times[playername] = 10
+            player_respawn_times[playername] = 20
         end
     end
 end)
