@@ -440,14 +440,14 @@ local function drawEspHook(builder)
 					if builder_name == "armor and helmet" then
 						local x, y = client.WorldToScreen(builder_entity:GetAbsOrigin());
 						if x ~= nil and y ~= nil then
-							table.insert(drawespxy, { x, y, screenCenterX - 500, 0, 255, 255, 0, 255 })
+							table.insert(drawespxy, { x, y, screenCenterX - 500, 0, 255, 140, 0, 255 })
 						end
 					end
 				end
 				if not string.find(returnweaponstr(pLocal), "shield") and builder_name == "weapon_shield" then
 					local x, y = client.WorldToScreen(builder_entity:GetAbsOrigin());
 					if x ~= nil and y ~= nil then
-						table.insert(drawespxy, { x, y, screenCenterX - 500, 0, 255, 255, 0, 255 })
+						table.insert(drawespxy, { x, y, screenCenterX - 500, 0, 255, 140, 0, 255 })
 					end
 				end
 			end

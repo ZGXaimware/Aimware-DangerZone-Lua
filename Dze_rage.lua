@@ -13,6 +13,9 @@ smooth:SetDescription("Aimstep like function, turn off will use fov based(Unsafe
 local aimsmoothstep = gui.Slider(main_box, "main.aimstepsmooth", "AimSmoothStep", 8, 5, 25, 1)
 local aastep        = gui.Slider(main_box, "main.aastep", "AAStep", 8, 5, 25, 1)
 local aimsmoothfov  = gui.Slider(main_box, "main.fov", "AimStep Fov", 15, 5, 20, 1)
+local teammatecheck = gui.Checkbox(main_box, "main.teammatecheck", "Teammate Indicater", 1)
+local antiteammate  = gui.Checkbox(main_box, "main.antiteammate", "Anti-Teammate", 1)
+
 local autoshield    = gui.Checkbox(main_box, "main.autoshield", "Autoshield", 1)
 autoshield:SetDescription("Auto inject healthshot when you have shield and low hp")
 local notshield = gui.Checkbox(main_box, "main.notshield", "NoHitShield", 0)
@@ -137,6 +140,9 @@ local n = 0
 local iscommandattack1 = false
 local iscommandattack2 = false
 local backward = false
+local teammatename = ""
+local teammatedistance = math.huge
+local teammateweapon = ""
 
 gui.SetValue("rbot.master", true)
 local weapons_table = {
@@ -150,6 +156,8 @@ local weapons_table = {
 	["shotgun"] = true,
 	["sniper"] = true
 }
+
+local cachedmutedplayer = {}
 
 local cache_weapontable = {}
 
@@ -170,6 +178,21 @@ local function ingame()
 	local money = entities.FindByClass("CItemCash")
 	return money ~= nil and #money ~= 0
 end
+
+local function isMutedPlayerName(player)
+	if cachedmutedplayer[player:GetIndex()] then
+		return cachedmutedplayer[player:GetIndex()]
+	else
+		if entities.GetPlayerResources():GetPropInt("m_bHasCommunicationAbuseMute", player:GetIndex()) == 1 then
+			cachedmutedplayer[player:GetIndex()] = player:GetName() + "(M)"
+			return player:GetName() + "(M)"
+		end
+		cachedmutedplayer[player:GetIndex()] = player:GetName()
+		return player:GetName()
+	end
+end
+
+
 
 local function returnweaponstr(player)
 	if player:IsPlayer() and player:IsAlive() then
@@ -465,7 +488,7 @@ local function smoothaim(Enemy, step)
 		local enemyangle = nil
 		if weaponClass == "SHIELD" or weaponClass == "kniefetc" or weaponClass == "RemoteBomb" then
 			local Distance = math.abs((Enemy:GetAbsOrigin() - pLocal:GetAbsOrigin()):Length())
-			if Distance > 350 then return false end
+			if Distance > 450 then return false end
 			enemyangle = (Enemy:GetHitboxPosition(3) - pLocal:GetHitboxPosition(1)):Angles()
 		else
 			if velo > 260 then return false end
@@ -708,6 +731,10 @@ callbacks.Register("CreateMove", function(ucmd)
 		bestduckShieldDistance = math.huge
 		bestduckShieldName = nil
 		local bestduckShield = nil
+		local teammate = nil
+		teammatename = ""
+		teammatedistance = math.huge
+		teammateweapon = ""
 		bx = 0
 		by = 0
 		cx = 0
@@ -779,7 +806,7 @@ callbacks.Register("CreateMove", function(ucmd)
 								if Distance < CBestDistance then
 									CBestDistance = Distance
 									CBestEnemy = Enemy
-									Cowner = Enemy:GetName()
+									Cowner = isMutedPlayerName(Enemy)
 								end
 							end
 							local btrace = engine.TraceLine(Enemy:GetHitboxPosition(1), localheadbox)
@@ -788,9 +815,14 @@ callbacks.Register("CreateMove", function(ucmd)
 								if not pass then
 									BestDistance = Distance
 									BestEnemy = Enemy
-									owner = Enemy:GetName()
+									owner = isMutedPlayerName(Enemy)
 								end
 							end
+						else
+							teammate = Enemy
+							teammatename = isMutedPlayerName(Enemy)
+							teammatedistance = (Enemy:GetAbsOrigin() - localabs):Length()
+							teammateweapon = get_weapon_class(Enemy:GetWeaponID())
 						end
 					end
 				end
@@ -818,6 +850,11 @@ callbacks.Register("CreateMove", function(ucmd)
 								BestEnemy = Enemy
 								owner = Enemy:GetName()
 							end
+						elseif Enemy:GetPropInt("m_nSurvivalTeam") == localteamid then
+							teammate = Enemy
+							teammatename = isMutedPlayerName(Enemy)
+							teammatedistance = (Enemy:GetAbsOrigin() - localabs):Length()
+							teammateweapon = get_weapon_class(Enemy:GetWeaponID())
 						end
 					end
 				end
@@ -925,6 +962,12 @@ callbacks.Register("CreateMove", function(ucmd)
 
 				autolockmessage = ""
 				if autolock:GetValue() then
+					if antiteammate:GetValue() and teammate ~= nil then
+						local trace = engine.TraceLine(attacker:GetHitboxPosition(3), localheadbox)
+						if trace ~= nil and trace.fraction >= 0.9 and teammateweapon == "RemoteBomb" and teammatedistance < 450 then
+							smoothon = smoothaim(teammate, aimsmoothstep:GetValue())
+						end
+					end
 					if localhp <= 90 and localweaponid ~= 37 then
 						if attacker ~= nil then
 							local trace = engine.TraceLine(attacker:GetHitboxPosition(1), localheadbox)
@@ -1074,16 +1117,16 @@ callbacks.Register("CreateMove", function(ucmd)
 						if bestduckShield ~= nil and bestShieldDistance >= bestduckShieldDistance then
 							beshieldistance = math.floor(bestduckShieldDistance)
 							beshieldid = bestduckShield:GetIndex()
-							beshieldidname = bestduckShield:GetName()
+							beshieldidname = isMutedPlayerName(bestduckShield)
 						else
 							beshieldistance = math.floor(bestShieldDistance)
 							beshieldid = bestShield:GetIndex()
-							beshieldidname = bestShield:GetName()
+							beshieldidname = isMutedPlayerName(bestShield)
 						end
 					elseif bestduckShield ~= nil then
 						beshieldistance = math.floor(bestduckShieldDistance)
 						beshieldid = bestduckShield:GetIndex()
-						beshieldidname = bestduckShield:GetName()
+						beshieldidname = isMutedPlayerName(bestduckShield)
 					end
 				end
 				if bestShield ~= nil then
@@ -1542,6 +1585,11 @@ local function switch()
 					draw.Text(screen_w / 2, screen_h / 2 - 250, cdistance)
 					draw.Text(screen_w / 2 + 200, screen_h / 2 - 250, cname .. "(C)")
 				end
+				if teammatecheck:GetValue() and teammatename ~= "" then
+					draw.Text(screen_w / 2, screen_h / 2 - 150, math.floor(teammatedistance))
+					draw.Text(screen_w / 2 + 100, screen_h / 2 - 150, teammateweapon)
+					draw.Text(screen_w / 2 + 200, screen_h / 2 - 150, teammatename .. "(T)")
+				end
 				draw.Text(screen_w / 2, screen_h / 2 - 200, bedistance);
 				draw.Text(screen_w / 2 + 200, screen_h / 2 - 200, bename .. "(B)");
 			end
@@ -1590,7 +1638,9 @@ local function switch()
 		if roll_aa_switch:GetValue() then
 			draw.Text(screen_w / 2 - 782, screen_h / 2 - 160, "Roll(Very Unsafe)")
 		end
-
+		if antiteammate:GetValue() then
+			draw.Text(screen_w / 2 - 782, screen_h / 2 - 180, "Anti-Teammate")
+		end
 
 		draw.SetFont(fontA);
 		if lockatdrone then
