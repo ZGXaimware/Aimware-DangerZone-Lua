@@ -184,8 +184,8 @@ local function isMutedPlayerName(player)
 		return cachedmutedplayer[player:GetIndex()]
 	else
 		if entities.GetPlayerResources():GetPropInt("m_bHasCommunicationAbuseMute", player:GetIndex()) == 1 then
-			cachedmutedplayer[player:GetIndex()] = player:GetName() + "(M)"
-			return player:GetName() + "(M)"
+			cachedmutedplayer[player:GetIndex()] = player:GetName() .. "(M)"
+			return player:GetName() .. "(M)"
 		end
 		cachedmutedplayer[player:GetIndex()] = player:GetName()
 		return player:GetName()
@@ -963,7 +963,7 @@ callbacks.Register("CreateMove", function(ucmd)
 				autolockmessage = ""
 				if autolock:GetValue() then
 					if antiteammate:GetValue() and teammate ~= nil then
-						local trace = engine.TraceLine(attacker:GetHitboxPosition(3), localheadbox)
+						local trace = engine.TraceLine(teammate:GetHitboxPosition(3), localheadbox)
 						if trace ~= nil and trace.fraction >= 0.9 and teammateweapon == "RemoteBomb" and teammatedistance < 450 then
 							smoothon = smoothaim(teammate, aimsmoothstep:GetValue())
 						end
@@ -1586,10 +1586,22 @@ local function switch()
 					draw.Text(screen_w / 2 + 200, screen_h / 2 - 250, cname .. "(C)")
 				end
 				if teammatecheck:GetValue() and teammatename ~= "" then
-					draw.Text(screen_w / 2, screen_h / 2 - 150, math.floor(teammatedistance))
-					draw.Text(screen_w / 2 + 100, screen_h / 2 - 150, teammateweapon)
-					draw.Text(screen_w / 2 + 200, screen_h / 2 - 150, teammatename .. "(T)")
+					if teammateweapon == "RemoteBomb" then
+						draw.Color(255, 0, 0, 255)
+						draw.SetFont(fontA)
+						draw.Text(screen_w / 2 - 200, screen_h / 2 + 50, math.floor(teammatedistance))
+						draw.Text(screen_w / 2 + 100, screen_h / 2 + 50, teammateweapon)
+						draw.Text(screen_w / 2 + 400, screen_h / 2 + 50, teammatename .. "(T)")
+						draw.Color(colorx, colory, colorz, 255)
+						draw.SetFont(font);
+					else
+						draw.Text(screen_w / 2, screen_h / 2 + 50, math.floor(teammatedistance))
+						draw.Text(screen_w / 2 + 100, screen_h / 2 + 50, teammateweapon)
+						draw.Text(screen_w / 2 + 200, screen_h / 2 + 50, teammatename .. "(T)")
+					end
 				end
+
+
 				draw.Text(screen_w / 2, screen_h / 2 - 200, bedistance);
 				draw.Text(screen_w / 2 + 200, screen_h / 2 - 200, bename .. "(B)");
 			end
@@ -1707,6 +1719,7 @@ callbacks.Register("FireGameEvent", function(e)
 		if (eventName == "client_disconnect") or (eventName == "begin_new_match") then
 			plocallive = false
 			beshieldid = -1
+			cachedmutedplayer = {}
 			gui.SetValue("rbot.antiaim.base", "0 Desync")
 			gui.SetValue("rbot.antiaim.condition.autodir.targets", 0)
 			gui.SetValue("rbot.aim.enable", "Off")
