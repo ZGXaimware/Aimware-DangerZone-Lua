@@ -57,7 +57,7 @@ local fasthop = gui.Keybox(switch_box, "danger.fasthop", "FastHop", 70)
 fasthop:SetDescription("DZ movement exploit that makes you hop super fast.")
 local hitshieldleg = gui.Keybox(switch_box, "main.hitshieldleg", "HitShieldguyLeg", 81)
 hitshieldleg:SetDescription("Press key to lock you viewangle to shieldguy's foot or calf")
-
+local backwardswitchkey = gui.Keybox(switch_box, "main.backwardkey", "BackwardKey", 0)
 
 
 
@@ -126,7 +126,6 @@ local screenCenterX = screen_w * 0.5;
 local loadback = false
 local enemydir = true
 local beshieldid = -1
-local legit_aa_key_value = true
 local bestShieldDistance = math.huge
 local bestShieldName = nil
 local beshieldidname = ""
@@ -143,6 +142,7 @@ local backward = false
 local teammatename = ""
 local teammatedistance = math.huge
 local teammateweapon = ""
+local onlyshieldguyin = false
 
 gui.SetValue("rbot.master", true)
 local weapons_table = {
@@ -319,7 +319,10 @@ end
 
 callbacks.Register("CreateMove", function()
 	pLocal = GOTVstatus()
-	if pLocal == nil then plocallive = false end
+	if pLocal == nil then
+		plocallive = false
+		return
+	end
 	weaponstr = returnweaponstr(pLocal)
 	if weaponstr ~= "weapon_fists " and pLocal:IsAlive() and ingame() then
 		plocallive = true
@@ -335,13 +338,11 @@ callbacks.Register("CreateMove", function()
 		aimstatus = gui.GetValue("rbot.aim.enable")
 		local localteamidt = pLocal:GetPropInt("m_nSurvivalTeam")
 		localteamid = (localteamidt == -1) and -2 or localteamidt
-		legit_aa_key_value = legit_aa_key:GetValue()
 		local vx = pLocal:GetPropFloat('localdata', 'm_vecVelocity[0]')
 		local vy = pLocal:GetPropFloat('localdata', 'm_vecVelocity[1]')
 		if vx ~= nil then
 			velo = math.floor(math.min(10000, math.sqrt(vx * vx + vy * vy) + 0.5))
 		end
-		backward = gui.GetValue("misc.showspec")
 	else
 		plocallive = false
 	end
@@ -613,7 +614,7 @@ local function lockonitlegprecalc(Enemy)
 		end
 	end
 
-	if tra == nil or bestfraction < 0.85 then
+	if tra == nil or bestfraction < 0.95 then
 		return 1
 	else
 		return hitboxnumber
@@ -828,7 +829,8 @@ callbacks.Register("CreateMove", function(ucmd)
 				end
 			end
 			if #shieldguy ~= 0 and CBestEnemy == nil then
-				for i, Enemy in pairs(Enemies) do
+				onlyshieldguyin = true
+				for _, Enemy in pairs(Enemies) do
 					if Enemy:IsAlive() then
 						local Distance = (Enemy:GetAbsOrigin() - localabs):Length()
 						totaldistance = totaldistance + Distance
@@ -858,6 +860,8 @@ callbacks.Register("CreateMove", function(ucmd)
 						end
 					end
 				end
+			else
+				onlyshieldguyin = false
 			end
 
 			if BestEnemy == nil then
@@ -1099,9 +1103,7 @@ callbacks.Register("CreateMove", function(ucmd)
 					end
 				end
 
-
-
-				bestShieldisUseShield = (bestShield ~= nil and bestShield:GetWeaponID() == 37) or #duckshield ~= 0
+				bestShieldisUseShield = (bestShield ~= nil and bestShield:GetWeaponID() == 37) or (#duckshield ~= 0 and bestduckShieldDistance < bestShieldDistance)
 				if bestShield ~= nil then
 					sx, sy = client.WorldToScreen(bestShield:GetAbsOrigin())
 				elseif bestduckShield ~= nil then
@@ -1109,7 +1111,7 @@ callbacks.Register("CreateMove", function(ucmd)
 				end
 				if (shieldids[beshieldid] ~= true) and (beshieldistance <= bestShieldDistance or beshieldistance <= bestduckShieldDistance) and beshieldid ~= -1 and cshieldhit:GetValue() then
 					if backward then
-						gui.SetValue("misc.showspec", 0)
+						backward = false
 					end
 				end
 				if bestShieldisUseShield then
@@ -1144,7 +1146,7 @@ callbacks.Register("CreateMove", function(ucmd)
 								if notshield:GetValue() then needoffaim = true end
 							end
 						end
-						if weaponHitable[weaponClass] and velo < 150 and not smoothon and autolock:GetValue() and bestShieldDistance < weaponHitable[weaponClass] and cshieldhit:GetValue() then
+						if weaponHitable[weaponClass] and velo < 150 and (not smoothon or onlyshieldguyin) and autolock:GetValue() and bestShieldDistance < weaponHitable[weaponClass] and cshieldhit:GetValue() then
 							hascalledattack1 = true
 							needoffaim = true
 							aimingleg = lockonitlegac(bestShield, leghitbox, aimsmoothstep:GetValue(), bestShieldDistance)
@@ -1183,7 +1185,7 @@ callbacks.Register("CreateMove", function(ucmd)
 					needoffaim = true
 				end
 				if (bestShieldDistance < 130 or bestduckShieldDistance < 130) and cshieldhit:GetValue() and bestShieldisUseShield and not backward then
-					gui.SetValue("misc.showspec", 1)
+					backward = true
 				end
 
 				local needtoswitchbaim = false
@@ -1202,7 +1204,7 @@ callbacks.Register("CreateMove", function(ucmd)
 
 				beshieldid = -1
 				if backward and cshieldhit:GetValue() then
-					gui.SetValue("misc.showspec", 0)
+					backward = false
 				end
 			else
 				switchtobaim(false)
@@ -1364,7 +1366,7 @@ callbacks.Register("CreateMove", function(ucmd)
 			if lowesthp >= localhp or lowesthp == 0 then
 				if string.find(weaponstr, "healthshot") ~= nil then
 					healthshotinject = true
-					gui.SetValue("misc.showspec", 1)
+					backward = true
 					if localweaponid ~= 57 and not input.IsButtonDown(69) then
 						client.Command("use weapon_healthshot", true)
 					elseif (pLocal:GetPropEntity("m_hActiveWeapon")):GetPropInt("m_iIronSightMode") ~= 2 then
@@ -1422,7 +1424,7 @@ callbacks.Register("CreateMove", function(ucmd)
 			gui.SetValue("misc.fakelag.enable", false);
 			steptotargetangle(angle, stargetangle, aastep:GetValue())
 		else
-			gui.SetValue("misc.strafe.enable", false)
+			--gui.SetValue("misc.strafe.enable", false)
 
 			if not input.IsButtonDown(17) and pLocal:GetProp('m_flDuckAmount') >= 0.1 then
 				client.Command("-duck", true);
@@ -1440,7 +1442,7 @@ callbacks.Register("CreateMove", function(ucmd)
 				end
 			else
 				if backward then
-					gui.SetValue("misc.showspec", 0)
+					backward = false
 				end
 				if angle ~= 0 then
 					steptotargetangle(angle, 0, aastep:GetValue())
@@ -1452,9 +1454,14 @@ end);
 
 local function switch()
 	if plocallive then
-		if legit_aa_key_value ~= 0 then
-			if input.IsButtonPressed(legit_aa_key_value) then
+		if legit_aa_key:GetValue() ~= 0 then
+			if input.IsButtonPressed(legit_aa_key:GetValue()) then
 				aa_side = not aa_side
+			end
+		end
+		if backwardswitchkey:GetValue() ~= 0 then
+			if input.IsButtonPressed(backwardswitchkey:GetValue()) then
+				backward = not backward
 			end
 		end
 		f = (fasthop:GetValue() ~= nil and fasthop:GetValue() ~= 0 and input.IsButtonPressed(fasthop:GetValue())) and
@@ -1585,6 +1592,8 @@ local function switch()
 					draw.Text(screen_w / 2, screen_h / 2 - 250, cdistance)
 					draw.Text(screen_w / 2 + 200, screen_h / 2 - 250, cname .. "(C)")
 				end
+				draw.Text(screen_w / 2, screen_h / 2 - 200, bedistance);
+				draw.Text(screen_w / 2 + 200, screen_h / 2 - 200, bename .. "(B)");
 				if teammatecheck:GetValue() and teammatename ~= "" then
 					if teammateweapon == "RemoteBomb" then
 						draw.Color(255, 0, 0, 255)
@@ -1592,18 +1601,12 @@ local function switch()
 						draw.Text(screen_w / 2 - 200, screen_h / 2 + 50, math.floor(teammatedistance))
 						draw.Text(screen_w / 2 + 100, screen_h / 2 + 50, teammateweapon)
 						draw.Text(screen_w / 2 + 400, screen_h / 2 + 50, teammatename .. "(T)")
-						draw.Color(colorx, colory, colorz, 255)
-						draw.SetFont(font);
 					else
 						draw.Text(screen_w / 2, screen_h / 2 + 50, math.floor(teammatedistance))
 						draw.Text(screen_w / 2 + 100, screen_h / 2 + 50, teammateweapon)
 						draw.Text(screen_w / 2 + 200, screen_h / 2 + 50, teammatename .. "(T)")
 					end
 				end
-
-
-				draw.Text(screen_w / 2, screen_h / 2 - 200, bedistance);
-				draw.Text(screen_w / 2 + 200, screen_h / 2 - 200, bename .. "(B)");
 			end
 		end
 		draw.SetFont(font1);
@@ -1652,6 +1655,10 @@ local function switch()
 		end
 		if antiteammate:GetValue() then
 			draw.Text(screen_w / 2 - 782, screen_h / 2 - 180, "Anti-Teammate")
+		end
+
+		if backward then
+			draw.Text(screen_w / 2 - 782, screen_h / 2 - 200, "180 Backward")
 		end
 
 		draw.SetFont(fontA);
@@ -1720,6 +1727,7 @@ callbacks.Register("FireGameEvent", function(e)
 			plocallive = false
 			beshieldid = -1
 			cachedmutedplayer = {}
+			onlyshieldguyin = false
 			gui.SetValue("rbot.antiaim.base", "0 Desync")
 			gui.SetValue("rbot.antiaim.condition.autodir.targets", 0)
 			gui.SetValue("rbot.aim.enable", "Off")

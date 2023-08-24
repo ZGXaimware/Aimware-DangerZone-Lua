@@ -1,5 +1,5 @@
 # Aimware-DangerZone-Lua<br />
-Last Updated 2023/8/21 1.1.5(bugfix3)(BETA) (New Version)<br />
+**Last Updated 2023/8/24 1.1.6(Beta)(Not Tested)(New Version)**<br />
 
 （&nbsp;）Tips:the lua with "DZe_" name is not consider as a stable release, if you need use it safety please use branch oldversion<br />
 （&nbsp;）Tips:the lua with "DZe_" name is for new version config<br />
@@ -115,11 +115,19 @@ Updated 1.1.5(bugfix2):<br />
 <DZe_visual.lua>Fixed for Survivial team respawn time not correct<br />
 <br />
 
-
 Updated 1.1.5(bugfix3):<br />
 <DZe_rage.lua>Fixed for desync error<br />
 <DZe_visual.lua>Fixed for Survival team respawn time not correct<br />
 <DZe_sniffer.lua>Updated for new purchase sniffer,Respawn got next time<br />
+<br />
+
+Updated 1.1.6:<br />
+<DZe_rage.lua>add new indicator for teammate,and show big font /Red color when use RemoteBomb<br />
+<DZe_rage.lua>add new function Annti-Teammate to prevent teammate use Remotebomb kill you<br />
+<DZe_rage.lua>Aimleg Bug fixup(when only 2 shield guy in and aimleg not working)<br />
+<DZe_rage.lua>backward switch used independent key instead of spectator list switch<br />
+<DZe_visual.lua>guideline Color Updated<br />
+<DZe_sniffer.lua>Used drone_dispatched event to listen on player purchase event.Next version will remove old detect way<br />
 <br />
 
 
