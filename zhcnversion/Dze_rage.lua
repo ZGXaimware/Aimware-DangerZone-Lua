@@ -185,7 +185,7 @@ local function isMutedPlayerName(player)
 		return cachedmutedplayer[player:GetIndex()]
 	else
 		if entities.GetPlayerResources():GetPropInt("m_bHasCommunicationAbuseMute", player:GetIndex()) == 1 then
-			cachedmutedplayer[player:GetIndex()] = player:GetName() .. "(M)"
+			cachedmutedplayer[player:GetIndex()] = player:GetName() .. "(外纪)"
 			return player:GetName() .. "(M)"
 		end
 		cachedmutedplayer[player:GetIndex()] = player:GetName()
@@ -278,7 +278,7 @@ local engtozhcnweaponlist = {
 	['pistol'] = '手枪',
 	['Bumpmine'] = '跳雷',
 	['lmg'] = '机关枪(M249)',
-	['RemoteBomb'] = "平板",
+	['RemoteBomb'] = "遥控炸弹",
 	['asniper'] = '连狙',
 	['hpistol'] = '沙鹰/左轮',
 	['Tablet'] = '平板',

@@ -313,7 +313,7 @@ local m_kg = gui.Button(main_box, "检查特训组队情况", function()
                                 nonsingleteamout[teamstr] = teamstr ..
                                     ":" ..
                                     string.gsub(player:GetName(), '%s', '') ..
-                                    "_" .. teammateString .. string.gsub(data[2], '%s', '')
+                                    "=" .. teammateString .. string.gsub(data[2], '%s', '')
                             end
                         end
                     else
@@ -333,7 +333,7 @@ local m_kg = gui.Button(main_box, "检查特训组队情况", function()
                 partyapisay(nonsingleteamout[teamstr])
             end
         end
-        partyapisay("总共:_" .. #players .. "_名玩家")
+        partyapisay("总共:" .. #players .. "名玩家")
         partyapisay("-----------------END------------------")
     end
 end)
