@@ -1,5 +1,5 @@
 # Aimware-DangerZone-Lua<br />
-**Last Updated 2023/8/24 1.1.6(Beta)(Not Tested)(New Version)**<br />
+**Last Updated 2023/8/25 1.1.7(Beta)(Not Tested)(New Version)**<br />
 
 （&nbsp;）Tips:the lua with "DZe_" name is not consider as a stable release, if you need use it safety please use branch oldversion<br />
 （&nbsp;）Tips:the lua with "DZe_" name is for new version config<br />
@@ -128,6 +128,12 @@ Updated 1.1.6:<br />
 <DZe_rage.lua>backward switch used independent key instead of spectator list switch<br />
 <DZe_visual.lua>guideline Color Updated<br />
 <DZe_sniffer.lua>Used drone_dispatched event to listen on player purchase event.Next version will remove old detect way<br />
+<br />
+
+Updated 1.1.7:<br />
+Provided Chinese Version<br />
+<DZe_sniffer.lua> Updated NewFunction That you cant listen on teammate exit/join<br />
+<DZe_sniffer.lua> Removed old detect purchase way<br />
 <br />
 
 

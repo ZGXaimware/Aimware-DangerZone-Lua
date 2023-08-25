@@ -2,38 +2,38 @@
 --Last Updated 2023/8/15 1.1.5 (New Version)
 
 
-local tab = gui.Tab(gui.Reference("Visuals"), "DZevis", "DangerZone Elite Visual");
+local tab = gui.Tab(gui.Reference("Visuals"), "DZevis", "特训专家视觉");
 local main_box = gui.Groupbox(tab, "ESP", 16, 16, 200, 0);
-local visual_box = gui.Groupbox(tab, "SnapLine", 232, 16, 200, 0);
-local line_box = gui.Groupbox(tab, "SubLine", 448, 16, 174, 0);
+local visual_box = gui.Groupbox(tab, "导航线", 232, 16, 200, 0);
+local line_box = gui.Groupbox(tab, "次要导航线", 448, 16, 174, 0);
 
 
 
-local espmaster = gui.Checkbox(main_box, "vis.dzespmaster", "ESP Master Switch", 1)
-local showammo = gui.Checkbox(main_box, "vis.showammo", "Show Ammo", 1)
-local showdistance = gui.Checkbox(main_box, "vis.showdistance", "Show Distance", 1)
-local showteamstatus = gui.Checkbox(main_box, "vis.showteamstatus", "Show TeamStatus", 1)
-local showguntype = gui.Checkbox(main_box, "vis.showguntype", "Show GunType", 1)
-local barrelmaster = gui.Checkbox(main_box, "vis.barrelmaster", "Show Barrel ESP", 1)
-local remotebombmaster = gui.Checkbox(main_box, "vis.remotebombmaster", "Show RemoteBomb ESP", 1)
-local removegrassmaster = gui.Checkbox(main_box, "vis.removegrassmaster", "Remove Grass", 1)
-removegrassmaster:SetDescription("It will only makes change on game start")
-local gotvswitch = gui.Combobox(main_box, "vis.gotvswitch", "GOTV Selection", "Off", "Disable on GOTV",
+local espmaster = gui.Checkbox(main_box, "vis.dzespmaster", "ESP总开关", 1)
+local showammo = gui.Checkbox(main_box, "vis.showammo", "显示子弹", 1)
+local showdistance = gui.Checkbox(main_box, "vis.showdistance", "显示距离", 1)
+local showteamstatus = gui.Checkbox(main_box, "vis.showteamstatus", "显示组队情况", 1)
+local showguntype = gui.Checkbox(main_box, "vis.showguntype", "显示武器情况", 1)
+local barrelmaster = gui.Checkbox(main_box, "vis.barrelmaster", "显示油桶ESP", 1)
+local remotebombmaster = gui.Checkbox(main_box, "vis.remotebombmaster", "显示遥控炸弹ESP", 1)
+local removegrassmaster = gui.Checkbox(main_box, "vis.removegrassmaster", "开局除草", 1)
+removegrassmaster:SetDescription("只会在游戏开始时被触发")
+local gotvswitch = gui.Combobox(main_box, "vis.gotvswitch", "GOTV选择", "Off", "Disable on GOTV",
 	"Force Enable on GOTV");
 
 
-local linemaster = gui.Checkbox(visual_box, "vis.dzespmaster", "Line Master Switch", 1)
-local linesubmaster = gui.Checkbox(line_box, "vis.dzespmaster", "SubLine Master Switch", 1)
-local hsmaster = gui.Checkbox(line_box, "vis.hsmaster", "Hostage Snapline", 0)
-local ammomaster = gui.Checkbox(line_box, "vis.ammomaster", "Ammobox Snapline", 1)
-local boxmaster = gui.Checkbox(line_box, "vis.boxmaster", "NormalBox Snapline", 0)
-local cashmaster = gui.Checkbox(line_box, "vis.cashmaster", "Cash Snapline", 0)
-local healmaster = gui.Checkbox(line_box, "vis.healmaster", "Healthshot Snapline", 0)
-local dronemaster = gui.Checkbox(visual_box, "vis.dronemasterr", "Drone Detector", 1)
-local endcirclemaster = gui.Checkbox(visual_box, "vis.endzone", "EndZone Detector/Line", 1)
-local shieldarmormaster = gui.Checkbox(line_box, "vis.shieldarmormaster", "Shield/Armor Snapline", 1)
-local guidemaster = gui.Checkbox(visual_box, "vis.endzone", "GuideLine(Very useful)", 1)
-local wpmaster = gui.Checkbox(line_box, "vis.wpmaster", "Weapon Snapline", 1)
+local linemaster = gui.Checkbox(visual_box, "vis.dzespmaster", "主要导航线开关", 1)
+local linesubmaster = gui.Checkbox(line_box, "vis.dzespmaster", "次要导航线开关", 1)
+local hsmaster = gui.Checkbox(line_box, "vis.hsmaster", "人质导航线", 0)
+local ammomaster = gui.Checkbox(line_box, "vis.ammomaster", "子弹盒导航线", 1)
+local boxmaster = gui.Checkbox(line_box, "vis.boxmaster", "普通箱子导航线", 0)
+local cashmaster = gui.Checkbox(line_box, "vis.cashmaster", "金钱导航线", 0)
+local healmaster = gui.Checkbox(line_box, "vis.healmaster", "医疗针导航线", 0)
+local dronemaster = gui.Checkbox(visual_box, "vis.dronemasterr", "无人机检测器", 1)
+local endcirclemaster = gui.Checkbox(visual_box, "vis.endzone", "最终安全区检测器/导航线", 1)
+local shieldarmormaster = gui.Checkbox(line_box, "vis.shieldarmormaster", "大盾/护甲导航线", 1)
+local guidemaster = gui.Checkbox(visual_box, "vis.endzone", "必备物品引导线(非常有用)", 1)
+local wpmaster = gui.Checkbox(line_box, "vis.wpmaster", "武器/武器箱导航线", 1)
 
 
 
@@ -133,6 +133,27 @@ local weaponClasses = {
 	[72] = "Tablet"
 }
 
+local engtozhcnweaponlist = {
+['smg'] = "冲锋枪",
+['zeus'] = "电击枪",
+['rifle'] = "步枪",
+['kniefetc'] = "近战武器",
+['SHIELD'] = '大盾',
+['shotgun'] = '霰弹枪',
+['sniper'] = 'AWP狙击枪',
+['scout'] = "鸟狙",
+['pistol'] = '手枪',
+['Bumpmine'] = '跳雷',
+['lmg'] = '机关枪(M249)',
+['RemoteBomb'] = "平板",
+['asniper'] = '连狙',
+['hpistol'] = '沙鹰/左轮',
+['Tablet'] = '平板',
+['shared'] = '其他'
+}
+
+
+
 local function get_weapon_class(weapon_id)
 	return weaponClasses[weapon_id] or "shared"
 end
@@ -205,9 +226,9 @@ local function drawEspHookESP(builder)
 
 		if teamstr == "team-1" then
 			if ischeater == 1 then
-				righttext = "Cheater Solo"
+				righttext = "外纪单排"
 			else
-				righttext = "Solo"
+				righttext = "单排"
 			end
 		else
 			if playerdata[teamstr] ~= nil and #playerdata[teamstr] > 1 then
@@ -223,25 +244,25 @@ local function drawEspHookESP(builder)
 						if abuseteam[teamstr] then
 							if ischeater == 1 then
 								righttext = data[4] and
-									"(M)(Cheater) " .. math.floor((lpabs - data[3]):Length()) .. " " .. data[2] or
-									"(M)(Cheater)(Dead) " .. data[2] .. " R:" .. string.format("%.1f", respawntime) ..
+									"(被屏蔽)(外纪) " .. math.floor((lpabs - data[3]):Length()) .. " " .. data[2] or
+									"(被屏蔽)(外纪)(死) " .. data[2] .. " R:" .. string.format("%.1f", respawntime) ..
 									"s"
 							else
 								righttext = data[4] and
-									"(Cheater) " .. math.floor((lpabs - data[3]):Length()) .. " " .. data[2] or
-									"(Cheater)(Dead) " .. data[2] .. " R:" .. string.format("%.1f", respawntime) .. "s"
+									"(外纪) " .. math.floor((lpabs - data[3]):Length()) .. " " .. data[2] or
+									"(外纪)(死) " .. data[2] .. " R:" .. string.format("%.1f", respawntime) .. "s"
 							end
 						else
 							righttext = data[4] and math.floor((lpabs - data[3]):Length()) .. " " .. data[2] or
-								"(Dead) " .. data[2] .. " R:" .. string.format("%.1f", respawntime) .. "s"
+								"(死) " .. data[2] .. " R:" .. string.format("%.1f", respawntime) .. "s"
 						end
 					end
 				end
 			else
 				if ischeater == 1 then
-					righttext = "Might Cheater Solo"
+					righttext = "可能外纪单排"
 				else
-					righttext = "Might Solo"
+					righttext = "可能单排"
 				end
 			end
 		end
@@ -251,9 +272,9 @@ local function drawEspHookESP(builder)
 	end
 	if showguntype:GetValue() and plocallive then
 		builder:Color(255, 0, 0, 255)
-		local guntype = get_weapon_class(builder_entity:GetWeaponID())
+		local guntype = engtozhcnweaponlist[get_weapon_class(builder_entity:GetWeaponID())]
 		if string.find(returnweaponstr(builder_entity), "shield") ~= nil and guntype ~= "SHIELD" then
-			builder:AddTextTop("(S)" .. guntype)
+			builder:AddTextTop("(盾)" .. guntype)
 		else
 			builder:AddTextTop(guntype)
 		end
@@ -381,13 +402,13 @@ local function SnapLines()
 						local dx, dy = client.WorldToScreen(Drone:GetAbsOrigin());
 						if dx ~= nil and dy ~= nil then
 							if Drone:GetProp("m_hCurrentPilot") ~= -1 then
-								table.insert(dronetable, { dx, dy, "Manual Controlled" })
+								table.insert(dronetable, { dx, dy, "人工控制" })
 								if distance < BestMDistance then
 									BestMDistance = distance
 								end
 							end
 							if Drone:GetProp("m_hDeliveryCargo") ~= -1 then
-								table.insert(dronetable, { dx, dy + 100, "Has Cargo" })
+								table.insert(dronetable, { dx, dy + 100, "有货物" })
 							end
 						end
 					end
@@ -406,7 +427,7 @@ local function SnapLines()
 							end
 							if get_weapon_class(Enemy:GetWeaponID()) == "Tablet" and velocity < 100 then
 								table.insert(dronetable,
-									{ screenCenterX - 800, screenH / 2 + 300 + drawstep, "Possible:" .. Enemy:GetName() })
+									{ screenCenterX - 800, screenH / 2 + 300 + drawstep, "可能是:" .. Enemy:GetName() })
 								drawstep = drawstep + 40
 							end
 						end
@@ -493,7 +514,7 @@ local function DrawLine()
 	if linesubmaster:GetValue() and ingame() then
 		draw.Color(255, 255, 255, 255);
 		draw.SetFont(font1);
-		draw.Text(screenCenterX - 782, screenH / 2 - 100, "SubSnapLine")
+		draw.Text(screenCenterX - 782, screenH / 2 - 100, "次级导航线")
 	end
 	for _, key in pairs(drawxy) do
 		draw.Color(key[5], key[6], key[7], key[8])
@@ -511,13 +532,13 @@ local function DrawLine()
 		draw.Text(key[1], key[2], key[3])
 	end
 	if #dronetable ~= 0 and BestMDistance < 6000 then
-		draw.Text(screenCenterX - 800, screenH / 2 + 200, "MD Distance:" .. math.floor(BestMDistance));
+		draw.Text(screenCenterX - 800, screenH / 2 + 200, "最近的手动无人机:" .. math.floor(BestMDistance));
 	end
 	draw.SetFont(font)
 	draw.Color(255, 255, 255, 255);
 	if ENDdistance ~= 0 then
 		draw.Text(screenCenterX - 800, screenH / 2 + 140,
-			"EndCircle Distance:" .. ENDdistance);
+			"离最终圈距离:" .. ENDdistance);
 	end
 end
 
@@ -667,7 +688,7 @@ callbacks.Register("Draw", "DrawRB", function()
 			draw.OutlinedRect(v[1], v[2], v[1] + charge_image.width, v[2] + charge_image.height)
 			if v[3] then
 				draw.SetFont(font)
-				draw.TextShadow(v[1], v[2] + 20, "explore!")
+				draw.TextShadow(v[1], v[2] + 20, "爆炸!")
 			end
 		end
 

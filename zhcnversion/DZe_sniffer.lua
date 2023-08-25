@@ -1,17 +1,17 @@
 -- Aimware-DangerZone-Lua
 --Last Updated 2023/8/15 1.1.5 (New Version)
 
-local tab = gui.Tab(gui.Reference("Misc"), "DZesniffer", "DangerZone Elite Sniffer");
+local tab = gui.Tab(gui.Reference("Misc"), "DZesniffer", "特训专家监听器");
 local main_box = gui.Groupbox(tab, "Sniffer", 16, 16, 400, 0);
-local ranks_mode = gui.Combobox(main_box, "tablet.mode", "Message SendWay",
-    "Only Console", "In Party chat", "In Team Chat")
-local messagemaster = gui.Checkbox(main_box, "tablet.master", "Master Switch", 1)
+local ranks_mode = gui.Combobox(main_box, "tablet.mode", "消息发送模式",
+    "只控制台", "派对聊天(不用队友去屏蔽)", "小队聊天")
+local messagemaster = gui.Checkbox(main_box, "tablet.master", "主开关", 1)
 -- local purchasemaster = gui.Checkbox(main_box, "tablet.purchasemaster", "Purchase sniffer", 1)
-local respawnmaster = gui.Checkbox(main_box, "tablet.respawnmaster", "Respawn sniffer", 1)
-local exitmaster = gui.Checkbox(main_box, "tablet.exitmaster", "Exit sniffer", 1)
-local paradropmaster = gui.Checkbox(main_box, "tablet.paradropmaster", "ParaDrop sniffer", 1)
-local dronedispatchmaster = gui.Checkbox(main_box, "tablet.dronedispatchmaster", "Purchase Sniffer", 0)
-local gotvswitch = gui.Combobox(main_box, "tablet.gotvswitch", "GOTV Selection", "Off", "Disable on GOTV",
+local respawnmaster = gui.Checkbox(main_box, "tablet.respawnmaster", "复活监听", 1)
+local exitmaster = gui.Checkbox(main_box, "tablet.exitmaster", "退出监听", 1)
+local paradropmaster = gui.Checkbox(main_box, "tablet.paradropmaster", "空投监听", 1)
+local dronedispatchmaster = gui.Checkbox(main_box, "tablet.dronedispatchmaster", "购买监听", 0)
+local gotvswitch = gui.Combobox(main_box, "tablet.gotvswitch", "GOTV选择", "Off", "Disable on GOTV",
     "Force Enable on GOTV");
 
 gui.SetValue("misc.log.console", true)
@@ -34,25 +34,25 @@ local cachelist = {}
 local deadlist = {}
 local player_respawn_times = {}
 local tabletitemindex = {
-    [-1] = "None",
-    [0] = "Knief",
-    [1] = "Piston",
-    [2] = "Smg",
-    [3] = "Rifle",
-    [4] = "Scout",
-    [6] = "Armor",
-    [7] = "Ammo box",
-    [10] = "Smoke pack",
-    [11] = "Jammer",
-    [12] = "Healthshot",
-    [13] = "DroneDetect Chip",
-    [14] = "EndZone Chip",
-    [15] = "Rich Chip",
-    [16] = "Grenade pack",
-    [17] = "Deagle",
-    [18] = "DroneControl Chip",
-    [19] = "Exojump set",
-    [21] = "Shield"
+    [-1] = "空",
+    [0] = "刀",
+    [1] = "手枪",
+    [2] = "冲锋枪",
+    [3] = "步枪",
+    [4] = "鸟狙",
+    [6] = "护甲",
+    [7] = "子弹盒",
+    [10] = "烟闪套装",
+    [11] = "屏蔽器",
+    [12] = "医疗针",
+    [13] = "无人机检测芯片",
+    [14] = "安全区检测芯片",
+    [15] = "富贵芯片",
+    [16] = "手雷套装",
+    [17] = "沙鹰",
+    [18] = "无人机控制芯片",
+    [19] = "EXO弹跳套装",
+    [21] = "大盾"
 }
 local teammatename = ""
 local teammatenoshow = true
@@ -128,8 +128,8 @@ callbacks.Register("CreateMove", function()
         if lastcssplayernumber ~= #players then
             needupdatecssplayer = true
             playerlist = {}
+            teammateisin = false
         end
-        if needupdatecssplayer then teammateisin = false end
         for _, player in ipairs(players) do
             local playerIndex = player:GetIndex()
             local playername = player:GetName()
@@ -139,10 +139,10 @@ callbacks.Register("CreateMove", function()
                     if player:IsAlive() and deadlist[playername] then
                         local addstr = ""
                         if player_respawn_times[playername] then
-                            addstr = "Next_Time:" ..
+                            addstr = "下一次时间:" ..
                                 math.floor(player_respawn_times[playername])
                         end
-                        partyapisay("Respawn" ..
+                        partyapisay("复活" ..
                             string.gsub(': ' .. playername, '%s', '') .. addstr)
                         deadlist[playername] = nil
                     end
@@ -188,11 +188,11 @@ callbacks.Register("CreateMove", function()
         if (#cachelist ~= #playerlist or #cachelist == 0) and exitmaster:GetValue() and #playerlist ~= 0 then
             if teammateisin and teammatenoshow then
                 teammatenoshow = false
-                partyapisay("Your_teammate_is" .. ":" .. string.gsub(teammatename, '%s', ''))
+                partyapisay("你的队友是" .. ":" .. string.gsub(teammatename, '%s', ''))
             end
 
             if not teammateisin and not teammatenoshow then
-                partyapisay("Teammate_Exit" .. ":" .. string.gsub(teammatename, '%s', ''))
+                partyapisay("你的队友已离开" .. ":" .. string.gsub(teammatename, '%s', ''))
                 teammatenoshow = true
             end
 
@@ -201,9 +201,9 @@ callbacks.Register("CreateMove", function()
             for _, enemy in ipairs(cachelist) do
                 if not findthisguy(enemy, playerlist) and enemy ~= teammatename then
                     if ingamestatus then
-                        partyapisay("Defeat_Exit" .. ":" .. string.gsub(enemy, '%s', ''))
+                        partyapisay("退出" .. ":" .. string.gsub(enemy, '%s', ''))
                     else
-                        partyapisay("Warmup_Escaped" .. ":" .. string.gsub(enemy, '%s', ''))
+                        partyapisay("热身畏惧跑路" .. ":" .. string.gsub(enemy, '%s', ''))
                     end
                 end
             end
@@ -234,9 +234,9 @@ callbacks.Register("FireGameEvent", function(e)
     end
     if paradropmaster:GetValue() then
         if eventName == "survival_paradrop_spawn" then
-            partyapisay("ParaDrop_has_created!")
+            partyapisay("生成了空投！")
         elseif eventName == "survival_paradrop_break" then
-            partyapisay("ParaDrop_has_destoryed!")
+            partyapisay("空投被摧毁！")
         end
     end
     if dronedispatchmaster:GetValue() and eventName == "drone_dispatched" then --and client.GetPlayerIndexByUserID(e:GetInt("userid")) ~= localindex and entities.GetByUserID(e:GetInt("userid")):GetPropInt("m_nSurvivalTeam") ~= localteamid then
@@ -245,7 +245,7 @@ callbacks.Register("FireGameEvent", function(e)
         if player:GetWeaponID() == 72 and ingamestatus then
             local purchaseIndex = (player:GetPropEntity("m_hActiveWeapon")):GetPropInt("m_nLastPurchaseIndex")
             if purchaseIndex ~= -1 then
-                partyapisay(playername .. "_purchased_" .. tabletitemindex[purchaseIndex])
+                partyapisay(playername .. "_购买了_" .. tabletitemindex[purchaseIndex])
             end
             --partyapisay(playername .. "_dispatched_Drone")
         end
@@ -264,9 +264,9 @@ callbacks.Register("FireGameEvent", function(e)
     end
 end)
 
-local m_kg = gui.Button(main_box, "Check DZ Team", function()
+local m_kg = gui.Button(main_box, "检查特训组队情况", function()
     if client.GetConVar("game_type") ~= "6" then
-        partyapisay("Not_DangerZone_Mode!")
+        partyapisay("非头号特训模式!")
         return
     end
     local playerdata = {}
@@ -299,9 +299,9 @@ local m_kg = gui.Button(main_box, "Check DZ Team", function()
             local playerName = player:GetName()
             if teamstr == "team-1" and playerName ~= "GOTV" then
                 if communicationMute == 1 then
-                    partyapisay(string.gsub(playerName, '%s', '') .. "=Cheater_Solo")
+                    partyapisay(string.gsub(playerName, '%s', '') .. "=单排外纪")
                 else
-                    partyapisay(string.gsub(playerName, '%s', '') .. "=Solo")
+                    partyapisay(string.gsub(playerName, '%s', '') .. "=单排")
                 end
             else
                 local playerTeamData = playerdata[teamstr]
@@ -309,7 +309,7 @@ local m_kg = gui.Button(main_box, "Check DZ Team", function()
                     if #playerTeamData ~= 1 then
                         for j, data in ipairs(playerTeamData) do
                             if data[1] ~= player:GetIndex() then
-                                local teammateString = abuseteam[teamstr] and "CheaterTeammate:" or "Teammate:"
+                                local teammateString = abuseteam[teamstr] and "外纪队友:" or "队友:"
                                 nonsingleteamout[teamstr] = teamstr ..
                                     ":" ..
                                     string.gsub(player:GetName(), '%s', '') ..
@@ -319,9 +319,9 @@ local m_kg = gui.Button(main_box, "Check DZ Team", function()
                     else
                         if communicationMute == 1 then
                             nonsingleteamout[teamstr] = string.gsub(player:GetName(), '%s', '') ..
-                                "=Might_Cheater_Solo"
+                                "=可能单排外纪"
                         else
-                            nonsingleteamout[teamstr] = string.gsub(player:GetName(), '%s', '') .. "=Might_Solo"
+                            nonsingleteamout[teamstr] = string.gsub(player:GetName(), '%s', '') .. "=可能单排"
                         end
                     end
                 end
@@ -333,7 +333,7 @@ local m_kg = gui.Button(main_box, "Check DZ Team", function()
                 partyapisay(nonsingleteamout[teamstr])
             end
         end
-        partyapisay("Total:_" .. #players .. "_players")
+        partyapisay("总共:_" .. #players .. "_名玩家")
         partyapisay("-----------------END------------------")
     end
 end)

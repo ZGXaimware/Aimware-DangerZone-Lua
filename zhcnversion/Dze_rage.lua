@@ -4,60 +4,61 @@
 
 
 
-local tab = gui.Tab(gui.Reference("Ragebot"), "DZe", "DangerZone Elite");
+local tab = gui.Tab(gui.Reference("Ragebot"), "DZe", "特训专家");
 
-local main_box = gui.Groupbox(tab, "Main", 16, 16, 200, 0);
+local main_box = gui.Groupbox(tab, "主要", 16, 16, 200, 0);
 
-local smooth = gui.Checkbox(main_box, "main.aimsmooth", "AimSmooth", 1)
-smooth:SetDescription("Aimstep like function, turn off will use fov based(Unsafe)")
-local aimsmoothstep = gui.Slider(main_box, "main.aimstepsmooth", "AimSmoothStep", 8, 5, 25, 1)
-local aastep        = gui.Slider(main_box, "main.aastep", "AAStep", 8, 5, 25, 1)
-local aimsmoothfov  = gui.Slider(main_box, "main.fov", "AimStep Fov", 15, 5, 20, 1)
-local teammatecheck = gui.Checkbox(main_box, "main.teammatecheck", "Teammate Indicater", 1)
-local antiteammate  = gui.Checkbox(main_box, "main.antiteammate", "Anti-Teammate", 1)
+local smooth = gui.Checkbox(main_box, "main.aimsmooth", "平滑自瞄", 1)
+smooth:SetDescription("关闭将采用基于动态FOV的攻击(会死号)")
+local aimsmoothstep = gui.Slider(main_box, "main.aimstepsmooth", "平滑自瞄度数", 8, 5, 25, 1)
+local aastep        = gui.Slider(main_box, "main.aastep", "平滑AA度数", 8, 5, 25, 1)
+local aimsmoothfov  = gui.Slider(main_box, "main.fov", "自瞄机器人Fov", 15, 5, 20, 1)
+local teammatecheck = gui.Checkbox(main_box, "main.teammatecheck", "队友指示器", 1)
+local antiteammate  = gui.Checkbox(main_box, "main.antiteammate", "自动反队友炸", 1)
+local autoshield    = gui.Checkbox(main_box, "main.autoshield", "自动背身大盾打针", 1)
+autoshield:SetDescription("自动打针当你有大盾且血量低时")
+local notshield = gui.Checkbox(main_box, "main.notshield", "智能不打盾", 0)
+notshield:SetDescription("关闭自瞄当打不中盾哥的时候")
+local autolock = gui.Checkbox(main_box, "main.autolock", "自动锁", 1)
+autolock:SetDescription("在1750范围内的敌人且能看见情况下自动锁上去(需要开启平滑自瞄)")
+local shieldreturn = gui.Checkbox(main_box, "main.shieldreturn", "换弹背身", 1)
+shieldreturn:SetDescription("换弹时候一键背身防止被偷")
+local cshieldhit = gui.Checkbox(main_box, "main.shieldhit", "大盾把戏", 1)
+cshieldhit:SetDescription("当最近的盾哥换武器,如果你在背身大盾,将自动切回自瞄秒了他")
+local disablefakelag = gui.Checkbox(main_box, "main.disablefakelag", "关闭假卡", 0)
+local disabledistancevis = gui.Checkbox(main_box, "main.disabledisvis", "关闭基于距离的视觉", 0)
+disabledistancevis:SetDescription("关闭距离指示器，人物射线等")
+local disablevisual = gui.Checkbox(main_box, "main.disablevisual", "关闭所有视觉(录屏专用)", 0)
+disablevisual:SetDescription("关闭所有由外纪带来的视觉")
+local disablesetprop = gui.Checkbox(main_box, "main.disableprop", "关闭一些小功能", 1)
+disablesetprop:SetDescription("比如地下平板可用/去除打针视觉效果")
+local debugaimstep = gui.Checkbox(main_box, "main.debug_reallyaimstep", "(非常不安全)超级保护", 0)
+debugaimstep:SetDescription("每打一枪,在可以打下一枪之前会自动背身")
 
-local autoshield    = gui.Checkbox(main_box, "main.autoshield", "Autoshield", 1)
-autoshield:SetDescription("Auto inject healthshot when you have shield and low hp")
-local notshield = gui.Checkbox(main_box, "main.notshield", "NoHitShield", 0)
-notshield:SetDescription("off aimbot when enemy who covered by shield")
-local autolock = gui.Checkbox(main_box, "main.autolock", "Autolock", 1)
-autolock:SetDescription("Auto switch to Enemy who close to you and visible (by Aimsmooth) ")
-local shieldreturn = gui.Checkbox(main_box, "main.shieldreturn", "shieldreturn", 1)
-shieldreturn:SetDescription("when weapon reload auto switch to 180 backward and when done auto reset")
-local cshieldhit = gui.Checkbox(main_box, "main.shieldhit", "ShieldHit", 1)
-cshieldhit:SetDescription("when shieldguy switch to another weapon or another enemy close to you then switch aimbot on")
-local disablefakelag = gui.Checkbox(main_box, "main.disablefakelag", "Disable FakeLag", 0)
-local disabledistancevis = gui.Checkbox(main_box, "main.disabledisvis", "DisableDistanceVis", 0)
-disabledistancevis:SetDescription("disable distance visual function supply by che@t")
-local disablevisual = gui.Checkbox(main_box, "main.disablevisual", "DisableVisual", 0)
-disablevisual:SetDescription("disable all visual function supply by cheat")
-local disablesetprop = gui.Checkbox(main_box, "main.disableprop", "DisableProp(Safe Option)", 1)
-disablesetprop:SetDescription("disable all visual by setprop")
-local debugaimstep = gui.Checkbox(main_box, "main.debug_reallyaimstep", "(Very Unsafe)LowDistanceaimstep", 0)
-local gotvswitch = gui.Combobox(main_box, "main.gotvswitch", "GOTV Selection", "Off", "Disable on GOTV",
+local gotvswitch = gui.Combobox(main_box, "main.gotvswitch", "GOTV选择", "Off", "Disable on GOTV",
 	"Force Enable on GOTV");
 
 
 
 
-local legit_aa_box = gui.Groupbox(tab, "(Desync) Legit Anti-Aim", 232, 16, 200, 0);
+local legit_aa_box = gui.Groupbox(tab, "演技AA/大角度", 232, 16, 200, 0);
 
-local legit_aa_switch = gui.Checkbox(legit_aa_box, "aa.switch", "Master Switch", 1);
-local legit_aa_key = gui.Keybox(legit_aa_box, "aa.inverter", "Inverter", 0);
-local roll_aa_switch = gui.Checkbox(legit_aa_box, "aa.switch", "Roll Switch(Very Unsafe)", 0);
+local legit_aa_switch = gui.Checkbox(legit_aa_box, "aa.switch", "总开关", 1);
+local legit_aa_key = gui.Keybox(legit_aa_box, "aa.inverter", "切换AA方向键", 0);
+local roll_aa_switch = gui.Checkbox(legit_aa_box, "aa.switch", "大角度开关(非常不安全)", 0);
 
-local switch_box = gui.Groupbox(tab, "Switch", 448, 16, 174, 0);
+local switch_box = gui.Groupbox(tab, "按键区", 448, 16, 174, 0);
 
-local switch_awall_key = gui.Keybox(switch_box, "switch.autowall", "Auto Wall", 0);
-local lockmdrone = gui.Keybox(switch_box, "main.lockmdrone", "LockOnManualDrone", 17)
-lockmdrone:SetDescription("lock viewangle to closet manual drone")
-local lockcdrone = gui.Keybox(switch_box, "main.lockndrone", "LockOnCargoDrone", 18)
-lockcdrone:SetDescription("lock viewangle to closet cargo drone")
-local fasthop = gui.Keybox(switch_box, "danger.fasthop", "FastHop", 70)
-fasthop:SetDescription("DZ movement exploit that makes you hop super fast.")
-local hitshieldleg = gui.Keybox(switch_box, "main.hitshieldleg", "HitShieldguyLeg", 81)
-hitshieldleg:SetDescription("Press key to lock you viewangle to shieldguy's foot or calf")
-local backwardswitchkey = gui.Keybox(switch_box, "main.backwardkey", "BackwardKey", 0)
+local switch_awall_key = gui.Keybox(switch_box, "switch.autowall", "自动穿墙切换", 0);
+local lockmdrone = gui.Keybox(switch_box, "main.lockmdrone", "锁在人工控制无人机上", 17)
+lockmdrone:SetDescription("锁人工无人机上")
+local lockcdrone = gui.Keybox(switch_box, "main.lockndrone", "锁在有货物无人机上", 18)
+lockcdrone:SetDescription("锁在有货物无人机上")
+local fasthop = gui.Keybox(switch_box, "danger.fasthop", "超级连跳", 70)
+fasthop:SetDescription("连跳需要搭配EXO跳跃不按WASD")
+local hitshieldleg = gui.Keybox(switch_box, "main.hitshieldleg", "手动锁脚", 81)
+hitshieldleg:SetDescription("锁住最近的盾哥的脚")
+local backwardswitchkey = gui.Keybox(switch_box, "main.backwardkey", "按键切换背身/正常", 0)
 
 
 
@@ -265,7 +266,24 @@ local weaponHitable = {
 	["hpistol"] = 500
 }
 
-
+local engtozhcnweaponlist = {
+	['smg'] = "冲锋枪",
+	['zeus'] = "电击枪",
+	['rifle'] = "步枪",
+	['kniefetc'] = "近战武器",
+	['SHIELD'] = '大盾',
+	['shotgun'] = '霰弹枪',
+	['sniper'] = 'AWP狙击枪',
+	['scout'] = "鸟狙",
+	['pistol'] = '手枪',
+	['Bumpmine'] = '跳雷',
+	['lmg'] = '机关枪(M249)',
+	['RemoteBomb'] = "平板",
+	['asniper'] = '连狙',
+	['hpistol'] = '沙鹰/左轮',
+	['Tablet'] = '平板',
+	['shared'] = '其他'
+	}
 
 local function get_weapon_class(weapon_id)
 	return weaponClasses[weapon_id] or "shared"
@@ -899,7 +917,7 @@ callbacks.Register("CreateMove", function(ucmd)
 				tracedistance = {}
 				tracegun = {}
 				tracebf = {}
-				for i, Enemy in pairs(Enemies) do
+				for _, Enemy in pairs(Enemies) do
 					if Enemy:IsAlive() and Enemy:GetIndex() ~= localindex then
 						local Distance = (Enemy:GetAbsOrigin() - localabs):Length()
 						local maxDistance = math.floor(totaldistance / enemyalive)
@@ -1481,8 +1499,8 @@ local function switch()
 		draw.SetFont(font1)
 		draw.Color(255, 255, 255, 255)
 		draw.Text(screen_w / 2 - 738, screen_h / 2, "Fov:")
-		draw.Text(screen_w / 2 - 783, screen_h / 2 + 40, "Autowall:")
-		draw.Text(screen_w / 2 - 783, screen_h / 2 + 60, "Resolver:")
+		draw.Text(screen_w / 2 - 783, screen_h / 2 + 40, "自动穿墙:")
+		draw.Text(screen_w / 2 - 783, screen_h / 2 + 60, "解析器:")
 
 
 		draw.Color(255, 0, 0, 255)
@@ -1491,18 +1509,18 @@ local function switch()
 		local switch_awall_key_value = switch_awall_key:GetValue()
 		if switch_awall then
 			draw.Color(0, 255, 0, 255)
-			draw.Text(screen_w / 2 - 688, screen_h / 2 + 40, "On")
+			draw.Text(screen_w / 2 - 688, screen_h / 2 + 40, "开")
 		else
 			draw.Color(255, 0, 0, 255)
-			draw.Text(screen_w / 2 - 688, screen_h / 2 + 40, "Off")
+			draw.Text(screen_w / 2 - 688, screen_h / 2 + 40, "关")
 		end
 
 		if gui.GetValue("rbot.aim.posadj.resolver") ~= 0 then
 			draw.Color(0, 255, 0, 255)
-			draw.Text(screen_w / 2 - 688, screen_h / 2 + 60, "On")
+			draw.Text(screen_w / 2 - 688, screen_h / 2 + 60, "开")
 		else
 			draw.Color(255, 0, 0, 255)
-			draw.Text(screen_w / 2 - 688, screen_h / 2 + 60, "Off")
+			draw.Text(screen_w / 2 - 688, screen_h / 2 + 60, "关")
 		end
 		if switch_awall_key_value ~= 0 and input.IsButtonPressed(switch_awall_key_value) then
 			switch_awall = not switch_awall
@@ -1513,14 +1531,15 @@ local function switch()
 		end
 		if not disabledistancevis:GetValue() then
 			if enemyalive ~= 0 then
-				draw.Color(255, 0, 0, 255);
 				draw.SetFont(fontA)
 				if shieldjumper then
+					draw.Color(255, 0, 0, 255);
 					draw.Text(screen_w / 2, screen_h / 2 + 200,
-						math.floor(shieldjumpernameDistance) .. " jumper(Shield)!Name:" .. shieldjumpername)
+						math.floor(shieldjumpernameDistance) .. " 跳雷!(带盾):" .. shieldjumpername)
 				elseif normaljumper then
+					draw.Color(255, 255, 255, 255);
 					draw.Text(screen_w / 2, screen_h / 2 + 200,
-						math.floor(normaljumpernameDistance) .. " jumper!Name:" .. normaljumpername);
+						math.floor(normaljumpernameDistance) .. " 跳雷!:" .. normaljumpername);
 				end
 
 				if #tracename ~= 0 then
@@ -1534,7 +1553,7 @@ local function switch()
 							" " ..
 							tracedistance[i] ..
 							" " ..
-							tracegun[i] ..
+							engtozhcnweaponlist[tracegun[i]] ..
 							" " .. string.format("%.1f", tracebf[i])
 						)
 					end
@@ -1547,64 +1566,64 @@ local function switch()
 				draw.Color(colorx, colory, colorz, 255)
 				draw.SetFont(font);
 				if bevisible then
-					draw.Text(screen_w / 2 - 180, screen_h / 2 + 80, "Visible")
+					draw.Text(screen_w / 2 - 180, screen_h / 2 + 80, "最佳敌人可见!")
 				elseif benoscreen then
 					draw.SetFont(fontA)
-					draw.Text(screen_w / 2 - 180, screen_h / 2 + 80, "Be NoScreen!")
+					draw.Text(screen_w / 2 - 180, screen_h / 2 + 80, "最佳敌人不在屏幕上!")
 				end
 				draw.SetFont(font);
 				if cvisible then
-					draw.Text(screen_w / 2 - 180, screen_h / 2 + 140, "CVisible")
+					draw.Text(screen_w / 2 - 180, screen_h / 2 + 140, "最近敌人可见!")
 				elseif cnoscreen then
 					draw.SetFont(fontA)
-					draw.Text(screen_w / 2 - 180, screen_h / 2 + 140, "C NoScreen!")
+					draw.Text(screen_w / 2 - 180, screen_h / 2 + 140, "最近敌人不在屏幕上!")
 				end
 
 				if Nobest and not cbeaimme then
 					draw.SetFont(font);
-					draw.Text(screen_w / 2 - 400, screen_h / 2 - 250, "Safe")
+					draw.Text(screen_w / 2 - 400, screen_h / 2 - 250, "安全")
 				end
 				if beaimme then
 					draw.SetFont(fontA)
-					draw.Text(screen_w / 2 - 400, screen_h / 2 - 250, "BE aim me!")
+					draw.Text(screen_w / 2 - 400, screen_h / 2 - 250, "被最佳敌人瞄准!")
 				end
 
 				if cbeaimme then
 					draw.SetFont(fontA)
-					draw.Text(screen_w / 2 - 400, screen_h / 2 - 300, "CBE aim me!")
+					draw.Text(screen_w / 2 - 400, screen_h / 2 - 300, "被最近敌人瞄准!")
 				end
 				draw.SetFont(font);
 
 				if bestShieldName ~= nil then
 					draw.Text(screen_w / 2, screen_h / 2 - 300, math.floor(bestShieldDistance))
-					draw.Text(screen_w / 2 + 200, screen_h / 2 - 300, bestShieldName .. "(S)")
+					draw.Text(screen_w / 2 + 200, screen_h / 2 - 300, bestShieldName .. "(盾)")
 					if sx ~= nil and sx ~= 0 then
 						draw.Line(sx, sy, screenCenterX, 0)
 					end
 				elseif bestduckShieldName ~= nil then
 					draw.Text(screen_w / 2, screen_h / 2 - 300, math.floor(bestduckShieldDistance))
-					draw.Text(screen_w / 2 + 200, screen_h / 2 - 300, bestduckShieldName .. "(Sd)")
+					draw.Text(screen_w / 2 + 200, screen_h / 2 - 300, bestduckShieldName .. "(盾蹲)")
 					if sx ~= nil and sx ~= 0 then
 						draw.Line(sx, sy, screenCenterX, 0)
 					end
 				end
 				if needCdisplay then
 					draw.Text(screen_w / 2, screen_h / 2 - 250, cdistance)
-					draw.Text(screen_w / 2 + 200, screen_h / 2 - 250, cname .. "(C)")
+					draw.Text(screen_w / 2 + 200, screen_h / 2 - 250, cname .. "(近)")
 				end
 				draw.Text(screen_w / 2, screen_h / 2 - 200, bedistance);
-				draw.Text(screen_w / 2 + 200, screen_h / 2 - 200, bename .. "(B)");
+				draw.Text(screen_w / 2 + 200, screen_h / 2 - 200, bename .. "(佳)");
 				if teammatecheck:GetValue() and teammatename ~= "" then
 					if teammateweapon == "RemoteBomb" then
 						draw.Color(255, 0, 0, 255)
 						draw.SetFont(fontA)
 						draw.Text(screen_w / 2 - 200, screen_h / 2 + 50, math.floor(teammatedistance))
-						draw.Text(screen_w / 2 + 100, screen_h / 2 + 50, teammateweapon)
-						draw.Text(screen_w / 2 + 400, screen_h / 2 + 50, teammatename .. "(T)")
+						draw.Text(screen_w / 2 + 100, screen_h / 2 + 50, engtozhcnweaponlist[teammateweapon])
+						draw.Text(screen_w / 2 + 400, screen_h / 2 + 50, teammatename .. "(友)")
 					else
 						draw.Text(screen_w / 2, screen_h / 2 + 50, math.floor(teammatedistance))
-						draw.Text(screen_w / 2 + 100, screen_h / 2 + 50, teammateweapon)
-						draw.Text(screen_w / 2 + 200, screen_h / 2 + 50, teammatename .. "(T)")
+						draw.Text(screen_w / 2 + 100, screen_h / 2 + 50, engtozhcnweaponlist[teammateweapon])
+						draw.Text(screen_w / 2 + 200, screen_h / 2 + 50, teammatename .. "(友)")
 					end
 				end
 			end
@@ -1612,21 +1631,21 @@ local function switch()
 		draw.SetFont(font1);
 		draw.Color(255, 255, 255, 255)
 		if smooth:GetValue() then
-			draw.Text(screen_w / 2 - 782, screen_h / 2 + 20, smoothon and "SmoothAim Active" or "SmoothAim")
+			draw.Text(screen_w / 2 - 782, screen_h / 2 + 20, smoothon and "平滑自瞄运行!" or "平滑自瞄")
 		end
 
 		if autoshield:GetValue() then
 			draw.Text(screen_w / 2 - 782, screen_h / 2 - 40,
-				string.find(weaponstr, "shield") and "AutoShield" or "AutoShield NoShield")
+				string.find(weaponstr, "shield") and "自动打针" or "自动打针 没盾")
 		end
 
 		if notshield:GetValue() then
 			if math.floor(bestShieldDistance) < 2000 or math.floor(bestduckShieldDistance) < 2000 then
 				local outvalue = bestShieldDistance >= bestduckShieldDistance and math.floor(bestduckShieldDistance) or
 					math.floor(bestShieldDistance)
-				draw.Text(screen_w / 2 - 782, screen_h / 2 - 60, "NohitShield " .. outvalue)
+				draw.Text(screen_w / 2 - 782, screen_h / 2 - 60, "智能不打盾 " .. outvalue)
 			else
-				draw.Text(screen_w / 2 - 782, screen_h / 2 - 60, "NohitShield")
+				draw.Text(screen_w / 2 - 782, screen_h / 2 - 60, "智能不打盾")
 			end
 		end
 		draw.SetFont(font1);
@@ -1634,52 +1653,52 @@ local function switch()
 
 		if autolock:GetValue() then
 			if localhp <= 90 then
-				draw.Text(screen_w / 2 - 782, screen_h / 2 - 80, "AutoLockAttacker")
+				draw.Text(screen_w / 2 - 782, screen_h / 2 - 80, "自动锁攻击者")
 				if attacker ~= nil then
-					draw.Text(screen_w / 2 - 550, screen_h / 2 - 80, " target: " .. attacker:GetName())
+					draw.Text(screen_w / 2 - 550, screen_h / 2 - 80, " 目标: " .. attacker:GetName())
 				end
 			else
-				draw.Text(screen_w / 2 - 782, screen_h / 2 - 80, "AutoLock")
+				draw.Text(screen_w / 2 - 782, screen_h / 2 - 80, "自动锁")
 			end
 		end
 
 		if shieldreturn:GetValue() then
-			draw.Text(screen_w / 2 - 782, screen_h / 2 - 120, "Shieldreturn")
+			draw.Text(screen_w / 2 - 782, screen_h / 2 - 120, "换弹背身")
 		end
 		if cshieldhit:GetValue() then
 			draw.Text(screen_w / 2 - 782, screen_h / 2 - 140,
-				beshieldid == -1 and "ShieldHit" or "ShieldHit " .. beshieldidname)
+				beshieldid == -1 and "大盾把戏" or "大盾把戏 " .. beshieldidname)
 		end
 		if roll_aa_switch:GetValue() then
-			draw.Text(screen_w / 2 - 782, screen_h / 2 - 160, "Roll(Very Unsafe)")
+			draw.Text(screen_w / 2 - 782, screen_h / 2 - 160, "大角度(非常不安全)")
 		end
 		if antiteammate:GetValue() then
-			draw.Text(screen_w / 2 - 782, screen_h / 2 - 180, "Anti-Teammate")
+			draw.Text(screen_w / 2 - 782, screen_h / 2 - 180, "自动反队友炸")
 		end
 
 		if backward then
-			draw.Text(screen_w / 2 - 782, screen_h / 2 - 200, "180 Backward")
+			draw.Text(screen_w / 2 - 782, screen_h / 2 - 200, "背身大盾模式")
 		end
 
 		draw.SetFont(fontA);
 		if lockatdrone then
-			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160, "AimDrone: " .. dronedistance)
+			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160, "瞄准无人机: " .. dronedistance)
 		elseif aimingleg then
 			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160,
 				"AimLeg! " .. math.floor(bestShieldDistance))
 		elseif smoothon then
-			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160, "AimLOCK!")
+			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160, "平滑自瞄锁住!")
 		elseif needoffaim and (bestny or bestduckny) then
 			local ny = calledsny and bestduckny or bestny
-			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160, "AimShield! angle: " .. math.floor(ny))
+			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160, "智能不打盾!对面角度: " .. math.floor(ny))
 		end
 		if aimstatus == '"Off"' and not needoffaim then
 			if loadback then
-				draw.Text(screen_w / 2 - 450, screen_h / 2 - 160, "AAyaw " .. angle .. " LoadBack!")
+				draw.Text(screen_w / 2 - 450, screen_h / 2 - 160, "AA角度: " .. angle .. " 换弹背身!")
 			elseif healthshotinject then
-				draw.Text(screen_w / 2 - 500, screen_h / 2 - 220, "AAyaw " .. angle .. " Protecting!")
+				draw.Text(screen_w / 2 - 500, screen_h / 2 - 220, "AA角度: " .. angle .. " 正在保护打针!")
 			else
-				draw.Text(screen_w / 2 - 450, screen_h / 2 - 160, "AAyaw " .. angle .. " Aimbot disabled!")
+				draw.Text(screen_w / 2 - 450, screen_h / 2 - 160, "AA角度: " .. angle .. " 关闭自瞄!")
 			end
 		end
 		if not disabledistancevis:GetValue() then
