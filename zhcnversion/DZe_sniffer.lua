@@ -61,7 +61,8 @@ local localindex = 0
 local localteamid = 0
 local lastcssplayernumber = 0
 local teammateisin = false
-
+local purchaseguy = 0
+local purchasedex = false
 
 local function GOTVstatus()
     local spLocal = entities.GetLocalPlayer()
@@ -210,6 +211,17 @@ callbacks.Register("CreateMove", function()
             cachelist = playerlist
         end
         lastcssplayernumber = #players
+        if purchasedex then
+            local thisplayer = entities.GetByUserID(purchaseguy)
+            local playername = string.gsub(thisplayer:GetName(), '%s', '')
+            if thisplayer:GetWeaponID() == 72 and ingamestatus then
+                local purchaseIndex = (thisplayer:GetPropEntity("m_hActiveWeapon")):GetPropInt("m_nLastPurchaseIndex")
+                if purchaseIndex ~= -1 then
+                    partyapisay(playername .. "_购买了_" .. tabletitemindex[purchaseIndex])
+                end
+            end
+            purchasedex = false
+        end
     end
 end)
 
@@ -239,16 +251,9 @@ callbacks.Register("FireGameEvent", function(e)
             partyapisay("空投被摧毁！")
         end
     end
-    if dronedispatchmaster:GetValue() and eventName == "drone_dispatched" then --and client.GetPlayerIndexByUserID(e:GetInt("userid")) ~= localindex and entities.GetByUserID(e:GetInt("userid")):GetPropInt("m_nSurvivalTeam") ~= localteamid then
-        local player = entities.GetByUserID(e:GetInt("userid"))
-        local playername = string.gsub(entities.GetByUserID(e:GetInt("userid")):GetName(), '%s', '')
-        if player:GetWeaponID() == 72 and ingamestatus then
-            local purchaseIndex = (player:GetPropEntity("m_hActiveWeapon")):GetPropInt("m_nLastPurchaseIndex")
-            if purchaseIndex ~= -1 then
-                partyapisay(playername .. "_购买了_" .. tabletitemindex[purchaseIndex])
-            end
-            --partyapisay(playername .. "_dispatched_Drone")
-        end
+    if dronedispatchmaster:GetValue() and eventName == "drone_dispatched" then
+        purchaseguy = e.GetInt("userid")
+        purchasedex = true
     end
     if eventName == "player_death" and ingamestatus then
         deadlist[(entities.GetByUserID(e:GetInt("userid"))):GetName()] = true
