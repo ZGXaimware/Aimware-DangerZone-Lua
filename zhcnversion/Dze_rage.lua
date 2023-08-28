@@ -178,9 +178,8 @@ local function setColors(x, y, z)
 	colorx, colory, colorz = x, y, z
 end
 local function ingame()
-	return true
-	-- local money = entities.FindByClass("CItemCash")
-	-- return money ~= nil and #money ~= 0
+	local money = entities.FindByClass("CItemCash")
+	return money ~= nil and #money ~= 0
 end
 
 local function isMutedPlayerName(player)

@@ -215,7 +215,7 @@ callbacks.Register("FireGameEvent", function(e)
         end
     end
     if dronedispatchmaster:GetValue() and eventName == "drone_dispatched" then
-        purchaseguy = e.GetInt("userid")
+        purchaseguy = e:GetInt("userid")
         purchasedex = true
     end
     if eventName == "player_death" and ingamestatus then
