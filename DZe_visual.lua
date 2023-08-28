@@ -216,7 +216,8 @@ local function drawEspHookESP(builder)
 						local respawntime = 0.00
 						if not data[4] then
 							if player_respawn_times[data[2]] then
-								respawntime = player_respawn_times[data[2]][1] + player_respawn_times[data[2]][2] - globals.CurTime()
+								respawntime = player_respawn_times[data[2]][1] + player_respawn_times[data[2]][2] -
+								globals.CurTime()
 								if respawntime < 0 then respawntime = 0 end
 							end
 						end
@@ -703,13 +704,15 @@ callbacks.Register("FireGameEvent", function(e)
 			materials.Find(mapglassplace[map_name]):SetMaterialVarFlag(4, removegrassmaster:GetValue())
 		end
 	elseif eventName == "player_death" and ingame() then
-		local teamid = (entities.GetByUserID(e:GetInt("userid"))):GetPropInt("m_nSurvivalTeam")
-		if teamid == -1 or teamid == nil then return end
-		local playername = (entities.GetByUserID(e:GetInt("userid"))):GetName()
-		if player_respawn_times[playername] then
-			player_respawn_times[playername] = { globals.CurTime(), player_respawn_times[playername][2] + 10 }
-		else
-			player_respawn_times[playername] = { globals.CurTime(), 10 }
+		if (entities.GetByUserID(e:GetInt("userid"))):IsPlayer() then
+			local teamid = (entities.GetByUserID(e:GetInt("userid"))):GetPropInt("m_nSurvivalTeam")
+			if teamid == -1 or teamid == nil then return end
+			local playername = (entities.GetByUserID(e:GetInt("userid"))):GetName()
+			if player_respawn_times[playername] then
+				player_respawn_times[playername] = { globals.CurTime(), player_respawn_times[playername][2] + 10 }
+			else
+				player_respawn_times[playername] = { globals.CurTime(), 10 }
+			end
 		end
 	elseif eventName == "survival_no_respawns_final" and ingame() then
 		player_respawn_times = {}
