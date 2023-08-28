@@ -116,15 +116,8 @@ callbacks.Register("CreateMove", function()
     local players = entities.FindByClass("CCSPlayer")
     ingamestatus = ingame()
     if not exitmaster:GetValue() then cachelist = {} end
-    -- if not purchasemaster:GetValue() then
-    --     cachemoneylist = {}
-    --     cachelistpurchaseid = {}
-    -- end
-    -- if not respawnmaster:GetValue() then
-    --     deadlist = {}
-    -- end
+
     if players ~= nil then
-        -- local moneylist = {}
         local needupdatecssplayer = false
         if lastcssplayernumber ~= #players then
             needupdatecssplayer = true
@@ -147,7 +140,6 @@ callbacks.Register("CreateMove", function()
                             string.gsub(': ' .. playername, '%s', '') .. addstr)
                         deadlist[playername] = nil
                     end
-                    -- deadlist = {}
                 end
                 local playerteamid = player:GetPropInt("m_nSurvivalTeam")
                 if localindex ~= playerIndex and exitmaster:GetValue() and needupdatecssplayer then
@@ -158,34 +150,8 @@ callbacks.Register("CreateMove", function()
                         table.insert(playerlist, player:GetName())
                     end
                 end
-
-
-                -- if not player:IsAlive() and ingamestatus and respawnmaster:GetValue() then
-                --     deadlist[playername] = true
-                -- end
-                -- if player:GetWeaponID() == 72 and ingamestatus and purchasemaster:GetValue() then
-                --     local playerMoney = player:GetPropInt("m_iAccount")
-                --     local purchaseIndex = (player:GetPropEntity("m_hActiveWeapon")):GetPropInt("m_nLastPurchaseIndex")
-                --     moneylist[playerIndex] = playerMoney
-
-                --     if cachelistpurchaseid[playerIndex] == nil then
-                --         cachelistpurchaseid[playerIndex] = purchaseIndex
-                --     end
-                --     if cachemoneylist[playerIndex] == nil then
-                --         cachemoneylist[playerIndex] = playerMoney
-                --     end
-                --     if cachelistpurchaseid[playerIndex] ~= purchaseIndex then
-                --         if cachemoneylist[playerIndex] - playerMoney > 0 and purchaseIndex ~= -1 then
-                --             partyapisay(string.gsub(player:GetName(), '%s', '') ..
-                --                 "_purchased_" .. tabletitemindex[purchaseIndex])
-                --         end
-                --         cachelistpurchaseid[playerIndex] = purchaseIndex
-                --     end
-                -- end
             end
         end
-        -- if ingamestatus and purchasemaster:GetValue() then cachemoneylist = moneylist end
-
         if (#cachelist ~= #playerlist or #cachelist == 0) and exitmaster:GetValue() and #playerlist ~= 0 then
             if teammateisin and teammatenoshow then
                 teammatenoshow = false
@@ -196,9 +162,6 @@ callbacks.Register("CreateMove", function()
                 partyapisay("Teammate_Exit" .. ":" .. string.gsub(teammatename, '%s', ''))
                 teammatenoshow = true
             end
-
-
-
             for _, enemy in ipairs(cachelist) do
                 if not findthisguy(enemy, playerlist) and enemy ~= teammatename then
                     if ingamestatus then
@@ -236,8 +199,6 @@ client.AllowListener("player_death")
 callbacks.Register("FireGameEvent", function(e)
     local eventName = e:GetName()
     if (eventName == "client_disconnect") or (eventName == "begin_new_match") then
-        -- cachelistpurchaseid = {}
-        -- cachemoneylist = {}
         cachelist = {}
         deadlist = {}
         lastcssplayernumber = 0
@@ -259,14 +220,15 @@ callbacks.Register("FireGameEvent", function(e)
     end
     if eventName == "player_death" and ingamestatus then
         deadlist[(entities.GetByUserID(e:GetInt("userid"))):GetName()] = true
-
-        local teamid = (entities.GetByUserID(e:GetInt("userid"))):GetPropInt("m_nSurvivalTeam")
-        if teamid == -1 or teamid == nil then return end
-        local playername = (entities.GetByUserID(e:GetInt("userid"))):GetName()
-        if player_respawn_times[playername] then
-            player_respawn_times[playername] = player_respawn_times[playername] + 10
-        else
-            player_respawn_times[playername] = 20
+        if (entities.GetByUserID(e:GetInt("userid"))):IsPlayer() then
+            local teamid = (entities.GetByUserID(e:GetInt("userid"))):GetPropInt("m_nSurvivalTeam")
+            if teamid == -1 or teamid == nil then return end
+            local playername = (entities.GetByUserID(e:GetInt("userid"))):GetName()
+            if player_respawn_times[playername] then
+                player_respawn_times[playername] = player_respawn_times[playername] + 10
+            else
+                player_respawn_times[playername] = 20
+            end
         end
     end
 end)

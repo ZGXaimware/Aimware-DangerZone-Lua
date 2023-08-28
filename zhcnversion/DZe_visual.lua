@@ -134,22 +134,22 @@ local weaponClasses = {
 }
 
 local engtozhcnweaponlist = {
-['smg'] = "冲锋枪",
-['zeus'] = "电击枪",
-['rifle'] = "步枪",
-['kniefetc'] = "近战武器",
-['SHIELD'] = '大盾',
-['shotgun'] = '霰弹枪',
-['sniper'] = 'AWP狙击枪',
-['scout'] = "鸟狙",
-['pistol'] = '手枪',
-['Bumpmine'] = '跳雷',
-['lmg'] = '机关枪(M249)',
-['RemoteBomb'] = "平板",
-['asniper'] = '连狙',
-['hpistol'] = '沙鹰/左轮',
-['Tablet'] = '平板',
-['shared'] = '其他'
+	['smg'] = "冲锋枪",
+	['zeus'] = "电击枪",
+	['rifle'] = "步枪",
+	['kniefetc'] = "近战武器",
+	['SHIELD'] = '大盾',
+	['shotgun'] = '霰弹枪',
+	['sniper'] = 'AWP狙击枪',
+	['scout'] = "鸟狙",
+	['pistol'] = '手枪',
+	['Bumpmine'] = '跳雷',
+	['lmg'] = '机关枪(M249)',
+	['RemoteBomb'] = "平板",
+	['asniper'] = '连狙',
+	['hpistol'] = '沙鹰/左轮',
+	['Tablet'] = '平板',
+	['shared'] = '其他'
 }
 
 
@@ -237,7 +237,8 @@ local function drawEspHookESP(builder)
 						local respawntime = 0.00
 						if not data[4] then
 							if player_respawn_times[data[2]] then
-								respawntime = player_respawn_times[data[2]][1] + player_respawn_times[data[2]][2] - globals.CurTime()
+								respawntime = player_respawn_times[data[2]][1] + player_respawn_times[data[2]][2] -
+								globals.CurTime()
 								if respawntime < 0 then respawntime = 0 end
 							end
 						end
@@ -245,7 +246,8 @@ local function drawEspHookESP(builder)
 							if ischeater == 1 then
 								righttext = data[4] and
 									"(被屏蔽)(外纪) " .. math.floor((lpabs - data[3]):Length()) .. " " .. data[2] or
-									"(被屏蔽)(外纪)(死) " .. data[2] .. " R:" .. string.format("%.1f", respawntime) ..
+									"(被屏蔽)(外纪)(死) " ..
+									data[2] .. " R:" .. string.format("%.1f", respawntime) ..
 									"s"
 							else
 								righttext = data[4] and
@@ -631,18 +633,21 @@ local mapglassplace = {
 	["dz_frostbite"] = "ski/detail/detailsprites_overgrown_ski",
 	["dz_county"] = "detail/county/detailsprites_county"
 }
+local bestRemoteBombDistance = math.huge()
+
 
 local function RemoteBombDetector()
 	if plocallive and remotebombmaster:GetValue() then
 		rbvec = {}
+		bestRemoteBombDistance = math.huge()
 		local rbs = entities.FindByClass("CBreachChargeProjectile")
 		if rbs == nil then return end
 		for i = 1, #rbs do
 			local rb = rbs[i]
 			local rbabs = rb:GetProp("m_vecOrigin")
 			local Distance = (localabs - rbabs):Length()
-
 			if Distance < 1599 then
+				if bestRemoteBombDistance > Distance then bestRemoteBombDistance = Distance end
 				local x, y = client.WorldToScreen(rbabs)
 				if x ~= nil and y ~= nil then
 					table.insert(rbvec, { x, y, rb:GetProp("m_bShouldExplode") == 1 })
@@ -691,7 +696,14 @@ callbacks.Register("Draw", "DrawRB", function()
 				draw.TextShadow(v[1], v[2] + 20, "爆炸!")
 			end
 		end
-
+		if barrelmaster:GetValue() and bestRemoteBombDistance < 1599 then
+			draw.SetFont(font)
+			draw.Color(255, 0, 0, 255);
+			if ENDdistance ~= 0 then
+				draw.Text(screenCenterX - 800, screenH / 2 + 230,
+					"遥控炸弹:" .. math.floor(bestRemoteBombDistance));
+			end
+		end
 		for _, v in pairs(bavec) do
 			draw.SetTexture(barrel_image.texture)
 			draw.Color(255, 255, 255, 255)
@@ -724,13 +736,15 @@ callbacks.Register("FireGameEvent", function(e)
 			materials.Find(mapglassplace[map_name]):SetMaterialVarFlag(4, removegrassmaster:GetValue())
 		end
 	elseif eventName == "player_death" and ingame() then
-		local teamid = (entities.GetByUserID(e:GetInt("userid"))):GetPropInt("m_nSurvivalTeam")
-		if teamid == -1 or teamid == nil then return end
-		local playername = (entities.GetByUserID(e:GetInt("userid"))):GetName()
-		if player_respawn_times[playername] then
-			player_respawn_times[playername] = { globals.CurTime(), player_respawn_times[playername][2] + 10 }
-		else
-			player_respawn_times[playername] = { globals.CurTime(), 10 }
+		if (entities.GetByUserID(e:GetInt("userid"))):IsPlayer() then
+			local teamid = (entities.GetByUserID(e:GetInt("userid"))):GetPropInt("m_nSurvivalTeam")
+			if teamid == -1 or teamid == nil then return end
+			local playername = (entities.GetByUserID(e:GetInt("userid"))):GetName()
+			if player_respawn_times[playername] then
+				player_respawn_times[playername] = { globals.CurTime(), player_respawn_times[playername][2] + 10 }
+			else
+				player_respawn_times[playername] = { globals.CurTime(), 10 }
+			end
 		end
 	elseif eventName == "survival_no_respawns_final" and ingame() then
 		player_respawn_times = {}

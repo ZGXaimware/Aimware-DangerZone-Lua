@@ -256,15 +256,16 @@ callbacks.Register("FireGameEvent", function(e)
         purchasedex = true
     end
     if eventName == "player_death" and ingamestatus then
-        deadlist[(entities.GetByUserID(e:GetInt("userid"))):GetName()] = true
-
-        local teamid = (entities.GetByUserID(e:GetInt("userid"))):GetPropInt("m_nSurvivalTeam")
-        if teamid == -1 or teamid == nil then return end
-        local playername = (entities.GetByUserID(e:GetInt("userid"))):GetName()
-        if player_respawn_times[playername] then
-            player_respawn_times[playername] = player_respawn_times[playername] + 10
-        else
-            player_respawn_times[playername] = 20
+        if (entities.GetByUserID(e:GetInt("userid"))):IsPlayer() then
+            deadlist[(entities.GetByUserID(e:GetInt("userid"))):GetName()] = true
+            local teamid = (entities.GetByUserID(e:GetInt("userid"))):GetPropInt("m_nSurvivalTeam")
+            if teamid == -1 or teamid == nil then return end
+            local playername = (entities.GetByUserID(e:GetInt("userid"))):GetName()
+            if player_respawn_times[playername] then
+                player_respawn_times[playername] = player_respawn_times[playername] + 10
+            else
+                player_respawn_times[playername] = 20
+            end
         end
     end
 end)
