@@ -633,13 +633,13 @@ local mapglassplace = {
 	["dz_frostbite"] = "ski/detail/detailsprites_overgrown_ski",
 	["dz_county"] = "detail/county/detailsprites_county"
 }
-local bestRemoteBombDistance = math.huge()
+local bestRemoteBombDistance = math.huge
 
 
 local function RemoteBombDetector()
 	if plocallive and remotebombmaster:GetValue() then
 		rbvec = {}
-		bestRemoteBombDistance = math.huge()
+		bestRemoteBombDistance = math.huge
 		local rbs = entities.FindByClass("CBreachChargeProjectile")
 		if rbs == nil then return end
 		for i = 1, #rbs do
