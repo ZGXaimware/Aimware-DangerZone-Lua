@@ -59,7 +59,7 @@ fasthop:SetDescription("连跳需要搭配EXO跳跃不按WASD")
 local hitshieldleg = gui.Keybox(switch_box, "main.hitshieldleg", "手动锁脚", 81)
 hitshieldleg:SetDescription("锁住最近的盾哥的脚")
 local backwardswitchkey = gui.Keybox(switch_box, "main.backwardkey", "按键切换背身/正常", 0)
-
+local forcehitteammate = gui.Keybox(switch_box, "main.forceteammate", "强制攻击队友", 0)
 
 
 
@@ -139,11 +139,13 @@ local f = 0
 local n = 0
 local iscommandattack1 = false
 local iscommandattack2 = false
+local iscommandattack3 = false
 local backward = false
 local teammatename = ""
 local teammatedistance = math.huge
 local teammateweapon = ""
 local onlyshieldguyin = false
+local aimteammate = false
 
 gui.SetValue("rbot.master", true)
 local weapons_table = {
@@ -176,8 +178,9 @@ local function setColors(x, y, z)
 	colorx, colory, colorz = x, y, z
 end
 local function ingame()
-	local money = entities.FindByClass("CItemCash")
-	return money ~= nil and #money ~= 0
+	return true
+	-- local money = entities.FindByClass("CItemCash")
+	-- return money ~= nil and #money ~= 0
 end
 
 local function isMutedPlayerName(player)
@@ -283,7 +286,7 @@ local engtozhcnweaponlist = {
 	['hpistol'] = '沙鹰/左轮',
 	['Tablet'] = '平板',
 	['shared'] = '其他'
-	}
+}
 
 local function get_weapon_class(weapon_id)
 	return weaponClasses[weapon_id] or "shared"
@@ -499,7 +502,7 @@ end
 
 
 
-local function smoothaim(Enemy, step)
+local function smoothaim(Enemy, step, baim)
 	if angle ~= 0 or Enemy == nil then return end
 	if weaponClass == "shared" then return false end
 	if (smooth:GetValue()) then
@@ -511,7 +514,11 @@ local function smoothaim(Enemy, step)
 			enemyangle = (Enemy:GetHitboxPosition(3) - pLocal:GetHitboxPosition(1)):Angles()
 		else
 			if velo > 260 then return false end
-			enemyangle = (Enemy:GetHitboxPosition(1) - pLocal:GetHitboxPosition(1)):Angles()
+			if baim then
+				enemyangle = (Enemy:GetHitboxPosition(3) - pLocal:GetHitboxPosition(1)):Angles()
+			else
+				enemyangle = (Enemy:GetHitboxPosition(1) - pLocal:GetHitboxPosition(1)):Angles()
+			end
 		end
 		local enemy_x = enemyangle.x
 		local enemy_y = enemyangle.y
@@ -525,6 +532,28 @@ local function smoothaim(Enemy, step)
 		return false
 	end
 end
+
+local function lockteammate(Enemy, step)
+	if angle ~= 0 or Enemy == nil then return end
+	if weaponClass == "shared" then return false end
+	if (smooth:GetValue()) then
+		local enemyangle = nil
+		if velo > 260 then return false end
+		enemyangle = (Enemy:GetHitboxPosition(3) - pLocal:GetHitboxPosition(1)):Angles()
+		local enemy_x = enemyangle.x
+		local enemy_y = enemyangle.y
+		local own_eye = engine.GetViewAngles()
+		local own_eyex = own_eye.x
+		local own_eyey = own_eye.y
+		stepchangeviewanglemain(own_eyex, enemy_x, own_eyey, enemy_y, step)
+		return true
+	end
+end
+
+
+
+
+
 
 
 
@@ -725,6 +754,7 @@ callbacks.Register("CreateMove", function(ucmd)
 		Nobest = false
 		aimingleg = false
 		smoothon = false
+		aimteammate = false
 		shieldhit = false
 		local Enemies = entities.FindByClass("CCSPlayer")
 		if Enemies == nil then return end
@@ -981,13 +1011,31 @@ callbacks.Register("CreateMove", function(ucmd)
 				local cvbest = cvelocity >= bvelocity
 				nvelocity = cvbest and cvelocity or bvelocity
 
-
+				local hascalledattack3 = false
 				autolockmessage = ""
 				if autolock:GetValue() then
 					if antiteammate:GetValue() and teammate ~= nil then
 						local trace = engine.TraceLine(teammate:GetHitboxPosition(3), localheadbox)
-						if trace ~= nil and trace.fraction >= 0.9 and teammateweapon == "RemoteBomb" and teammatedistance < 450 then
-							smoothon = smoothaim(teammate, aimsmoothstep:GetValue())
+						if trace ~= nil and trace.fraction >= 0.9 then
+							if teammateweapon == "RemoteBomb" and teammatedistance < 450 then
+								aimteammate = lockteammate(teammate, aimsmoothstep:GetValue())
+								if globals.TickCount() % 10 == 0 and not input.IsButtonDown(fasthop:GetValue()) then
+									ucmd.buttons =
+										bit.lshift(1, 5)
+								end
+							end
+							if forcehitteammate:GetValue() ~= 0 and input.IsButtonDown(forcehitteammate:GetValue()) then
+								if not aimteammate then aimteammate = lockteammate(teammate, aimsmoothstep:GetValue()) end
+								hascalledattack3 = true
+								if aimteammate then
+									client.Command("+attack", true);
+									iscommandattack3 = true
+								else
+									client.Command("-attack", true);
+									iscommandattack3 = false
+								end
+							end
+							smoothon = aimteammate
 						end
 					end
 					if localhp <= 90 and localweaponid ~= 37 then
@@ -1000,7 +1048,7 @@ callbacks.Register("CreateMove", function(ucmd)
 									gui.SetValue("rbot.aim.target.selection", 2)
 
 									if not Closedto and not smoothon then
-										smoothon = smoothaim(attacker, aimsmoothstep:GetValue())
+										smoothon = smoothaim(attacker, aimsmoothstep:GetValue(), false)
 									end
 								end
 							end
@@ -1016,12 +1064,12 @@ callbacks.Register("CreateMove", function(ucmd)
 
 							if localhp <= 109 then
 								if BestDistance < 1750 and not Closedto and not smoothon then
-									smoothon = smoothaim(BestEnemy, aimsmoothstep:GetValue())
+									smoothon = smoothaim(BestEnemy, aimsmoothstep:GetValue(), false)
 									autolockmessage = "Too Close and Low HP " .. localhp
 								end
 							else
 								if BestDistance < 1250 and not Closedto and not smoothon then
-									smoothon = smoothaim(BestEnemy, aimsmoothstep:GetValue())
+									smoothon = smoothaim(BestEnemy, aimsmoothstep:GetValue(), false)
 									autolockmessage = "Extremely Close"
 								end
 							end
@@ -1030,7 +1078,7 @@ callbacks.Register("CreateMove", function(ucmd)
 					normaljumper = false
 					if ((CBestDistance < 3000 or BestDistance < 3000) and nvelocity > 399 and Closedto ~= true) and not shieldjumper then
 						if Cowner == owner and autolock:GetValue() and not smoothon then
-							smoothon = smoothaim(BestEnemy, aimsmoothstep:GetValue())
+							smoothon = smoothaim(BestEnemy, aimsmoothstep:GetValue(), false)
 						end
 						normaljumper = true
 
@@ -1044,6 +1092,11 @@ callbacks.Register("CreateMove", function(ucmd)
 					else
 						normaljumper = false
 					end
+				end
+
+				if hascalledattack3 == false and iscommandattack3 == true then
+					client.Command("-attack", true);
+					iscommandattack3 = false
 				end
 
 				bx, by = client.WorldToScreen(BestEnemy:GetAbsOrigin())
@@ -1121,7 +1174,8 @@ callbacks.Register("CreateMove", function(ucmd)
 					end
 				end
 
-				bestShieldisUseShield = (bestShield ~= nil and bestShield:GetWeaponID() == 37) or (#duckshield ~= 0 and bestduckShieldDistance < bestShieldDistance)
+				bestShieldisUseShield = (bestShield ~= nil and bestShield:GetWeaponID() == 37) or
+					(#duckshield ~= 0 and bestduckShieldDistance < bestShieldDistance)
 				if bestShield ~= nil then
 					sx, sy = client.WorldToScreen(bestShield:GetAbsOrigin())
 				elseif bestduckShield ~= nil then
@@ -1245,7 +1299,7 @@ callbacks.Register("CreateMove", function(ucmd)
 			setColors(255, 255, 255)
 		end
 
-		if angle ~= 0 or smoothon or needoffaim then
+		if angle ~= 0 or smoothon or needoffaim or aimteammate then
 			gui.SetValue("rbot.antiaim.condition.use", 0)
 
 			if angle ~= 0 or needshieldprotect then
@@ -1258,7 +1312,7 @@ callbacks.Register("CreateMove", function(ucmd)
 				client.Command("bind mouse1 +attack", true)
 			end
 
-			if aimstatus ~= '"Off"' and not smoothon and not needoffaim and gui.GetValue("esp.master") then
+			if aimstatus ~= '"Off"' and not smoothon and not needoffaim and not aimteammate and gui.GetValue("esp.master") then
 				client.Command("play training/light_on", true)
 			end
 			gui.SetValue("rbot.aim.enable", "Off")
@@ -1614,7 +1668,7 @@ local function switch()
 				draw.Text(screen_w / 2, screen_h / 2 - 200, bedistance);
 				draw.Text(screen_w / 2 + 200, screen_h / 2 - 200, bename .. "(佳)");
 				if teammatecheck:GetValue() and teammatename ~= "" then
-					if teammateweapon == "RemoteBomb" then
+					if teammateweapon == "RemoteBomb" and teammatedistance < 1500 then
 						draw.Color(255, 0, 0, 255)
 						draw.SetFont(fontA)
 						draw.Text(screen_w / 2 - 200, screen_h / 2 + 50, math.floor(teammatedistance))
@@ -1686,13 +1740,16 @@ local function switch()
 		elseif aimingleg then
 			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160,
 				"AimLeg! " .. math.floor(bestShieldDistance))
+		elseif aimteammate then
+			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160, "锁住队友!")
+
 		elseif smoothon then
 			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160, "平滑自瞄锁住!")
 		elseif needoffaim and (bestny or bestduckny) then
 			local ny = calledsny and bestduckny or bestny
 			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160, "智能不打盾!对面角度: " .. math.floor(ny))
 		end
-		if aimstatus == '"Off"' and not needoffaim then
+		if aimstatus == '"Off"' and not needoffaim and not smoothon and not aimteammate then
 			if loadback then
 				draw.Text(screen_w / 2 - 450, screen_h / 2 - 160, "AA角度: " .. angle .. " 换弹背身!")
 			elseif healthshotinject then

@@ -676,10 +676,10 @@ callbacks.Register("Draw", "DrawRB", function()
 			end
 		end
 		if barrelmaster:GetValue() and bestRemoteBombDistance < 1599 then
-			draw.SetFont(font)
+			draw.SetFont(fontA)
 			draw.Color(255, 0, 0, 255);
 			if ENDdistance ~= 0 then
-				draw.Text(screenCenterX - 800, screenH / 2 + 230,
+				draw.Text(screenCenterX - 680, screenH / 2 + 50,
 					"RemoteBomb Distance:" .. math.floor(bestRemoteBombDistance));
 			end
 		end
