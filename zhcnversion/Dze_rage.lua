@@ -1,18 +1,12 @@
 -- Aimware-DangerZone-Lua
---Last Updated 2023/8/15 1.1.5 (New Version)
-
-
-
-
+--Last Updated 2023/8/29 1.1.8 (New Version)
 local tab = gui.Tab(gui.Reference("Ragebot"), "DZe", "特训专家");
-
 local main_box = gui.Groupbox(tab, "主要", 16, 16, 200, 0);
-
 local smooth = gui.Checkbox(main_box, "main.aimsmooth", "平滑自瞄", 1)
 smooth:SetDescription("关闭将采用基于动态FOV的攻击(会死号)")
-local aimsmoothstep = gui.Slider(main_box, "main.aimstepsmooth", "平滑自瞄度数", 8, 5, 25, 1)
-local aastep        = gui.Slider(main_box, "main.aastep", "平滑AA度数", 8, 5, 25, 1)
-local aimsmoothfov  = gui.Slider(main_box, "main.fov", "自瞄机器人Fov", 15, 5, 20, 1)
+local aimsmoothstep = gui.Slider(main_box, "main.aimstepsmooth", "平滑自瞄度数", 8, 5, 15, 1)
+local aastep        = gui.Slider(main_box, "main.aastep", "平滑AA度数", 8, 5, 15, 1)
+local aimsmoothfov  = gui.Slider(main_box, "main.fov", "自瞄机器人Fov", 15, 10, 20, 1)
 local teammatecheck = gui.Checkbox(main_box, "main.teammatecheck", "队友指示器", 1)
 local antiteammate  = gui.Checkbox(main_box, "main.antiteammate", "自动反队友炸", 1)
 local autoshield    = gui.Checkbox(main_box, "main.autoshield", "自动背身大盾打针", 1)
@@ -34,21 +28,13 @@ local disablesetprop = gui.Checkbox(main_box, "main.disableprop", "关闭一些�
 disablesetprop:SetDescription("比如地下平板可用/去除打针视觉效果")
 local debugaimstep = gui.Checkbox(main_box, "main.debug_reallyaimstep", "(非常不安全)超级保护", 0)
 debugaimstep:SetDescription("每打一枪,在可以打下一枪之前会自动背身")
-
 local gotvswitch = gui.Combobox(main_box, "main.gotvswitch", "GOTV选择", "Off", "Disable on GOTV",
 	"Force Enable on GOTV");
-
-
-
-
 local legit_aa_box = gui.Groupbox(tab, "演技AA/大角度", 232, 16, 200, 0);
-
 local legit_aa_switch = gui.Checkbox(legit_aa_box, "aa.switch", "总开关", 1);
 local legit_aa_key = gui.Keybox(legit_aa_box, "aa.inverter", "切换AA方向键", 0);
 local roll_aa_switch = gui.Checkbox(legit_aa_box, "aa.switch", "大角度开关(非常不安全)", 0);
-
 local switch_box = gui.Groupbox(tab, "按键区", 448, 16, 174, 0);
-
 local switch_awall_key = gui.Keybox(switch_box, "switch.autowall", "自动穿墙切换", 0);
 local lockmdrone = gui.Keybox(switch_box, "main.lockmdrone", "锁在人工控制无人机上", 17)
 lockmdrone:SetDescription("锁人工无人机上")
@@ -60,9 +46,6 @@ local hitshieldleg = gui.Keybox(switch_box, "main.hitshieldleg", "手动锁脚",
 hitshieldleg:SetDescription("锁住最近的盾哥的脚")
 local backwardswitchkey = gui.Keybox(switch_box, "main.backwardkey", "按键切换背身/正常", 0)
 local forcehitteammate = gui.Keybox(switch_box, "main.forceteammate", "强制攻击队友", 0)
-
-
-
 local font = draw.CreateFont("Microsoft Tai Le", 30, 1000);
 local fontA = draw.CreateFont("Microsoft Tai Le", 80, 1000);
 local font1 = draw.CreateFont("Verdana", 22, 400);
@@ -144,9 +127,9 @@ local backward = false
 local teammatename = ""
 local teammatedistance = math.huge
 local teammateweapon = ""
+local teammatehp = 0
 local onlyshieldguyin = false
 local aimteammate = false
-
 gui.SetValue("rbot.master", true)
 local weapons_table = {
 	["asniper"] = true,
@@ -159,11 +142,8 @@ local weapons_table = {
 	["shotgun"] = true,
 	["sniper"] = true
 }
-
 local cachedmutedplayer = {}
-
 local cache_weapontable = {}
-
 for v, _ in ipairs(weapons_table) do
 	if v ~= "shotgun" and v ~= "sniper" then
 		cache_weapontable[v] = gui.GetValue("rbot.hitscan.hitbox." .. v .. ".head.priority")
@@ -173,7 +153,6 @@ gui.SetValue("rbot.hitscan.hitbox.shotgun.head.priority", 0)
 gui.SetValue("rbot.hitscan.hitbox.sniper.head.priority", 0)
 gui.SetValue("rbot.hitscan.hitbox.shotgun.body.priority", 1)
 gui.SetValue("rbot.hitscan.hitbox.sniper.body.priority", 1)
-
 local function setColors(x, y, z)
 	colorx, colory, colorz = x, y, z
 end
@@ -181,22 +160,18 @@ local function ingame()
 	local money = entities.FindByClass("CItemCash")
 	return money ~= nil and #money ~= 0
 end
-
 local function isMutedPlayerName(player)
 	if cachedmutedplayer[player:GetIndex()] then
 		return cachedmutedplayer[player:GetIndex()]
 	else
 		if entities.GetPlayerResources():GetPropInt("m_bHasCommunicationAbuseMute", player:GetIndex()) == 1 then
 			cachedmutedplayer[player:GetIndex()] = player:GetName() .. "(外纪)"
-			return player:GetName() .. "(M)"
+			return player:GetName() .. "(外纪)"
 		end
 		cachedmutedplayer[player:GetIndex()] = player:GetName()
 		return player:GetName()
 	end
 end
-
-
-
 local function returnweaponstr(player)
 	if player:IsPlayer() and player:IsAlive() then
 		local recstr = ""
@@ -211,7 +186,6 @@ local function returnweaponstr(player)
 		return ""
 	end
 end
-
 local weaponClasses = {
 	[11] = "asniper",
 	[38] = "asniper",
@@ -258,7 +232,6 @@ local weaponClasses = {
 	[70] = "RemoteBomb",
 	[72] = "Tablet"
 }
-
 local weaponHitable = {
 	["rifle"] = 1200,
 	["smg"] = 900,
@@ -267,7 +240,6 @@ local weaponHitable = {
 	["pistol"] = 500,
 	["hpistol"] = 500
 }
-
 local engtozhcnweaponlist = {
 	['smg'] = "冲锋枪",
 	['zeus'] = "电击枪",
@@ -286,12 +258,9 @@ local engtozhcnweaponlist = {
 	['Tablet'] = '平板',
 	['shared'] = '其他'
 }
-
 local function get_weapon_class(weapon_id)
 	return weaponClasses[weapon_id] or "shared"
 end
-
-
 local angle = 0
 local pLocal = nil
 local weaponstr = ""
@@ -302,7 +271,6 @@ local localindex = 0
 local localheadbox = nil
 local localhp = 0
 local localteamid = -2
-
 local function GOTVstatus()
 	-- if gui.GetValue("esp.DZevis.vis.gotvswitch") then
 	-- 	if gui.GetValue("esp.DZevis.vis.gotvswitch") ~= gui.GetValue("rbot.DZe.main.gotvswitch") then
@@ -319,7 +287,6 @@ local function GOTVstatus()
 		return spLocal
 	end
 	if spLocal == nil then return nil end
-
 	if gotvswitch:GetValue() == 1 then
 		if (spLocal:GetPropEntity("m_hObserverTarget")):IsPlayer() then
 			return nil
@@ -327,7 +294,6 @@ local function GOTVstatus()
 			return spLocal
 		end
 	end
-
 	if gotvswitch:GetValue() == 2 then
 		if (spLocal:GetPropEntity("m_hObserverTarget")):IsPlayer() then
 			return spLocal:GetPropEntity("m_hObserverTarget")
@@ -336,7 +302,6 @@ local function GOTVstatus()
 		end
 	end
 end
-
 callbacks.Register("CreateMove", function()
 	pLocal = GOTVstatus()
 	if pLocal == nil then
@@ -367,22 +332,15 @@ callbacks.Register("CreateMove", function()
 		plocallive = false
 	end
 end)
-
 local function dynamicfov(Enemy)
 	local enemy_y = (Enemy:GetHitboxPosition(1) - localheadbox):Angles().y
 	local own_eye = engine.GetViewAngles().y
-
 	local needfov = math.abs(own_eye - enemy_y)
-
 	if math.abs(own_eye) + math.abs(enemy_y) >= (180 - math.abs(own_eye)) + (180 - math.abs(enemy_y)) then
 		needfov = (180 - math.abs(own_eye)) + (180 - math.abs(enemy_y))
 	end
-
 	return math.max(needfov, 20) + 5
 end
-
-
-
 local function eyetoneedyangle(enemy_x, enemy_y, own_eyex, own_eyey)
 	if enemy_x > 180 then
 		enemy_x = -(360 - enemy_x)
@@ -390,31 +348,25 @@ local function eyetoneedyangle(enemy_x, enemy_y, own_eyex, own_eyey)
 	if enemy_y > 180 then
 		enemy_y = -(360 - enemy_y)
 	end
-
 	local needx = own_eyex - enemy_x
 	local needy = own_eyey - enemy_y
-
 	if needx > 180 then
 		needx = needx - 360
 	elseif needx < -180 then
 		needx = needx + 360
 	end
-
 	if needy > 180 then
 		needy = needy - 360
 	elseif needy < -180 then
 		needy = needy + 360
 	end
-
 	return needx, needy
 end
-
 local function detectEnemydir(Enemy)
 	if Enemy == nil then return false, 180 end
 	local enemy_y = ((Enemy:GetHitboxPosition(1) - pLocal:GetHitboxPosition(1)):Angles()).y
 	local own_eyey = (engine.GetViewAngles()).y
 	local needy = 0
-
 	if (own_eyey >= 0 and enemy_y >= 0) or (own_eyey < 0 and enemy_y < 0) then
 		needy = math.floor(math.abs(own_eyey - enemy_y))
 		if enemy_y < own_eyey then
@@ -437,10 +389,8 @@ local function detectEnemydir(Enemy)
 	end
 	local backwardangle = 0
 	if needy < 0 then backwardangle = needy + 180 else backwardangle = needy - 180 end
-
 	return needy >= 0, backwardangle
 end
-
 local function stepchangeviewanglemain(own_eyex, enemy_x, own_eyey, enemy_y, step)
 	local needx = nil
 	local needy = nil
@@ -453,7 +403,6 @@ local function stepchangeviewanglemain(own_eyex, enemy_x, own_eyey, enemy_y, ste
 	else
 		needx = math.abs((own_eyex - enemy_x))
 	end
-
 	if (own_eyey >= 0 and enemy_y >= 0) or (own_eyey < 0 and enemy_y < 0) then
 		needy = math.abs(own_eyey - enemy_y)
 		if enemy_y < own_eyey then
@@ -474,23 +423,17 @@ local function stepchangeviewanglemain(own_eyex, enemy_x, own_eyey, enemy_y, ste
 			end
 		end
 	end
-
 	if math.abs(needx) < step then
 		stepx = math.abs(needx)
 	end
-
 	if needx >= 0 then
 		x = stepx
 	else
 		x = -stepx
 	end
-
-
-
 	if math.abs(needy) < step then
 		stepy = math.abs(needy)
 	end
-
 	if needy >= 0 then
 		y = stepy
 	else
@@ -498,9 +441,6 @@ local function stepchangeviewanglemain(own_eyex, enemy_x, own_eyey, enemy_y, ste
 	end
 	engine.SetViewAngles(EulerAngles(own_eyex + x, own_eyey + y, 0))
 end
-
-
-
 local function smoothaim(Enemy, step, baim)
 	if angle ~= 0 or Enemy == nil then return end
 	if weaponClass == "shared" then return false end
@@ -531,7 +471,6 @@ local function smoothaim(Enemy, step, baim)
 		return false
 	end
 end
-
 local function lockteammate(Enemy, step)
 	if angle ~= 0 or Enemy == nil then return end
 	if weaponClass == "shared" then return false end
@@ -548,43 +487,28 @@ local function lockteammate(Enemy, step)
 		return true
 	end
 end
-
-
-
-
-
-
-
-
 local function isVisible(entity)
 	--checking local entity for valid
 	-- local local_entity = entities.GetLocalPlayer()
 	-- if not local_entity or not local_entity:IsAlive() then
 	-- 	return
 	-- end
-
 	--local_eye is our view offset
 	local local_eye = pLocal:GetAbsOrigin() +
 		Vector3(0, 0, pLocal:GetPropFloat("localdata", "m_vecViewOffset[2]"))
-
 	local FIRST_HITBOX_NUMBER = 0;
 	local LAST_HITBOX_NUMBER = 7;
-
 	--iterating over all hitboxes to check them to visibility
 	for current_hitbox = FIRST_HITBOX_NUMBER, LAST_HITBOX_NUMBER, 1 do
 		local trace_to_hitbox = engine.TraceLine(Vector3(local_eye.x, local_eye.y, local_eye.z),
 			entity:GetHitboxPosition(current_hitbox))
-
 		--checking for contents to get trace hitting something or not
 		if trace_to_hitbox.contents == 0 then
 			return true
 		end
 	end
-
 	return false
 end
-
-
 local function enemyislook(Enemy)
 	if Enemy == nil then return false end
 	local targetDirection = localheadbox - Enemy:GetHitboxPosition(1);
@@ -597,10 +521,6 @@ local function enemyislook(Enemy)
 		return false
 	end
 end
-
-
-
-
 local function islook(Enemy, hitboxnum)
 	if Enemy == nil then return false end
 	local targetDirection = Enemy:GetHitboxPosition(hitboxnum) - localheadbox
@@ -608,7 +528,6 @@ local function islook(Enemy, hitboxnum)
 	local targetAngles = targetDirection:Angles()
 	local myeye = engine.GetViewAngles()
 	local nx, ny = eyetoneedyangle(myeye.x, myeye.y, targetAngles.x, targetAngles.y)
-
 	if targetDistance < 400 and hitboxnum < 9 then
 		return math.abs(nx) < 20 and math.abs(ny) < 15
 	elseif targetDistance < 1500 then
@@ -617,9 +536,6 @@ local function islook(Enemy, hitboxnum)
 		return math.abs(nx) < 40 and math.abs(ny) < 30
 	end
 end
-
-
-
 local function lockonitlegprecalc(Enemy)
 	if Enemy == nil then return 1 end
 	if angle ~= 0 or get_weapon_class(localweaponid) == "shared" or get_weapon_class(localweaponid) == "SHIELD" then
@@ -633,20 +549,17 @@ local function lockonitlegprecalc(Enemy)
 	local bestfraction = rfoot.fraction
 	local tra = rfoot
 	local hitboxnumber = 12
-
 	if Distance > 300 then
 		if bestfraction < rcalf.fraction then
 			bestfraction = rfoot.fraction
 			tra = rcalf
 			hitboxnumber = 10
 		end
-
 		if bestfraction < lcalf.fraction then
 			bestfraction = lcalf.fraction
 			tra = lcalf
 			hitboxnumber = 9
 		end
-
 		if bestfraction < lfoot.fraction then
 			bestfraction = lfoot.fraction
 			tra = lfoot
@@ -659,14 +572,12 @@ local function lockonitlegprecalc(Enemy)
 			hitboxnumber = 11
 		end
 	end
-
 	if tra == nil or bestfraction < 0.95 then
 		return 1
 	else
 		return hitboxnumber
 	end
 end
-
 local function lockonitlegac(Enemy, hitboxnumber, step, distance)
 	if hitboxnumber ~= 1 and Enemy ~= nil then
 		if get_weapon_class(pLocal:GetWeaponID()) == "shared" or get_weapon_class(pLocal:GetWeaponID()) == "SHIELD" then return end
@@ -683,16 +594,12 @@ local function lockonitlegac(Enemy, hitboxnumber, step, distance)
 		return false
 	end
 end
-
 local function lockdrone(Drone, step)
 	if angle ~= 0 then return end
-
 	local tra = engine.TraceLine(Drone:GetAbsOrigin(), localheadbox)
 	if tra == nil then return end
-
 	if tra.fraction > 0.8 then
 		if get_weapon_class(localweaponid) == "shared" or get_weapon_class(localweaponid) == "SHIELD" then return end
-
 		local enemyAngles = (Drone:GetAbsOrigin() - localheadbox):Angles()
 		local enemy_x = enemyAngles.x
 		local enemy_y = enemyAngles.y
@@ -702,8 +609,6 @@ local function lockdrone(Drone, step)
 		stepchangeviewanglemain(own_eyex, enemy_x, own_eyey, enemy_y, step)
 	end
 end
-
-
 local cacheswitch = false
 local function switchtobaim(switch)
 	if switch == nil or switch == cacheswitch then return end
@@ -720,9 +625,6 @@ local function switchtobaim(switch)
 		end
 	end
 end
-
-
-
 local function autoreloadback(bedistance)
 	local weaponvalid = weapons_table[weaponClass]
 	if weaponvalid == nil or not shieldreturn:GetValue() or input.IsButtonDown(69) then
@@ -740,10 +642,6 @@ local function autoreloadback(bedistance)
 		return pwentitie:GetPropFloat("LocalActiveWeaponData", "m_flNextPrimaryAttack") - globals.CurTime() > 1.3
 	end
 end
-
-
-
-
 callbacks.Register("CreateMove", function(ucmd)
 	if plocallive then
 		beaimme = false
@@ -789,8 +687,6 @@ callbacks.Register("CreateMove", function(ucmd)
 		cy = 0
 		sx = 0
 		sy = 0
-
-
 		if client.GetConVar("game_type") == "6" and lockmdrone:GetValue() ~= nil and lockmdrone:GetValue() ~= 0 and lockcdrone:GetValue() ~= nil and lockcdrone:GetValue() ~= 0 then
 			local Drones = entities.FindByClass("CDrone")
 			if Drones ~= nil then
@@ -834,7 +730,6 @@ callbacks.Register("CreateMove", function(ucmd)
 						local targetAngles = targetDirection:Angles()
 						local enemyeye = Enemy:GetProp("m_angEyeAngles")
 						local _, ny = eyetoneedyangle(enemyeye.x, enemyeye.y, targetAngles.x, targetAngles.y)
-
 						if (get_weapon_class(Enemy:GetWeaponID()) == "SHIELD" and math.abs(ny) < 64) or (get_weapon_class(Enemy:GetWeaponID()) ~= "SHIELD" and math.abs(ny) >= 108) then
 							if Enemy:GetIndex() ~= localindex and Enemy:GetPropInt("m_nSurvivalTeam") ~= localteamid then
 								table.insert(shieldguy, Enemy)
@@ -871,6 +766,7 @@ callbacks.Register("CreateMove", function(ucmd)
 							teammatename = isMutedPlayerName(Enemy)
 							teammatedistance = (Enemy:GetAbsOrigin() - localabs):Length()
 							teammateweapon = get_weapon_class(Enemy:GetWeaponID())
+							teammatehp = teammate:GetPropInt("m_iHealth")
 						end
 					end
 				end
@@ -904,13 +800,13 @@ callbacks.Register("CreateMove", function(ucmd)
 							teammatename = isMutedPlayerName(Enemy)
 							teammatedistance = (Enemy:GetAbsOrigin() - localabs):Length()
 							teammateweapon = get_weapon_class(Enemy:GetWeaponID())
+							teammatehp = teammate:GetPropInt("m_iHealth")
 						end
 					end
 				end
 			else
 				onlyshieldguyin = false
 			end
-
 			if BestEnemy == nil then
 				BestDistance = CBestDistance
 				BestEnemy = CBestEnemy
@@ -941,7 +837,6 @@ callbacks.Register("CreateMove", function(ucmd)
 						end
 					end
 				end
-
 				tracename = {}
 				tracedistance = {}
 				tracegun = {}
@@ -950,7 +845,6 @@ callbacks.Register("CreateMove", function(ucmd)
 					if Enemy:IsAlive() and Enemy:GetIndex() ~= localindex then
 						local Distance = (Enemy:GetAbsOrigin() - localabs):Length()
 						local maxDistance = math.floor(totaldistance / enemyalive)
-
 						if Distance < maxDistance and enemyalive <= 6 then
 							if enemyislook(Enemy) then
 								local trace = engine.TraceLine(Enemy:GetHitboxPosition(1), localheadbox)
@@ -969,7 +863,6 @@ callbacks.Register("CreateMove", function(ucmd)
 						end
 					end
 				end
-
 				if weaponClass == "SHIELD" or weaponClass == "kniefetc" then
 					if weaponClass == "SHIELD" then
 						gui.SetValue("esp.chams.localweapon.visible", 2)
@@ -979,17 +872,6 @@ callbacks.Register("CreateMove", function(ucmd)
 					shieldhit = (BestDistance < 76)
 				else
 					gui.SetValue("esp.chams.localweapon.visible", 0)
-					-- if weaponClass == "rifle" then
-					-- 	if BestDistance <= 2800 then
-					-- 		gui.SetValue("rbot.hitscan.accuracy.rifle.hitchance", 50)
-					-- 		gui.SetValue("rbot.hitscan.accuracy.rifle.hitchanceburst", 50)
-					-- 		gui.SetValue("rbot.hitscan.accuracy.rifle.mindamage", 10)
-					-- 	else
-					-- 		gui.SetValue("rbot.hitscan.accuracy.rifle.hitchance", 85)
-					-- 		gui.SetValue("rbot.hitscan.accuracy.rifle.hitchanceburst", 85)
-					-- 		gui.SetValue("rbot.hitscan.accuracy.rifle.mindamage", 21)
-					-- 	end
-					-- end
 				end
 				Closedto = islook(BestEnemy, 1)
 				local cvelocity = 0
@@ -998,18 +880,14 @@ callbacks.Register("CreateMove", function(ucmd)
 				local cvy = CBestEnemy:GetPropFloat('localdata', 'm_vecVelocity[1]')
 				local vx = BestEnemy:GetPropFloat('localdata', 'm_vecVelocity[0]')
 				local vy = BestEnemy:GetPropFloat('localdata', 'm_vecVelocity[1]')
-
 				if cvx ~= nil then
 					cvelocity = math.floor(math.min(10000, math.sqrt(cvx * cvx + cvy * cvy) + 0.5))
 				end
-
 				if vx ~= nil then
 					bvelocity = math.floor(math.min(10000, math.sqrt(vx * vx + vy * vy) + 0.5))
 				end
-
 				local cvbest = cvelocity >= bvelocity
 				nvelocity = cvbest and cvelocity or bvelocity
-
 				local hascalledattack3 = false
 				autolockmessage = ""
 				if autolock:GetValue() then
@@ -1040,12 +918,10 @@ callbacks.Register("CreateMove", function(ucmd)
 					if localhp <= 90 and localweaponid ~= 37 then
 						if attacker ~= nil then
 							local trace = engine.TraceLine(attacker:GetHitboxPosition(1), localheadbox)
-
 							if trace ~= nil and trace.fraction >= 0.2 then
 								if enemyislook(attacker) then
 									Closedto = islook(attacker, 1)
 									gui.SetValue("rbot.aim.target.selection", 2)
-
 									if not Closedto and not smoothon then
 										smoothon = smoothaim(attacker, aimsmoothstep:GetValue(), false)
 									end
@@ -1060,7 +936,6 @@ callbacks.Register("CreateMove", function(ucmd)
 							else
 								gui.SetValue("rbot.aim.target.selection", 2)
 							end
-
 							if localhp <= 109 then
 								if BestDistance < 1750 and not Closedto and not smoothon then
 									smoothon = smoothaim(BestEnemy, aimsmoothstep:GetValue(), false)
@@ -1080,7 +955,6 @@ callbacks.Register("CreateMove", function(ucmd)
 							smoothon = smoothaim(BestEnemy, aimsmoothstep:GetValue(), false)
 						end
 						normaljumper = true
-
 						if cvbest then
 							normaljumpername = CBestEnemy:GetName()
 							normaljumpernameDistance = CBestDistance
@@ -1092,12 +966,10 @@ callbacks.Register("CreateMove", function(ucmd)
 						normaljumper = false
 					end
 				end
-
 				if hascalledattack3 == false and iscommandattack3 == true then
 					client.Command("-attack", true);
 					iscommandattack3 = false
 				end
-
 				bx, by = client.WorldToScreen(BestEnemy:GetAbsOrigin())
 				bevisible = false
 				benoscreen = false
@@ -1109,17 +981,14 @@ callbacks.Register("CreateMove", function(ucmd)
 				else
 					benoscreen = true
 				end
-
 				cvisible = false
 				cnoscreen = false
 				needCdisplay = false
-
 				if Cowner ~= owner then
 					needCdisplay = true
 					cdistance = math.floor(CBestDistance)
 					cname = Cowner
 					cx, cy = client.WorldToScreen(CBestEnemy:GetAbsOrigin())
-
 					if cx ~= nil and cy ~= nil then
 						if isVisible(CBestEnemy) then
 							cvisible = true
@@ -1139,7 +1008,6 @@ callbacks.Register("CreateMove", function(ucmd)
 					shieldprotectenable = false
 				end
 			end
-
 			needoffaim = false
 			local shieldids = {}
 			local bestShieldisUseShield = false
@@ -1162,7 +1030,6 @@ callbacks.Register("CreateMove", function(ucmd)
 						table.insert(duckshieldny, shieldguyny[k])
 					end
 				end
-
 				for k, shield in pairs(duckshield) do
 					local sDistance = (localabs - shield:GetAbsOrigin()):Length()
 					if sDistance < bestduckShieldDistance then
@@ -1172,7 +1039,6 @@ callbacks.Register("CreateMove", function(ucmd)
 						bestduckny = duckshieldny[k]
 					end
 				end
-
 				bestShieldisUseShield = (bestShield ~= nil and bestShield:GetWeaponID() == 37) or
 					(#duckshield ~= 0 and bestduckShieldDistance < bestShieldDistance)
 				if bestShield ~= nil then
@@ -1231,7 +1097,6 @@ callbacks.Register("CreateMove", function(ucmd)
 						end
 					end
 				end
-
 				if bestduckShield ~= nil then
 					if bestduckShieldDistance < 500 then
 						shieldprotectenable = false
@@ -1249,7 +1114,6 @@ callbacks.Register("CreateMove", function(ucmd)
 						end
 					end
 				end
-
 				if input.IsButtonDown(hitshieldleg:GetValue()) and bestShield ~= nil and not aimingleg then
 					local leghitbox = lockonitlegprecalc(bestShield)
 					aimingleg = lockonitlegac(bestShield, leghitbox, aimsmoothstep:GetValue(), bestShieldDistance)
@@ -1258,7 +1122,6 @@ callbacks.Register("CreateMove", function(ucmd)
 				if (bestShieldDistance < 130 or bestduckShieldDistance < 130) and cshieldhit:GetValue() and bestShieldisUseShield and not backward then
 					backward = true
 				end
-
 				local needtoswitchbaim = false
 				if notshield:GetValue() then
 					if not calledsny then
@@ -1272,7 +1135,6 @@ callbacks.Register("CreateMove", function(ucmd)
 				switchtobaim(needtoswitchbaim)
 			elseif BestEnemy ~= nil and beshieldid == BestEnemy:GetIndex() then
 				switchtobaim(false)
-
 				beshieldid = -1
 				if backward and cshieldhit:GetValue() then
 					backward = false
@@ -1285,7 +1147,6 @@ callbacks.Register("CreateMove", function(ucmd)
 				iscommandattack1 = false
 			end
 		end
-
 		if BestDistance <= math.floor(totaldistance / enemyalive) then
 			if BestDistance <= math.floor(((totaldistance / enemyalive) * 1) / 5) or BestDistance < 1000 or CBestDistance < 1000 or bestShieldDistance < 1000 then
 				setColors(220, 20, 60)
@@ -1297,10 +1158,8 @@ callbacks.Register("CreateMove", function(ucmd)
 		else
 			setColors(255, 255, 255)
 		end
-
 		if angle ~= 0 or smoothon or needoffaim or aimteammate then
 			gui.SetValue("rbot.antiaim.condition.use", 0)
-
 			if angle ~= 0 or needshieldprotect then
 				if weaponClass == "SHIELD" or weaponClass == "kniefetc" then
 					client.Command("unbind mouse1", true)
@@ -1310,7 +1169,6 @@ callbacks.Register("CreateMove", function(ucmd)
 			else
 				client.Command("bind mouse1 +attack", true)
 			end
-
 			if aimstatus ~= '"Off"' and not smoothon and not needoffaim and not aimteammate and gui.GetValue("esp.master") then
 				client.Command("play training/light_on", true)
 			end
@@ -1318,7 +1176,6 @@ callbacks.Register("CreateMove", function(ucmd)
 		else
 			client.Command("bind mouse1 +attack", true)
 			gui.SetValue("rbot.antiaim.condition.use", 1)
-
 			local killsoundcmd = ""
 			if aimstatus ~= '"Automatic"' then
 				gui.SetValue("rbot.aim.enable", "Automatic")
@@ -1340,10 +1197,8 @@ callbacks.Register("CreateMove", function(ucmd)
 			legit_aa_switch:GetValue()
 	end
 end)
-
 local function steptotargetangle(angle, targetangle, aimstep)
 	if angle == targetangle then return end
-
 	if math.abs(angle) ~= 180 then
 		if (angle >= 90 and targetangle <= -90) or (angle <= -90 and targetangle >= 90) then
 			targetangle = 180
@@ -1355,22 +1210,17 @@ local function steptotargetangle(angle, targetangle, aimstep)
 			angle = -180
 		end
 	end
-
 	if targetangle == 180 and angle < 0 then
 		targetangle = -180
 	end
-
 	local increment = (targetangle > angle) and aimstep or -aimstep
 	angle = angle + increment
-
 	if (increment > 0 and angle >= targetangle) or (increment < 0 and angle <= targetangle) then
 		angle = targetangle
 	end
-
 	local state = angle .. "Desync"
 	gui.SetValue("rbot.antiaim.base", state)
 end
-
 callbacks.Register("CreateMove", function(ucmd)
 	if plocallive then
 		if not disablesetprop:GetValue() then
@@ -1394,7 +1244,6 @@ callbacks.Register("CreateMove", function(ucmd)
 			local sign = aa_side and 1 or -1
 			roll = 40 * sign
 			targetde = 58 * sign
-
 			if backward then
 				roll = 40 * sign
 				targetde = 40 * sign
@@ -1478,7 +1327,6 @@ callbacks.Register("CreateMove", function(ucmd)
 			local in_water = pLocal:GetProp("m_nWaterLevel") ~=
 				0                                                -- avoid auto strafe in water because it reduces speed
 			local adpressed = false
-
 			if input.IsButtonDown(65) or input.IsButtonDown(68) then
 				adpressed = true
 			end
@@ -1487,7 +1335,6 @@ callbacks.Register("CreateMove", function(ucmd)
 			else
 				client.Command("-duck", true);
 			end
-
 			f, n = f + 1, isTouchingGround;
 			gui.SetValue("misc.strafe.enable", true)
 			gui.SetValue("misc.strafe.air",
@@ -1496,7 +1343,6 @@ callbacks.Register("CreateMove", function(ucmd)
 			steptotargetangle(angle, stargetangle, aastep:GetValue())
 		else
 			--gui.SetValue("misc.strafe.enable", false)
-
 			if not input.IsButtonDown(17) and pLocal:GetProp('m_flDuckAmount') >= 0.1 then
 				client.Command("-duck", true);
 			end
@@ -1522,7 +1368,6 @@ callbacks.Register("CreateMove", function(ucmd)
 		end
 	end
 end);
-
 local function switch()
 	if plocallive then
 		if legit_aa_key:GetValue() ~= 0 then
@@ -1541,8 +1386,6 @@ local function switch()
 	if disablevisual:GetValue() then
 		gui.SetValue("esp.master", 0)
 		gui.SetValue("misc.log.console", 0)
-
-
 		return
 	else
 		if not gui.GetValue("esp.master") then gui.SetValue("esp.master", 1) end
@@ -1554,11 +1397,8 @@ local function switch()
 		draw.Text(screen_w / 2 - 738, screen_h / 2, "Fov:")
 		draw.Text(screen_w / 2 - 783, screen_h / 2 + 40, "自动穿墙:")
 		draw.Text(screen_w / 2 - 783, screen_h / 2 + 60, "解析器:")
-
-
 		draw.Color(255, 0, 0, 255)
 		draw.Text(screen_w / 2 - 688, screen_h / 2, gui.GetValue("rbot.aim.target.fov"))
-
 		local switch_awall_key_value = switch_awall_key:GetValue()
 		if switch_awall then
 			draw.Color(0, 255, 0, 255)
@@ -1567,7 +1407,6 @@ local function switch()
 			draw.Color(255, 0, 0, 255)
 			draw.Text(screen_w / 2 - 688, screen_h / 2 + 40, "关")
 		end
-
 		if gui.GetValue("rbot.aim.posadj.resolver") ~= 0 then
 			draw.Color(0, 255, 0, 255)
 			draw.Text(screen_w / 2 - 688, screen_h / 2 + 60, "开")
@@ -1594,7 +1433,6 @@ local function switch()
 					draw.Text(screen_w / 2, screen_h / 2 + 200,
 						math.floor(normaljumpernameDistance) .. " 跳雷!:" .. normaljumpername);
 				end
-
 				if #tracename ~= 0 then
 					draw.SetFont(font)
 					draw.Color(255, 255, 255, 255)
@@ -1631,7 +1469,6 @@ local function switch()
 					draw.SetFont(fontA)
 					draw.Text(screen_w / 2 - 180, screen_h / 2 + 140, "最近敌人不在屏幕上!")
 				end
-
 				if Nobest and not cbeaimme then
 					draw.SetFont(font);
 					draw.Text(screen_w / 2 - 400, screen_h / 2 - 250, "安全")
@@ -1640,13 +1477,11 @@ local function switch()
 					draw.SetFont(fontA)
 					draw.Text(screen_w / 2 - 400, screen_h / 2 - 250, "被最佳敌人瞄准!")
 				end
-
 				if cbeaimme then
 					draw.SetFont(fontA)
 					draw.Text(screen_w / 2 - 400, screen_h / 2 - 300, "被最近敌人瞄准!")
 				end
 				draw.SetFont(font);
-
 				if bestShieldName ~= nil then
 					draw.Text(screen_w / 2, screen_h / 2 - 300, math.floor(bestShieldDistance))
 					draw.Text(screen_w / 2 + 200, screen_h / 2 - 300, bestShieldName .. "(盾)")
@@ -1670,10 +1505,12 @@ local function switch()
 					if teammateweapon == "RemoteBomb" and teammatedistance < 1500 then
 						draw.Color(255, 0, 0, 255)
 						draw.SetFont(fontA)
+						draw.Text(screen_w / 2 - 500, screen_h / 2 + 50, math.floor(teammatehp))
 						draw.Text(screen_w / 2 - 200, screen_h / 2 + 50, math.floor(teammatedistance))
 						draw.Text(screen_w / 2 + 100, screen_h / 2 + 50, engtozhcnweaponlist[teammateweapon])
 						draw.Text(screen_w / 2 + 400, screen_h / 2 + 50, teammatename .. "(友)")
 					else
+						draw.Text(screen_w / 2 - 100, screen_h / 2 + 50, math.floor(teammatehp))
 						draw.Text(screen_w / 2, screen_h / 2 + 50, math.floor(teammatedistance))
 						draw.Text(screen_w / 2 + 100, screen_h / 2 + 50, engtozhcnweaponlist[teammateweapon])
 						draw.Text(screen_w / 2 + 200, screen_h / 2 + 50, teammatename .. "(友)")
@@ -1686,12 +1523,10 @@ local function switch()
 		if smooth:GetValue() then
 			draw.Text(screen_w / 2 - 782, screen_h / 2 + 20, smoothon and "平滑自瞄运行!" or "平滑自瞄")
 		end
-
 		if autoshield:GetValue() then
 			draw.Text(screen_w / 2 - 782, screen_h / 2 - 40,
 				string.find(weaponstr, "shield") and "自动打针" or "自动打针 没盾")
 		end
-
 		if notshield:GetValue() then
 			if math.floor(bestShieldDistance) < 2000 or math.floor(bestduckShieldDistance) < 2000 then
 				local outvalue = bestShieldDistance >= bestduckShieldDistance and math.floor(bestduckShieldDistance) or
@@ -1703,7 +1538,6 @@ local function switch()
 		end
 		draw.SetFont(font1);
 		draw.Color(255, 255, 255, 255)
-
 		if autolock:GetValue() then
 			if localhp <= 90 then
 				draw.Text(screen_w / 2 - 782, screen_h / 2 - 80, "自动锁攻击者")
@@ -1714,7 +1548,6 @@ local function switch()
 				draw.Text(screen_w / 2 - 782, screen_h / 2 - 80, "自动锁")
 			end
 		end
-
 		if shieldreturn:GetValue() then
 			draw.Text(screen_w / 2 - 782, screen_h / 2 - 120, "换弹背身")
 		end
@@ -1728,11 +1561,9 @@ local function switch()
 		if antiteammate:GetValue() then
 			draw.Text(screen_w / 2 - 782, screen_h / 2 - 180, "自动反队友炸")
 		end
-
 		if backward then
 			draw.Text(screen_w / 2 - 782, screen_h / 2 - 200, "背身大盾模式")
 		end
-
 		draw.SetFont(fontA);
 		if lockatdrone then
 			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160, "瞄准无人机: " .. dronedistance)
@@ -1741,7 +1572,6 @@ local function switch()
 				"AimLeg! " .. math.floor(bestShieldDistance))
 		elseif aimteammate then
 			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160, "锁住队友!")
-
 		elseif smoothon then
 			draw.Text(screen_w / 2 - 550, screen_h / 2 - 160, "平滑自瞄锁住!")
 		elseif needoffaim and (bestny or bestduckny) then
@@ -1776,11 +1606,7 @@ local function switch()
 		end
 	end
 end
-
 callbacks.Register("Draw", "switch", switch);
-
-
-
 client.AllowListener("weapon_fire");
 client.AllowListener("bullet_impact");
 client.Command("unbind mouse3;unbind shift;unbind q", true)
