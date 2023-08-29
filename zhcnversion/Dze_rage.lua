@@ -130,6 +130,7 @@ local teammateweapon = ""
 local teammatehp = 0
 local onlyshieldguyin = false
 local aimteammate = false
+local antibreachtime = 0
 gui.SetValue("rbot.master", true)
 local weapons_table = {
 	["asniper"] = true,
@@ -719,6 +720,12 @@ callbacks.Register("CreateMove", function(ucmd)
 				dronedistance = BestDDistance
 			end
 		elseif client.GetConVar("game_type") == "6" then
+			if antibreachtime + 10 > globals.CurTime() then
+				if globals.TickCount() % 10 == 0 and not input.IsButtonDown(fasthop:GetValue()) then
+					ucmd.buttons =
+						bit.lshift(1, 5)
+				end
+			end
 			enemyalive = 0
 			for i, Enemy in pairs(Enemies) do
 				if Enemy:IsAlive() then
@@ -896,10 +903,7 @@ callbacks.Register("CreateMove", function(ucmd)
 						if trace ~= nil and trace.fraction >= 0.9 then
 							if teammateweapon == "RemoteBomb" and teammatedistance < 500 and enemyislook(teammate) then
 								aimteammate = lockteammate(teammate, aimsmoothstep:GetValue())
-								if globals.TickCount() % 10 == 0 and not input.IsButtonDown(fasthop:GetValue()) then
-									ucmd.buttons =
-										bit.lshift(1, 5)
-								end
+								antibreachtime = globals.CurTime()
 							end
 							if forcehitteammate:GetValue() ~= 0 and input.IsButtonDown(forcehitteammate:GetValue()) then
 								if not aimteammate then aimteammate = lockteammate(teammate, aimsmoothstep:GetValue()) end
