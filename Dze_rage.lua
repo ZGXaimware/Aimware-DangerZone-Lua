@@ -455,7 +455,7 @@ end
 local function lockteammate(Enemy, step)
 	if angle ~= 0 or Enemy == nil then return end
 	if weaponClass == "shared" then return false end
-	if (smooth:GetValue()) then
+	if smooth:GetValue() and antiteammate:GetValue() then
 		local enemyangle = nil
 		if velo > 260 then return false end
 		enemyangle = (Enemy:GetHitboxPosition(3) - pLocal:GetHitboxPosition(1)):Angles()
@@ -875,7 +875,7 @@ callbacks.Register("CreateMove", function(ucmd)
 					if antiteammate:GetValue() and teammate ~= nil then
 						local trace = engine.TraceLine(teammate:GetHitboxPosition(3), localheadbox)
 						if trace ~= nil and trace.fraction >= 0.9 then
-							if teammateweapon == "RemoteBomb" and teammatedistance < 450 then
+							if teammateweapon == "RemoteBomb" and teammatedistance < 500 and enemyislook(teammate) then
 								aimteammate = lockteammate(teammate, aimsmoothstep:GetValue())
 								if globals.TickCount() % 10 == 0 and not input.IsButtonDown(fasthop:GetValue()) then
 									ucmd.buttons =
