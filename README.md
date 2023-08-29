@@ -1,5 +1,5 @@
 # Aimware-DangerZone-Lua<br />
-**Last Updated 2023/8/25 1.1.7(Beta)(Not Tested)(New Version)**<br />
+**Last Updated 2023/8/25 1.1.8(Beta)(New Version)**<br />
 
 （&nbsp;）Tips:the lua with "DZe_" name is not consider as a stable release, if you need use it safety please use branch oldversion<br />
 （&nbsp;）Tips:the lua with "DZe_" name is for new version config<br />
@@ -134,6 +134,13 @@ Updated 1.1.7:<br />
 Provided Chinese Version<br />
 <DZe_sniffer.lua> Updated NewFunction That you cant listen on teammate exit/join<br />
 <DZe_sniffer.lua> Removed old detect purchase way<br />
+<br />
+Updated 1.1.8:<br />
+<DZe_rage.lua> New function to auto anti teammate's remotebomb <br />
+<DZe_rage.lua> add function that you can force hit your teammate's chest by press a key<br />
+<DZe_visual.lua>add new remotebomb distance indicator<br />
+<DZe_sniffer.lua> Bug for purchase sniffer fixed<br />
+<DZe_rage.lua>when use Granade etc will disable desync now<br />
 <br />
 
 

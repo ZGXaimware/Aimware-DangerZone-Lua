@@ -424,13 +424,13 @@ local function stepchangeviewanglemain(own_eyex, enemy_x, own_eyey, enemy_y, ste
 	engine.SetViewAngles(EulerAngles(own_eyex + x, own_eyey + y, 0))
 end
 local function smoothaim(Enemy, step, baim)
-	if angle ~= 0 or Enemy == nil then return end
+	if not (angle == 0) or Enemy == nil then return end
 	if weaponClass == "shared" then return false end
 	if (smooth:GetValue()) then
 		gui.SetValue("rbot.aim.target.fov", aimsmoothfov:GetValue());
 		local enemyangle = nil
 		if weaponClass == "SHIELD" or weaponClass == "kniefetc" or weaponClass == "RemoteBomb" then
-			local Distance = math.abs((Enemy:GetAbsOrigin() - pLocal:GetAbsOrigin()):Length())
+			local Distance = math.abs((Enemy:GetAbsOrigin() - localabs):Length())
 			if Distance > 450 then return false end
 			enemyangle = (Enemy:GetHitboxPosition(3) - pLocal:GetHitboxPosition(1)):Angles()
 		else
@@ -454,8 +454,13 @@ local function smoothaim(Enemy, step, baim)
 	end
 end
 local function lockteammate(Enemy, step)
-	if angle ~= 0 or Enemy == nil then return end
+	if not (angle == 0) or Enemy == nil then return end
 	if weaponClass == "shared" then return false end
+	if weaponClass == "kniefetc" or weaponClass == "RemoteBomb" then
+		if math.abs((Enemy:GetAbsOrigin() - localabs):Length()) > 500 then
+			return false
+		end
+	end
 	if smooth:GetValue() and antiteammate:GetValue() then
 		local enemyangle = nil
 		if velo > 260 then return false end
@@ -468,6 +473,7 @@ local function lockteammate(Enemy, step)
 		stepchangeviewanglemain(own_eyex, enemy_x, own_eyey, enemy_y, step)
 		return true
 	end
+	return false
 end
 local function isVisible(entity)
 	--checking local entity for valid
@@ -476,7 +482,7 @@ local function isVisible(entity)
 	-- 	return
 	-- end
 	--local_eye is our view offset
-	local local_eye = pLocal:GetAbsOrigin() +
+	local local_eye = localabs +
 		Vector3(0, 0, pLocal:GetPropFloat("localdata", "m_vecViewOffset[2]"))
 	local FIRST_HITBOX_NUMBER = 0;
 	local LAST_HITBOX_NUMBER = 7;
@@ -520,7 +526,7 @@ local function islook(Enemy, hitboxnum)
 end
 local function lockonitlegprecalc(Enemy)
 	if Enemy == nil then return 1 end
-	if angle ~= 0 or get_weapon_class(localweaponid) == "shared" or get_weapon_class(localweaponid) == "SHIELD" then
+	if not (angle == 0) or get_weapon_class(localweaponid) == "shared" or get_weapon_class(localweaponid) == "SHIELD" then
 		return 1
 	end
 	local Distance = (Enemy:GetAbsOrigin() - localabs):Length()
@@ -577,7 +583,7 @@ local function lockonitlegac(Enemy, hitboxnumber, step, distance)
 	end
 end
 local function lockdrone(Drone, step)
-	if angle ~= 0 then return end
+	if not (angle == 0) then return end
 	local tra = engine.TraceLine(Drone:GetAbsOrigin(), localheadbox)
 	if tra == nil then return end
 	if tra.fraction > 0.8 then
@@ -1143,9 +1149,9 @@ callbacks.Register("CreateMove", function(ucmd)
 		else
 			setColors(255, 255, 255)
 		end
-		if angle ~= 0 or smoothon or needoffaim or aimteammate then
+		if not (angle == 0) or smoothon or needoffaim or aimteammate then
 			gui.SetValue("rbot.antiaim.condition.use", 0)
-			if angle ~= 0 or needshieldprotect then
+			if not (angle == 0) or needshieldprotect then
 				if weaponClass == "SHIELD" or weaponClass == "kniefetc" then
 					client.Command("unbind mouse1", true)
 				else
@@ -1179,7 +1185,7 @@ callbacks.Register("CreateMove", function(ucmd)
 			autoshield:GetValue() and shieldprotectenable
 		needesync = not input.IsButtonDown(fasthop:GetValue()) and
 			(weaponClass ~= "kniefetc" and weaponClass ~= "SHIELD" and localweaponid ~= 69) and
-			legit_aa_switch:GetValue()
+			legit_aa_switch:GetValue() and (localweaponid < 43 or localweaponid > 48 or not (angle == 0))
 	end
 end)
 local function steptotargetangle(angle, targetangle, aimstep)
@@ -1346,7 +1352,7 @@ callbacks.Register("CreateMove", function(ucmd)
 				if backward then
 					backward = false
 				end
-				if angle ~= 0 then
+				if not (angle == 0) then
 					steptotargetangle(angle, 0, aastep:GetValue())
 				end
 			end
@@ -1578,7 +1584,7 @@ local function switch()
 				draw.Text(screen_w / 2, screen_h / 2 - 40, "<-")
 			elseif targetde > 0 then
 				draw.Text(screen_w / 2, screen_h / 2 - 40, "->")
-			elseif angle ~= 0 then
+			elseif not (angle == 0) then
 				draw.Text(screen_w / 2, screen_h / 2 - 40, "V")
 			end
 			draw.Color(colorx, colory, colorz, 255)
