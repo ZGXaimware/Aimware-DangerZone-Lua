@@ -1,9 +1,7 @@
 # Aimware-DangerZone-Lua<br />
 **Last Updated 2023/8/25 1.1.8(Beta)(New Version)**<br />
 
-（&nbsp;）Tips:the lua with "DZe_" name is not consider as a stable release, if you need use it safety please use branch oldversion<br />
-（&nbsp;）Tips:the lua with "DZe_" name is for new version config<br />
-（&nbsp;）if you need use old config from hvhbbs or aimware you need use branch named "oldversion"<br />
+（&nbsp;）Tips1:Use low aastep/aimstep angle and not enable unsafe function that u will never been banned<br />
 
 （&nbsp;）Tips2:if your suffer performance issue you should consider turn off some function<br />
 （&nbsp;）Like part of snapline ,ESP,distance visual,etc <br />
@@ -42,7 +40,7 @@ part of function showcase:<br />
 
 
 
-DZe.lua:<br />
+DZe_rage.lua:<br />
 ![Alt text](/imgs/dze1.png)
 ![Alt text](/imgs/dze2.png)
   （&nbsp;）Aimstep by Distance(AutoLock & SmoothAim)<br />
@@ -56,6 +54,9 @@ DZe.lua:<br />
   （&nbsp;）AimDrone(press key to autoaim recent Drone(Manual controlled or Has Cargo)<br />
   （&nbsp;）LegitAA(Desync) and roll AA switch<br />
   （&nbsp;）ShieldBot (function as kniefbot but support all dz items)<br />
+  （&nbsp;）Anti-teammate (function anti-teammate breach you)<br />
+  （&nbsp;）ForcehitTeammate (press key to force baim teammate)<br />
+
 <br />
 DZe_visual.lua:<br />
 ![Alt text](/imgs/dzev.png)
@@ -69,12 +70,16 @@ DZe_visual.lua:<br />
   （&nbsp;）show ammo status on bottom<br />
   （&nbsp;）Show Barrel,RemoteBomb on screen by draw extra photo on it<br />
 <br />
+
 DZe_sniffer.lua:<br />
 ![Alt text](/imgs/dzes.png)
   （&nbsp;）reveal player tablebuy event and print on cheat console or partyapi (Example "菲尼克斯老张 purchased scout")<br />
   （&nbsp;）check player who disconnected and print on cheat console or partyapi(Example "Warmup Escaped 特训飓风JF" ,"Defeat Exit 尼古拉斯老王")<br />
   （&nbsp;）Check Player who is respawnor partyapi (Example Respawn: Bilibili主播风云错爱)<br />
   （&nbsp;）reveal player team and print it on cheat console or partyapi <br />
+  （&nbsp;）reveal paradrop create or destroy <br />
+  （&nbsp;）reveal players' respawn status<br />
+
 <br />
 
 
