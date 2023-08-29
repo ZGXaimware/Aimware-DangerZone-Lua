@@ -1,6 +1,5 @@
 -- Aimware-DangerZone-Lua
---Last Updated 2023/8/15 1.1.5 (New Version)
-
+--Last Updated 2023/8/29 1.1.8 (New Version)
 local tab = gui.Tab(gui.Reference("Misc"), "DZesniffer", "DangerZone Elite Sniffer");
 local main_box = gui.Groupbox(tab, "Sniffer", 16, 16, 400, 0);
 local ranks_mode = gui.Combobox(main_box, "tablet.mode", "Message SendWay",

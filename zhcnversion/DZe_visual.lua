@@ -1,7 +1,5 @@
 -- Aimware-DangerZone-Lua
---Last Updated 2023/8/15 1.1.5 (New Version)
-
-
+--Last Updated 2023/8/29 1.1.8 (New Version)
 local tab = gui.Tab(gui.Reference("Visuals"), "DZevis", "特训专家视觉");
 local main_box = gui.Groupbox(tab, "ESP", 16, 16, 200, 0);
 local visual_box = gui.Groupbox(tab, "导航线", 232, 16, 200, 0);

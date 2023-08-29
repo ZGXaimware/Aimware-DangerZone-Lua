@@ -1,14 +1,9 @@
 -- Aimware-DangerZone-Lua
---Last Updated 2023/8/15 1.1.5 (New Version)
-
-
+--Last Updated 2023/8/29 1.1.8 (New Version)
 local tab = gui.Tab(gui.Reference("Visuals"), "DZevis", "DangerZone Elite Visual");
 local main_box = gui.Groupbox(tab, "ESP", 16, 16, 200, 0);
 local visual_box = gui.Groupbox(tab, "SnapLine", 232, 16, 200, 0);
 local line_box = gui.Groupbox(tab, "SubLine", 448, 16, 174, 0);
-
-
-
 local espmaster = gui.Checkbox(main_box, "vis.dzespmaster", "ESP Master Switch", 1)
 local showammo = gui.Checkbox(main_box, "vis.showammo", "Show Ammo", 1)
 local showdistance = gui.Checkbox(main_box, "vis.showdistance", "Show Distance", 1)
@@ -20,8 +15,6 @@ local removegrassmaster = gui.Checkbox(main_box, "vis.removegrassmaster", "Remov
 removegrassmaster:SetDescription("It will only makes change on game start")
 local gotvswitch = gui.Combobox(main_box, "vis.gotvswitch", "GOTV Selection", "Off", "Disable on GOTV",
 	"Force Enable on GOTV");
-
-
 local linemaster = gui.Checkbox(visual_box, "vis.dzespmaster", "Line Master Switch", 1)
 local linesubmaster = gui.Checkbox(line_box, "vis.dzespmaster", "SubLine Master Switch", 1)
 local hsmaster = gui.Checkbox(line_box, "vis.hsmaster", "Hostage Snapline", 0)
@@ -34,12 +27,6 @@ local endcirclemaster = gui.Checkbox(visual_box, "vis.endzone", "EndZone Detecto
 local shieldarmormaster = gui.Checkbox(line_box, "vis.shieldarmormaster", "Shield/Armor Snapline", 1)
 local guidemaster = gui.Checkbox(visual_box, "vis.endzone", "GuideLine(Very useful)", 1)
 local wpmaster = gui.Checkbox(line_box, "vis.wpmaster", "Weapon Snapline", 1)
-
-
-
-
-
-
 local pLocal = nil
 local font = draw.CreateFont("Microsoft Tai Le", 45, 1000);
 local fontA = draw.CreateFont("Microsoft Tai Le", 80, 1000);
