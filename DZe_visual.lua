@@ -664,7 +664,7 @@ end
 callbacks.Register("CreateMove", "RemoteBombDetector", RemoteBombDetector)
 callbacks.Register("CreateMove", "BarrelsDetector", BarrelsDetector)
 callbacks.Register("Draw", "DrawRB", function()
-	if plocallive then
+	if plocallive and gui.GetValue("esp.master") then
 		for _, v in pairs(rbvec) do
 			draw.SetTexture(charge_image.texture)
 			draw.Color(255, 255, 255, 255)
