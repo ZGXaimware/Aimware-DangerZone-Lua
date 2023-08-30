@@ -22,6 +22,7 @@ cshieldhit:SetDescription("当最近的盾哥换武器,如果你在背身大盾,
 local disablefakelag = gui.Checkbox(main_box, "main.disablefakelag", "关闭假卡", 0)
 local disabledistancevis = gui.Checkbox(main_box, "main.disabledisvis", "关闭基于距离的视觉", 0)
 disabledistancevis:SetDescription("关闭距离指示器，人物射线等")
+local shieldaim = gui.Checkbox(main_box, "main.shieldaim", "连跳大盾永远朝向敌方", 1)
 local disablevisual = gui.Checkbox(main_box, "main.disablevisual", "关闭所有视觉(录屏专用)", 0)
 disablevisual:SetDescription("关闭所有由外纪带来的视觉")
 local disablesetprop = gui.Checkbox(main_box, "main.disableprop", "关闭一些小功能", 1)
@@ -1285,7 +1286,7 @@ callbacks.Register("CreateMove", function(ucmd)
 				gui.SetValue("esp.world.thirdperson", 0)
 			end
 		end
-		if string.find(weaponstr, "shield") then
+		if string.find(weaponstr, "shield") and shieldaim:GetValue() then
 			if enemydir then
 				stargetangle = benoscreen and (weaponClass == "SHIELD" and 135 or -45) or
 					(weaponClass == "SHIELD" and 45 or -135)

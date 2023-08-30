@@ -21,6 +21,7 @@ local cshieldhit = gui.Checkbox(main_box, "main.shieldhit", "ShieldHit", 1)
 cshieldhit:SetDescription("when shieldguy switch to another weapon or another enemy close to you then switch aimbot on")
 local disablefakelag = gui.Checkbox(main_box, "main.disablefakelag", "Disable FakeLag", 0)
 local disabledistancevis = gui.Checkbox(main_box, "main.disabledisvis", "DisableDistanceVis", 0)
+local shieldaim = gui.Checkbox(main_box, "main.shieldaim", "BunnyhopShield Attarget", 1)
 disabledistancevis:SetDescription("disable distance visual function supply by che@t")
 local disablevisual = gui.Checkbox(main_box, "main.disablevisual", "DisableVisual", 0)
 disablevisual:SetDescription("disable all visual function supply by cheat")
@@ -1266,7 +1267,7 @@ callbacks.Register("CreateMove", function(ucmd)
 				gui.SetValue("esp.world.thirdperson", 0)
 			end
 		end
-		if string.find(weaponstr, "shield") then
+		if string.find(weaponstr, "shield") and shieldaim:GetValue() then
 			if enemydir then
 				stargetangle = benoscreen and (weaponClass == "SHIELD" and 135 or -45) or
 					(weaponClass == "SHIELD" and 45 or -135)
