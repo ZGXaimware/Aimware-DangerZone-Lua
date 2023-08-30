@@ -9,7 +9,7 @@ local messagemaster = gui.Checkbox(main_box, "tablet.master", "Master Switch", 1
 local respawnmaster = gui.Checkbox(main_box, "tablet.respawnmaster", "Respawn sniffer", 1)
 local exitmaster = gui.Checkbox(main_box, "tablet.exitmaster", "Exit sniffer", 1)
 local paradropmaster = gui.Checkbox(main_box, "tablet.paradropmaster", "ParaDrop sniffer", 1)
-local dronedispatchmaster = gui.Checkbox(main_box, "tablet.dronedispatchmaster", "Purchase Sniffer", 0)
+local dronedispatchmaster = gui.Checkbox(main_box, "tablet.dronedispatchmaster", "Purchase Sniffer", 1)
 
 
 gui.SetValue("misc.log.console", true)

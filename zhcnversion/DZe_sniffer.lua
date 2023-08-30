@@ -5,11 +5,10 @@ local main_box = gui.Groupbox(tab, "Sniffer", 16, 16, 400, 0);
 local ranks_mode = gui.Combobox(main_box, "tablet.mode", "消息发送模式",
     "只控制台", "派对聊天(不用队友去屏蔽)", "小队聊天")
 local messagemaster = gui.Checkbox(main_box, "tablet.master", "主开关", 1)
--- local purchasemaster = gui.Checkbox(main_box, "tablet.purchasemaster", "Purchase sniffer", 1)
 local respawnmaster = gui.Checkbox(main_box, "tablet.respawnmaster", "复活监听", 1)
 local exitmaster = gui.Checkbox(main_box, "tablet.exitmaster", "退出监听", 1)
 local paradropmaster = gui.Checkbox(main_box, "tablet.paradropmaster", "空投监听", 1)
-local dronedispatchmaster = gui.Checkbox(main_box, "tablet.dronedispatchmaster", "购买监听", 0)
+local dronedispatchmaster = gui.Checkbox(main_box, "tablet.dronedispatchmaster", "购买监听", 1)
 
 gui.SetValue("misc.log.console", true)
 
@@ -26,8 +25,6 @@ end
 local playerlist = {}
 local ingamestatus = false
 local cachelist = {}
--- local cachelistpurchaseid = {}
--- local cachemoneylist = {}
 local deadlist = {}
 local player_respawn_times = {}
 local tabletitemindex = {
