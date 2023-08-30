@@ -28,8 +28,6 @@ local disablesetprop = gui.Checkbox(main_box, "main.disableprop", "关闭一些�
 disablesetprop:SetDescription("比如地下平板可用/去除打针视觉效果")
 local debugaimstep = gui.Checkbox(main_box, "main.debug_reallyaimstep", "(非常不安全)超级保护", 0)
 debugaimstep:SetDescription("每打一枪,在可以打下一枪之前会自动背身")
-local gotvswitch = gui.Combobox(main_box, "main.gotvswitch", "GOTV选择", "Off", "Disable on GOTV",
-	"Force Enable on GOTV");
 local legit_aa_box = gui.Groupbox(tab, "演技AA/大角度", 232, 16, 200, 0);
 local legit_aa_switch = gui.Checkbox(legit_aa_box, "aa.switch", "反自瞄总开关", 1);
 local legit_aa_key = gui.Keybox(legit_aa_box, "aa.inverter", "切换演技AA方向键", 0);
@@ -272,39 +270,9 @@ local localindex = 0
 local localheadbox = nil
 local localhp = 0
 local localteamid = -2
-local function GOTVstatus()
-	-- if gui.GetValue("esp.DZevis.vis.gotvswitch") then
-	-- 	if gui.GetValue("esp.DZevis.vis.gotvswitch") ~= gui.GetValue("rbot.DZe.main.gotvswitch") then
-	-- 		gui.SetValue("esp.DZevis.vis.gotvswitch", gui.GetValue("rbot.DZe.main.gotvswitch"))
-	-- 	end
-	-- end
-	-- if gui.GetValue("misc.DZesniffer.tablet.gotvswitch") then
-	-- 	if gui.GetValue("misc.DZesniffer.tablet.gotvswitch") ~= gui.GetValue("rbot.DZe.main.gotvswitch") then
-	-- 		gui.SetValue("misc.DZesniffer.tablet.gotvswitch", gui.GetValue("rbot.DZe.main.gotvswitch"))
-	-- 	end
-	-- end
-	local spLocal = entities.GetLocalPlayer()
-	if gotvswitch:GetValue() == 0 then
-		return spLocal
-	end
-	if spLocal == nil then return nil end
-	if gotvswitch:GetValue() == 1 then
-		if (spLocal:GetPropEntity("m_hObserverTarget")):IsPlayer() then
-			return nil
-		else
-			return spLocal
-		end
-	end
-	if gotvswitch:GetValue() == 2 then
-		if (spLocal:GetPropEntity("m_hObserverTarget")):IsPlayer() then
-			return spLocal:GetPropEntity("m_hObserverTarget")
-		else
-			return spLocal
-		end
-	end
-end
+
 callbacks.Register("CreateMove", function()
-	pLocal = GOTVstatus()
+	pLocal = entities.GetLocalPlayer()
 	if pLocal == nil then
 		plocallive = false
 		return

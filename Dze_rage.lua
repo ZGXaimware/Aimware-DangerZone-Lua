@@ -27,8 +27,6 @@ disablevisual:SetDescription("disable all visual function supply by cheat")
 local disablesetprop = gui.Checkbox(main_box, "main.disableprop", "DisableProp(Safe Option)", 1)
 disablesetprop:SetDescription("disable all visual by setprop")
 local debugaimstep = gui.Checkbox(main_box, "main.debug_reallyaimstep", "(Very Unsafe)LowDistanceaimstep", 0)
-local gotvswitch = gui.Combobox(main_box, "main.gotvswitch", "GOTV Selection", "Off", "Disable on GOTV",
-	"Force Enable on GOTV");
 local legit_aa_box = gui.Groupbox(tab, "(Desync) Legit Anti-Aim", 232, 16, 200, 0);
 local legit_aa_switch = gui.Checkbox(legit_aa_box, "aa.switch", "Master Switch", 1);
 local legit_aa_key = gui.Keybox(legit_aa_box, "aa.inverter", "Inverter", 0);
@@ -253,39 +251,9 @@ local localindex = 0
 local localheadbox = nil
 local localhp = 0
 local localteamid = -2
-local function GOTVstatus()
-	-- if gui.GetValue("esp.DZevis.vis.gotvswitch") then
-	-- 	if gui.GetValue("esp.DZevis.vis.gotvswitch") ~= gui.GetValue("rbot.DZe.main.gotvswitch") then
-	-- 		gui.SetValue("esp.DZevis.vis.gotvswitch", gui.GetValue("rbot.DZe.main.gotvswitch"))
-	-- 	end
-	-- end
-	-- if gui.GetValue("misc.DZesniffer.tablet.gotvswitch") then
-	-- 	if gui.GetValue("misc.DZesniffer.tablet.gotvswitch") ~= gui.GetValue("rbot.DZe.main.gotvswitch") then
-	-- 		gui.SetValue("misc.DZesniffer.tablet.gotvswitch", gui.GetValue("rbot.DZe.main.gotvswitch"))
-	-- 	end
-	-- end
-	local spLocal = entities.GetLocalPlayer()
-	if gotvswitch:GetValue() == 0 then
-		return spLocal
-	end
-	if spLocal == nil then return nil end
-	if gotvswitch:GetValue() == 1 then
-		if (spLocal:GetPropEntity("m_hObserverTarget")):IsPlayer() then
-			return nil
-		else
-			return spLocal
-		end
-	end
-	if gotvswitch:GetValue() == 2 then
-		if (spLocal:GetPropEntity("m_hObserverTarget")):IsPlayer() then
-			return spLocal:GetPropEntity("m_hObserverTarget")
-		else
-			return spLocal
-		end
-	end
-end
+
 callbacks.Register("CreateMove", function()
-	pLocal = GOTVstatus()
+	pLocal = entities.GetLocalPlayer()
 	if pLocal == nil then
 		plocallive = false
 		return

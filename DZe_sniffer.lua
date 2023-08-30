@@ -10,8 +10,7 @@ local respawnmaster = gui.Checkbox(main_box, "tablet.respawnmaster", "Respawn sn
 local exitmaster = gui.Checkbox(main_box, "tablet.exitmaster", "Exit sniffer", 1)
 local paradropmaster = gui.Checkbox(main_box, "tablet.paradropmaster", "ParaDrop sniffer", 1)
 local dronedispatchmaster = gui.Checkbox(main_box, "tablet.dronedispatchmaster", "Purchase Sniffer", 0)
-local gotvswitch = gui.Combobox(main_box, "tablet.gotvswitch", "GOTV Selection", "Off", "Disable on GOTV",
-    "Force Enable on GOTV");
+
 
 gui.SetValue("misc.log.console", true)
 
@@ -63,29 +62,7 @@ local teammateisin = false
 local purchaseguy = 0
 local purchasedex = false
 
-local function GOTVstatus()
-    local spLocal = entities.GetLocalPlayer()
-    if gotvswitch:GetValue() == 0 then
-        return spLocal
-    end
-    if spLocal == nil then return nil end
 
-    if gotvswitch:GetValue() == 1 then
-        if (spLocal:GetPropEntity("m_hObserverTarget")):IsPlayer() then
-            return nil
-        else
-            return spLocal
-        end
-    end
-
-    if gotvswitch:GetValue() == 2 then
-        if (spLocal:GetPropEntity("m_hObserverTarget")):IsPlayer() then
-            return spLocal:GetPropEntity("m_hObserverTarget")
-        else
-            return spLocal
-        end
-    end
-end
 
 local function ingame()
     local money = entities.FindByClass("CItemCash")
@@ -106,7 +83,7 @@ end
 
 
 callbacks.Register("CreateMove", function()
-    pLocal = GOTVstatus()
+    pLocal = entities.GetLocalPlayer()
     if pLocal == nil then return end
     localindex = pLocal:GetIndex()
     localteamid = pLocal:GetPropInt("m_nSurvivalTeam")

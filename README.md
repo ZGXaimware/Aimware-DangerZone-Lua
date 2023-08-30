@@ -146,6 +146,7 @@ Updated 1.1.8:<br />
 <DZe_visual.lua>add new remotebomb distance indicator<br />
 <DZe_sniffer.lua> Bug for purchase sniffer fixed<br />
 <DZe_rage.lua>when use Granade etc will disable desync now<br />
+Removed all unstable GOTV Selection<br />
 <br />
 
 

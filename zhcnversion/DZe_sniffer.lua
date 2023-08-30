@@ -10,8 +10,6 @@ local respawnmaster = gui.Checkbox(main_box, "tablet.respawnmaster", "复活监�
 local exitmaster = gui.Checkbox(main_box, "tablet.exitmaster", "退出监听", 1)
 local paradropmaster = gui.Checkbox(main_box, "tablet.paradropmaster", "空投监听", 1)
 local dronedispatchmaster = gui.Checkbox(main_box, "tablet.dronedispatchmaster", "购买监听", 0)
-local gotvswitch = gui.Combobox(main_box, "tablet.gotvswitch", "GOTV选择", "Off", "Disable on GOTV",
-    "Force Enable on GOTV");
 
 gui.SetValue("misc.log.console", true)
 
@@ -63,30 +61,6 @@ local teammateisin = false
 local purchaseguy = 0
 local purchasedex = false
 
-local function GOTVstatus()
-    local spLocal = entities.GetLocalPlayer()
-    if gotvswitch:GetValue() == 0 then
-        return spLocal
-    end
-    if spLocal == nil then return nil end
-
-    if gotvswitch:GetValue() == 1 then
-        if (spLocal:GetPropEntity("m_hObserverTarget")):IsPlayer() then
-            return nil
-        else
-            return spLocal
-        end
-    end
-
-    if gotvswitch:GetValue() == 2 then
-        if (spLocal:GetPropEntity("m_hObserverTarget")):IsPlayer() then
-            return spLocal:GetPropEntity("m_hObserverTarget")
-        else
-            return spLocal
-        end
-    end
-end
-
 local function ingame()
     local money = entities.FindByClass("CItemCash")
     return money ~= nil and #money ~= 0
@@ -106,7 +80,7 @@ end
 
 
 callbacks.Register("CreateMove", function()
-    pLocal = GOTVstatus()
+    pLocal = entities.GetLocalPlayer()
     if pLocal == nil then return end
     localindex = pLocal:GetIndex()
     localteamid = pLocal:GetPropInt("m_nSurvivalTeam")
@@ -115,15 +89,8 @@ callbacks.Register("CreateMove", function()
     local players = entities.FindByClass("CCSPlayer")
     ingamestatus = ingame()
     if not exitmaster:GetValue() then cachelist = {} end
-    -- if not purchasemaster:GetValue() then
-    --     cachemoneylist = {}
-    --     cachelistpurchaseid = {}
-    -- end
-    -- if not respawnmaster:GetValue() then
-    --     deadlist = {}
-    -- end
+
     if players ~= nil then
-        -- local moneylist = {}
         local needupdatecssplayer = false
         if lastcssplayernumber ~= #players then
             needupdatecssplayer = true
@@ -146,7 +113,6 @@ callbacks.Register("CreateMove", function()
                             string.gsub(': ' .. playername, '%s', '') .. addstr)
                         deadlist[playername] = nil
                     end
-                    -- deadlist = {}
                 end
                 local playerteamid = player:GetPropInt("m_nSurvivalTeam")
                 if localindex ~= playerIndex and exitmaster:GetValue() and needupdatecssplayer then
@@ -158,33 +124,8 @@ callbacks.Register("CreateMove", function()
                     end
                 end
 
-
-                -- if not player:IsAlive() and ingamestatus and respawnmaster:GetValue() then
-                --     deadlist[playername] = true
-                -- end
-                -- if player:GetWeaponID() == 72 and ingamestatus and purchasemaster:GetValue() then
-                --     local playerMoney = player:GetPropInt("m_iAccount")
-                --     local purchaseIndex = (player:GetPropEntity("m_hActiveWeapon")):GetPropInt("m_nLastPurchaseIndex")
-                --     moneylist[playerIndex] = playerMoney
-
-                --     if cachelistpurchaseid[playerIndex] == nil then
-                --         cachelistpurchaseid[playerIndex] = purchaseIndex
-                --     end
-                --     if cachemoneylist[playerIndex] == nil then
-                --         cachemoneylist[playerIndex] = playerMoney
-                --     end
-                --     if cachelistpurchaseid[playerIndex] ~= purchaseIndex then
-                --         if cachemoneylist[playerIndex] - playerMoney > 0 and purchaseIndex ~= -1 then
-                --             partyapisay(string.gsub(player:GetName(), '%s', '') ..
-                --                 "_purchased_" .. tabletitemindex[purchaseIndex])
-                --         end
-                --         cachelistpurchaseid[playerIndex] = purchaseIndex
-                --     end
-                -- end
             end
         end
-        -- if ingamestatus and purchasemaster:GetValue() then cachemoneylist = moneylist end
-
         if (#cachelist ~= #playerlist or #cachelist == 0) and exitmaster:GetValue() and #playerlist ~= 0 then
             if teammateisin and teammatenoshow then
                 teammatenoshow = false
@@ -233,8 +174,6 @@ client.AllowListener("player_death")
 callbacks.Register("FireGameEvent", function(e)
     local eventName = e:GetName()
     if (eventName == "client_disconnect") or (eventName == "begin_new_match") then
-        -- cachelistpurchaseid = {}
-        -- cachemoneylist = {}
         cachelist = {}
         deadlist = {}
         lastcssplayernumber = 0

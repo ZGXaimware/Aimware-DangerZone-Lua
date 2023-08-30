@@ -16,9 +16,6 @@ local barrelmaster = gui.Checkbox(main_box, "vis.barrelmaster", "显示油桶ESP
 local remotebombmaster = gui.Checkbox(main_box, "vis.remotebombmaster", "显示遥控炸弹ESP", 1)
 local removegrassmaster = gui.Checkbox(main_box, "vis.removegrassmaster", "开局除草", 1)
 removegrassmaster:SetDescription("只会在游戏开始时被触发")
-local gotvswitch = gui.Combobox(main_box, "vis.gotvswitch", "GOTV选择", "Off", "Disable on GOTV",
-	"Force Enable on GOTV");
-
 
 local linemaster = gui.Checkbox(visual_box, "vis.dzespmaster", "主要导航线开关", 1)
 local linesubmaster = gui.Checkbox(line_box, "vis.dzespmaster", "次要导航线开关", 1)
@@ -70,6 +67,7 @@ local drawespxy = {}
 local isNeedW = false
 local Teamcalled = false
 local player_respawn_times = {}
+local visualenabled = gui.GetValue("esp.master")
 local function returnweaponstr(player)
 	if player:IsPlayer() and player:IsAlive() then
 		local recstr = ""
@@ -163,7 +161,7 @@ local function ingame()
 end
 
 callbacks.Register("CreateMove", function()
-	if not espmaster:GetValue() or not gui.GetValue("esp.master") or not isNeedW or not showteamstatus:GetValue() or client.GetConVar("game_type") ~= "6" then
+	if not espmaster:GetValue() or not visualenabled or not isNeedW or not showteamstatus:GetValue() or client.GetConVar("game_type") ~= "6" then
 		Teamcalled = false
 		return
 	end
@@ -194,7 +192,7 @@ end)
 
 
 local function drawEspHookESP(builder)
-	if not espmaster:GetValue() or not gui.GetValue("esp.master") or not isNeedW then return end
+	if not espmaster:GetValue() or not visualenabled or not isNeedW then return end
 	local builder_entity = builder:GetEntity()
 	if builder_entity == nil then return end
 	if not builder_entity:IsPlayer() or not builder_entity:IsAlive() then return end
@@ -288,7 +286,8 @@ local function SnapLines()
 	BestMDistance = math.huge
 	drawxy = {}
 	dronetable = {}
-	if not linemaster:GetValue() or not gui.GetValue("esp.master") then return end
+	visualenabled = gui.GetValue("esp.master")
+	if not linemaster:GetValue() or not visualenabled then return end
 	if plocallive then
 		if hsmaster:GetValue() then hss = entities.FindByClass("CHostage") end
 		if boxmaster:GetValue() then lcs = entities.FindByClass("CPhysPropLootCrate") end
@@ -439,7 +438,7 @@ local function SnapLines()
 end
 
 local function drawEspHook(builder)
-	if not linemaster:GetValue() or not gui.GetValue("esp.master") then return end
+	if not linemaster:GetValue() or not visualenabled then return end
 
 	if plocallive then
 		drawespxy = {}
@@ -510,7 +509,7 @@ end
 
 
 local function DrawLine()
-	if not linemaster:GetValue() or not gui.GetValue("esp.master") then return end
+	if not linemaster:GetValue() or not visualenabled then return end
 	if linesubmaster:GetValue() and ingame() then
 		draw.Color(255, 255, 255, 255);
 		draw.SetFont(font1);
@@ -551,37 +550,8 @@ callbacks.Register('DrawESP', "drawEspHook", drawEspHook)
 callbacks.Register('DrawESP', "drawEspHookESP", drawEspHookESP)
 callbacks.Register("Draw", "DrawLine", DrawLine)
 
-
-
-
-
-local function GOTVstatus()
-	local spLocal = entities.GetLocalPlayer()
-	if gotvswitch:GetValue() == 0 then
-		return spLocal
-	end
-	if spLocal == nil then return nil end
-
-	if gotvswitch:GetValue() == 1 then
-		if (spLocal:GetPropEntity("m_hObserverTarget")):IsPlayer() then
-			return nil
-		else
-			return spLocal
-		end
-	end
-
-	if gotvswitch:GetValue() == 2 then
-		if (spLocal:GetPropEntity("m_hObserverTarget")):IsPlayer() then
-			return spLocal:GetPropEntity("m_hObserverTarget")
-		else
-			return spLocal
-		end
-	end
-end
-
-
 callbacks.Register("CreateMove", function()
-	pLocal = GOTVstatus()
+	pLocal = entities.GetLocalPlayer()
 	if pLocal == nil then
 		plocallive = false
 		isNeedW = false
@@ -683,7 +653,7 @@ end
 callbacks.Register("CreateMove", "RemoteBombDetector", RemoteBombDetector)
 callbacks.Register("CreateMove", "BarrelsDetector", BarrelsDetector)
 callbacks.Register("Draw", "DrawRB", function()
-	if plocallive and gui.GetValue("esp.master") then
+	if plocallive and visualenabled then
 		for _, v in pairs(rbvec) do
 			draw.SetTexture(charge_image.texture)
 			draw.Color(255, 255, 255, 255)
