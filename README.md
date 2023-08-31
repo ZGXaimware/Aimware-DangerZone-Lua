@@ -1,5 +1,5 @@
 # Aimware-DangerZone-Lua<br />
-**Last Updated 2023/8/25 1.1.8(Stable)(New Version)**<br />
+**Last Updated 2023/8/31 1.1.8(Stable)(New Version)**<br />
 
 （&nbsp;）Tips1:Use low aastep/aimstep angle and not enable unsafe function that u will never been banned<br />
 （&nbsp;）Tips2:if your suffer performance issue you should consider turn off some function<br />
