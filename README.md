@@ -1,27 +1,36 @@
 # Aimware-DangerZone-Lua<br />
-**Last Updated 2023/8/25 1.1.8(Beta)(New Version)**<br />
+**Last Updated 2023/8/25 1.1.8(Stable)(New Version)**<br />
 
 （&nbsp;）Tips1:Use low aastep/aimstep angle and not enable unsafe function that u will never been banned<br />
-
 （&nbsp;）Tips2:if your suffer performance issue you should consider turn off some function<br />
 （&nbsp;）Like part of snapline ,ESP,distance visual,etc <br />
 
 EZ KILLED NOOB Bilibili Streamer<br />
 ![Alt text](/imgs/punchkill.png)<br />
 
+From DZ Pro Player's respects<br />
+![Alt text](/imgs/cnmdsb.jpg)<br />
+
+
+
+**My DZ hacking videos:**<br />
 [My Bilibili Profile](https://space.bilibili.com/3494352856812225) <br />
 ![Alt text](/imgs/biliprofile.png)
 
-
+[My Youtube Channel 1](https://www.youtube.com/@CsgoDZcheat/videos)<br />
+[My Youtube Channel 2](https://www.youtube.com/channel/UCN-kH3a8ysPxVNbIdqcxJYA)<br />
 
 
 Dont sell my code on NL/SK/Pri market.It is opensource<br />
 But you can transfer to another cheat as free version to spilit out is allowed<br />
 <br />
-Ref:I have used code from<br />
-[[Release] Danger Zone Speedhack | AIMWARE.net](https://aimware.net/forum/thread/147031) (Has fixed by me) @Zerdos Thanks for your origin code<br />
-[[Release] UpperHook Semi Rage Helper (Updated 21/7/2022) | AIMWARE.net](https://aimware.net/forum/thread/168455) (Used its ui design) @RDX_K3LL3R<br />
-[[Release] Dangerzone Tweaks](https://aimware.net/forum/thread/100971) (used for extraesp) @ambien55<br />
+Ref:I have used some code from<br />
+[[Release] Danger Zone Speedhack | AIMWARE.net](https://aimware.net/forum/thread/147031)<br />
+(Has fixed by me) @Zerdos Thanks for your origin code<br />
+[[Release] UpperHook Semi Rage Helper (Updated 21/7/2022) | AIMWARE.net](https://aimware.net/forum/thread/168455)<br />
+(Used its ui design) @RDX_K3LL3R<br />
+[[Release] Dangerzone Tweaks](https://aimware.net/forum/thread/100971)
+(used for extraesp) @ambien55<br />
 
 Note:I have hard coded <br />
 1.smg hitchance, due to smg need different value(like bizon,mac10 need low,and mp9,mp7 for high hitchance)<br />
@@ -34,9 +43,7 @@ Main showcase:<br />
 https://youtu.be/rttTZmpphz4 <br />
 part of function showcase:<br />
 [SpeedHack](https://www.bilibili.com/video/BV1a8411m7HR/) <br />
-[NotHitShield](https://www.bilibili.com/video/BV1mP411r7F7/) <br />
 [AimDrone&DroneDetect](https://www.bilibili.com/video/BV1n14y1X7hq) <br />
-[Shieldbot](https://www.bilibili.com/video/BV1A94y1B7iZ/) <br />
 
 
 
@@ -49,7 +56,7 @@ DZe_rage.lua:<br />
   （&nbsp;）HitShieldguyLeg(in target distance that autoaim enemy's calf (can damage) who hold shield)<br />
   （&nbsp;）AutoShield(auto inject healthshot when low hp and has shield)<br />
   （&nbsp;）ShieldReturn(when reload switch aa to backward shield)<br />
-  （&nbsp;）exojump SpeedHack(FastHop) with anti-hit aa direction if has shield<br />
+  （&nbsp;）exojump SpeedHack(at 740 max) with anti-hit aa direction if has shield<br />
   （&nbsp;）ShieldHit(when recent shieldguy switch to another weapon instant change aa from 180 to normal)<br />
   （&nbsp;）AimDrone(press key to autoaim recent Drone(Manual controlled or Has Cargo)<br />
   （&nbsp;）LegitAA(Desync) and roll AA switch<br />
@@ -66,7 +73,7 @@ DZe_visual.lua:<br />
   （&nbsp;）show Recent Drone (will show Manual Drone Distance in screen,and Draw text on it entity) <br />
   （&nbsp;）show weapon class on top(when this one has shield,add"(S)" to string<br />
   （&nbsp;）show distance on left (localplayer to enemy Distance)<br />
-  （&nbsp;）show Enemy's Teammate and between two guy's distance, if his auto muted (probably cheating) then add "(Cheating)" (Example "(M)(Cheater)  1000 will11801") in right<br />
+  （&nbsp;）show Enemy's Teammate and between two guy's distance, if his auto muted (probably cheating) then add "(Cheating)" (Example "(M)(Cheater) 1000 will11801") in right<br />
   （&nbsp;）show ammo status on bottom<br />
   （&nbsp;）Show Barrel,RemoteBomb on screen by draw extra photo on it<br />
 <br />
@@ -79,13 +86,7 @@ DZe_sniffer.lua:<br />
   （&nbsp;）reveal player team and print it on cheat console or partyapi <br />
   （&nbsp;）reveal paradrop create or destroy <br />
   （&nbsp;）reveal players' respawn status<br />
-
 <br />
-
-
-<br />
-
-
 Updated 1.1.2:<br />
 (ALL)lua set merged<br />
 <DZe_rage.lua>add some new function,Updated GUI,fixed potential bugs<br />
