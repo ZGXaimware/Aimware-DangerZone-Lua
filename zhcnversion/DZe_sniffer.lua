@@ -89,7 +89,10 @@ callbacks.Register("CreateMove", function()
 
     if players ~= nil then
         local needupdatecssplayer = false
-        if lastcssplayernumber ~= #players then
+        local playernumber = #players
+        if playernumber <= 1 or playernumber == nil then return end
+        if lastcssplayernumber ~= playernumber then
+            lastcssplayernumber = playernumber
             needupdatecssplayer = true
             playerlist = {}
             teammateisin = false
@@ -100,7 +103,7 @@ callbacks.Register("CreateMove", function()
 
             if player:GetName() ~= "GOTV" then
                 if ingamestatus and respawnmaster:GetValue() then
-                    if player:IsAlive() and deadlist[playername] then
+                    if player:IsAlive() and deadlist[playername] == true then
                         local addstr = ""
                         if player_respawn_times[playername] then
                             addstr = "下一次时间:" ..
@@ -108,7 +111,7 @@ callbacks.Register("CreateMove", function()
                         end
                         partyapisay("复活" ..
                             string.gsub(': ' .. playername, '%s', '') .. addstr)
-                        deadlist[playername] = nil
+                        deadlist[playername] = false
                     end
                 end
                 local playerteamid = player:GetPropInt("m_nSurvivalTeam")
@@ -120,7 +123,6 @@ callbacks.Register("CreateMove", function()
                         table.insert(playerlist, player:GetName())
                     end
                 end
-
             end
         end
         if (#cachelist ~= #playerlist or #cachelist == 0) and exitmaster:GetValue() and #playerlist ~= 0 then
@@ -133,13 +135,11 @@ callbacks.Register("CreateMove", function()
                 partyapisay("你的队友已离开" .. ":" .. string.gsub(teammatename, '%s', ''))
                 teammatenoshow = true
             end
-
-
-
             for _, enemy in ipairs(cachelist) do
                 if not findthisguy(enemy, playerlist) and enemy ~= teammatename then
                     if ingamestatus then
                         partyapisay("退出" .. ":" .. string.gsub(enemy, '%s', ''))
+                        player_respawn_times[enemy] = nil
                     else
                         partyapisay("热身畏惧跑路" .. ":" .. string.gsub(enemy, '%s', ''))
                     end
@@ -147,9 +147,9 @@ callbacks.Register("CreateMove", function()
             end
             cachelist = playerlist
         end
-        lastcssplayernumber = #players
         if purchasedex then
             local thisplayer = entities.GetByUserID(purchaseguy)
+            if thisplayer == nil or not thisplayer:IsPlayer() then purchasedex = false end
             local playername = string.gsub(thisplayer:GetName(), '%s', '')
             if thisplayer:GetWeaponID() == 72 and ingamestatus then
                 local purchaseIndex = (thisplayer:GetPropEntity("m_hActiveWeapon")):GetPropInt("m_nLastPurchaseIndex")
@@ -191,8 +191,8 @@ callbacks.Register("FireGameEvent", function(e)
         purchasedex = true
     end
     if eventName == "player_death" and ingamestatus then
+        deadlist[(entities.GetByUserID(e:GetInt("userid"))):GetName()] = true
         if (entities.GetByUserID(e:GetInt("userid"))):IsPlayer() then
-            deadlist[(entities.GetByUserID(e:GetInt("userid"))):GetName()] = true
             local teamid = (entities.GetByUserID(e:GetInt("userid"))):GetPropInt("m_nSurvivalTeam")
             if teamid == -1 or teamid == nil then return end
             local playername = (entities.GetByUserID(e:GetInt("userid"))):GetName()

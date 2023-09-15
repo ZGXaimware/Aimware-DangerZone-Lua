@@ -690,7 +690,6 @@ client.AllowListener("round_prestart")
 client.AllowListener("round_poststart")
 client.AllowListener("round_start")
 client.AllowListener("player_death")
-client.AllowListener("survival_no_respawns_final")
 callbacks.Register("FireGameEvent", function(e)
 	local eventName = e:GetName()
 	if (eventName == "client_disconnect") or (eventName == "begin_new_match") then
@@ -717,7 +716,5 @@ callbacks.Register("FireGameEvent", function(e)
 				player_respawn_times[playername] = { globals.CurTime(), 10 }
 			end
 		end
-	elseif eventName == "survival_no_respawns_final" and ingame() then
-		player_respawn_times = {}
 	end
 end)
