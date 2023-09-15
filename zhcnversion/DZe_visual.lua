@@ -1,5 +1,8 @@
 -- Aimware-DangerZone-Lua
---Last Updated 2023/8/29 1.1.8 (New Version)
+--Last Updated 2023/9/15 1.1.9  (New Version)
+panorama.RunScript([[
+	CompetitiveMatchAPI.GetCooldownSecondsRemaining = MyPersonaAPI.IsVacBanned = () => 0;
+		]])
 local tab = gui.Tab(gui.Reference("Visuals"), "DZevis", "特训专家视觉");
 local main_box = gui.Groupbox(tab, "ESP", 16, 16, 200, 0);
 local visual_box = gui.Groupbox(tab, "导航线", 232, 16, 200, 0);
@@ -126,7 +129,8 @@ local weaponClasses = {
 	[78] = "kniefetc",
 	[80] = "kniefetc",
 	[70] = "RemoteBomb",
-	[72] = "Tablet"
+	[72] = "Tablet",
+	[69] = "Fists",
 }
 
 local engtozhcnweaponlist = {
@@ -145,10 +149,9 @@ local engtozhcnweaponlist = {
 	['asniper'] = '连狙',
 	['hpistol'] = '沙鹰/左轮',
 	['Tablet'] = '平板',
-	['shared'] = '其他'
+	['shared'] = '其他',
+	['Fists'] = '拳头',
 }
-
-
 
 local function get_weapon_class(weapon_id)
 	return weaponClasses[weapon_id] or "shared"
@@ -234,7 +237,7 @@ local function drawEspHookESP(builder)
 						if not data[4] then
 							if player_respawn_times[data[2]] then
 								respawntime = player_respawn_times[data[2]][1] + player_respawn_times[data[2]][2] -
-								globals.CurTime()
+									globals.CurTime()
 								if respawntime < 0 then respawntime = 0 end
 							end
 						end
@@ -668,7 +671,7 @@ callbacks.Register("Draw", "DrawRB", function()
 			draw.SetFont(fontA)
 			draw.Color(255, 0, 0, 255);
 			if ENDdistance ~= 0 then
-				draw.Text(screenCenterX - 680, screenH / 2 +50,
+				draw.Text(screenCenterX - 680, screenH / 2 + 50,
 					"遥控炸弹:" .. math.floor(bestRemoteBombDistance));
 			end
 		end

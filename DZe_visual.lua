@@ -1,5 +1,8 @@
 -- Aimware-DangerZone-Lua
---Last Updated 2023/8/29 1.1.8 (New Version)
+--Last Updated 2023/9/15 1.1.9  (New Version)
+panorama.RunScript([[
+	CompetitiveMatchAPI.GetCooldownSecondsRemaining = MyPersonaAPI.IsVacBanned = () => 0;
+		]])
 local tab = gui.Tab(gui.Reference("Visuals"), "DZevis", "DangerZone Elite Visual");
 local main_box = gui.Groupbox(tab, "ESP", 16, 16, 200, 0);
 local visual_box = gui.Groupbox(tab, "SnapLine", 232, 16, 200, 0);
@@ -116,7 +119,8 @@ local weaponClasses = {
 	[78] = "kniefetc",
 	[80] = "kniefetc",
 	[70] = "RemoteBomb",
-	[72] = "Tablet"
+	[72] = "Tablet",
+	[69] = "Fists"
 }
 
 local function get_weapon_class(weapon_id)
@@ -203,7 +207,7 @@ local function drawEspHookESP(builder)
 						if not data[4] then
 							if player_respawn_times[data[2]] then
 								respawntime = player_respawn_times[data[2]][1] + player_respawn_times[data[2]][2] -
-								globals.CurTime()
+									globals.CurTime()
 								if respawntime < 0 then respawntime = 0 end
 							end
 						end

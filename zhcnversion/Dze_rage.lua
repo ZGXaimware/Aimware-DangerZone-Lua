@@ -1,5 +1,5 @@
 -- Aimware-DangerZone-Lua
---Last Updated 2023/8/29 1.1.8 (New Version)
+--Last Updated 2023/9/15 1.1.9  (New Version)
 local tab = gui.Tab(gui.Reference("Ragebot"), "DZe", "特训专家");
 local main_box = gui.Groupbox(tab, "主要", 16, 16, 200, 0);
 local smooth = gui.Checkbox(main_box, "main.aimsmooth", "平滑自瞄", 1)
@@ -19,12 +19,18 @@ local shieldreturn = gui.Checkbox(main_box, "main.shieldreturn", "换弹背身",
 shieldreturn:SetDescription("换弹时候一键背身防止被偷")
 local cshieldhit = gui.Checkbox(main_box, "main.shieldhit", "大盾把戏", 1)
 cshieldhit:SetDescription("当最近的盾哥换武器,如果你在背身大盾,将自动切回自瞄秒了他")
+local dzkniefbot = gui.Checkbox(main_box, "main.dzkniefbot", "特训刀机器人", 1)
+dzkniefbot:SetDescription("锤子,斧头,扳手,拳头启用")
 local disablefakelag = gui.Checkbox(main_box, "main.disablefakelag", "关闭假卡", 0)
 local disabledistancevis = gui.Checkbox(main_box, "main.disabledisvis", "关闭基于距离的视觉", 0)
 disabledistancevis:SetDescription("关闭距离指示器，人物射线等")
 local shieldaim = gui.Checkbox(main_box, "main.shieldaim", "连跳大盾永远朝向敌方", 1)
 local disablevisual = gui.Checkbox(main_box, "main.disablevisual", "关闭所有视觉(录屏专用)", 0)
 disablevisual:SetDescription("关闭所有由外纪带来的视觉")
+local disablevisual = gui.Checkbox(main_box, "main.disablevisual", "关闭所有视觉(录屏专用)", 0)
+disablevisual:SetDescription("关闭所有由外纪带来的视觉")
+local disablesound = gui.Checkbox(main_box, "main.disablesound", "关闭所有声音(录屏/直播专用)", 0)
+disablesound:SetDescription("关闭所有由外纪带来的声音")
 local disablesetprop = gui.Checkbox(main_box, "main.disableprop", "关闭一些小功能", 1)
 disablesetprop:SetDescription("比如地下平板可用/去除打针视觉效果")
 local debugaimstep = gui.Checkbox(main_box, "main.debug_reallyaimstep", "(非常不安全)超级保护", 0)
@@ -62,7 +68,7 @@ local healthshotinject = false
 local shieldhit = false
 local plocallive = false
 local stargetangle = 0
-local roll = 0
+-- local roll = 0
 local kvelocity = 0
 local shieldjumper = false
 local shieldjumpername = ""
@@ -230,7 +236,9 @@ local weaponClasses = {
 	[78] = "kniefetc",
 	[80] = "kniefetc",
 	[70] = "RemoteBomb",
-	[72] = "Tablet"
+	[72] = "Tablet",
+	[69] = "Fists",
+
 }
 local weaponHitable = {
 	["rifle"] = 1200,
@@ -256,7 +264,8 @@ local engtozhcnweaponlist = {
 	['asniper'] = '连狙',
 	['hpistol'] = '沙鹰/左轮',
 	['Tablet'] = '平板',
-	['shared'] = '其他'
+	['shared'] = '其他',
+	['Fists'] = '拳头'
 }
 local function get_weapon_class(weapon_id)
 	return weaponClasses[weapon_id] or "shared"
@@ -417,7 +426,7 @@ local function smoothaim(Enemy, step, baim)
 	if (smooth:GetValue()) then
 		gui.SetValue("rbot.aim.target.fov", aimsmoothfov:GetValue());
 		local enemyangle = nil
-		if weaponClass == "SHIELD" or weaponClass == "kniefetc" or weaponClass == "RemoteBomb" then
+		if weaponClass == "SHIELD" or (dzkniefbot:GetValue() and (weaponClass == "kniefetc" or weaponClass == "Fists")) or weaponClass == "RemoteBomb" then
 			local Distance = math.abs((Enemy:GetAbsOrigin() - localabs):Length())
 			if Distance > 450 then return false end
 			enemyangle = (Enemy:GetHitboxPosition(3) - pLocal:GetHitboxPosition(1)):Angles()
@@ -444,7 +453,7 @@ end
 local function lockteammate(Enemy, step)
 	if not (angle == 0) or Enemy == nil then return end
 	if weaponClass == "shared" then return false end
-	if weaponClass == "kniefetc" or weaponClass == "RemoteBomb" then
+	if weaponClass == "kniefetc" or weaponClass == "RemoteBomb" or weaponClass == "Fists" then
 		if math.abs((Enemy:GetAbsOrigin() - localabs):Length()) > 500 then
 			return false
 		end
@@ -845,7 +854,7 @@ callbacks.Register("CreateMove", function(ucmd)
 						end
 					end
 				end
-				if weaponClass == "SHIELD" or weaponClass == "kniefetc" then
+				if weaponClass == "SHIELD" or (dzkniefbot:GetValue() and (weaponClass == "kniefetc" or weaponClass == "Fists")) then
 					if weaponClass == "SHIELD" then
 						gui.SetValue("esp.chams.localweapon.visible", 2)
 					elseif string.find(weaponstr, "shield") ~= nil and localhp <= 60 and CBestDistance < 1000 then
@@ -1140,7 +1149,7 @@ callbacks.Register("CreateMove", function(ucmd)
 		if not (angle == 0) or smoothon or needoffaim or aimteammate then
 			gui.SetValue("rbot.antiaim.condition.use", 0)
 			if not (angle == 0) or needshieldprotect then
-				if weaponClass == "SHIELD" or weaponClass == "kniefetc" then
+				if weaponClass == "SHIELD" or weaponClass == "kniefetc" or weaponClass == "Fists" then
 					client.Command("unbind mouse1", true)
 				else
 					client.Command("unbind mouse1;-attack", true)
@@ -1148,7 +1157,7 @@ callbacks.Register("CreateMove", function(ucmd)
 			else
 				client.Command("bind mouse1 +attack", true)
 			end
-			if aimstatus ~= '"Off"' and not smoothon and not needoffaim and not aimteammate and gui.GetValue("esp.master") then
+			if aimstatus ~= '"Off"' and not smoothon and not needoffaim and not aimteammate and gui.GetValue("esp.master") and not disablesound:GetValue() then
 				client.Command("play training/light_on", true)
 			end
 			gui.SetValue("rbot.aim.enable", "Off")
@@ -1158,9 +1167,9 @@ callbacks.Register("CreateMove", function(ucmd)
 			local killsoundcmd = ""
 			if aimstatus ~= '"Automatic"' then
 				gui.SetValue("rbot.aim.enable", "Automatic")
-				if weaponClass ~= "SHIELD" and weaponClass ~= "kniefetc" then
+				if weaponClass ~= "SHIELD" and weaponClass ~= "kniefetc" or weaponClass == "Fists" then
 					killsoundcmd = "-attack"
-					if gui.GetValue("esp.master") then
+					if gui.GetValue("esp.master") and not disablesound:GetValue() then
 						killsoundcmd = killsoundcmd .. ";play ui/item_drop2_uncommon"
 					end
 				end
@@ -1172,7 +1181,7 @@ callbacks.Register("CreateMove", function(ucmd)
 		needshieldprotect = localhp <= 75 and string.find(weaponstr, "shield") ~= nil and
 			autoshield:GetValue() and shieldprotectenable
 		needesync = not input.IsButtonDown(fasthop:GetValue()) and
-			(weaponClass ~= "kniefetc" and weaponClass ~= "SHIELD" and localweaponid ~= 69) and
+			(weaponClass ~= "Fists" and weaponClass ~= "kniefetc" and weaponClass ~= "SHIELD") and
 			legit_aa_switch:GetValue() and (localweaponid < 43 or localweaponid > 48 or not (angle == 0))
 	end
 end)
@@ -1221,17 +1230,17 @@ callbacks.Register("CreateMove", function(ucmd)
 		end
 		if needesync then
 			local sign = aa_side and 1 or -1
-			roll = 40 * sign
+			-- roll = 40 * sign
 			targetde = 58 * sign
 			if backward then
-				roll = 40 * sign
+				-- roll = 40 * sign
 				targetde = 40 * sign
 			end
 			if gui.GetValue("rbot.antiaim.base.rotation") ~= targetde then
 				gui.SetValue("rbot.antiaim.base.rotation", targetde)
-				if roll_aa_switch:GetValue() then
-					ucmd.viewangles = EulerAngles(ucmd.viewangles.x, ucmd.viewangles.y, roll)
-				end
+				-- if roll_aa_switch:GetValue() then
+				-- 	ucmd.viewangles = EulerAngles(ucmd.viewangles.x, ucmd.viewangles.y, roll)
+				-- end
 			end
 		elseif gui.GetValue("rbot.antiaim.base.rotation") ~= 0 then
 			gui.SetValue("rbot.antiaim.base.rotation", 0)
@@ -1247,7 +1256,7 @@ callbacks.Register("CreateMove", function(ucmd)
 				gui.SetValue("rbot.hitscan.accuracy.smg.hitchanceburst", 40)
 				gui.SetValue("rbot.hitscan.accuracy.smg.mindamage", 15)
 			end
-		elseif weaponClass == "SHIELD" or weaponClass == "kniefetc" then
+		elseif weaponClass == "SHIELD" or (dzkniefbot:GetValue() and (weaponClass == "kniefetc" or weaponClass == "Fists")) then
 			hascalledattack2 = true
 			if shieldhit then
 				client.Command("+attack", true);
@@ -1302,9 +1311,8 @@ callbacks.Register("CreateMove", function(ucmd)
 			ucmd.buttons = f < 2 and (f == 0 and ucmd.buttons - 4 or (f == 1 and ucmd.buttons - 2 or ucmd.buttons)) or
 				(n and ucmd.buttons - 6 or ucmd.buttons);
 			local isTouchingGround = bit.band(pLocal:GetPropInt("m_fFlags"), 1) ~= 0
-			local rappeling = pLocal:GetProp("m_bIsSpawnRappelling") == 1 -- avoid auto strafe with spawn rappel
-			local in_water = pLocal:GetProp("m_nWaterLevel") ~=
-				0                                                -- avoid auto strafe in water because it reduces speed
+			local rappeling = pLocal:GetProp("m_bIsSpawnRappelling") == 1
+			local in_water = pLocal:GetProp("m_nWaterLevel") ~= 0
 			local adpressed = false
 			if input.IsButtonDown(65) or input.IsButtonDown(68) then
 				adpressed = true
@@ -1317,7 +1325,8 @@ callbacks.Register("CreateMove", function(ucmd)
 			f, n = f + 1, isTouchingGround;
 			gui.SetValue("misc.strafe.enable", true)
 			gui.SetValue("misc.strafe.air",
-				not isTouchingGround and not rappeling and not in_water and angle == stargetangle);
+				not isTouchingGround and not rappeling and not in_water and angle == stargetangle and not adpressed and
+				velo < 700);
 			gui.SetValue("misc.fakelag.enable", false);
 			steptotargetangle(angle, stargetangle, aastep:GetValue())
 		else
@@ -1535,7 +1544,7 @@ local function switch()
 				beshieldid == -1 and "大盾把戏" or "大盾把戏 " .. beshieldidname)
 		end
 		if roll_aa_switch:GetValue() then
-			draw.Text(screen_w / 2 - 782, screen_h / 2 - 160, "大角度(非常不安全)")
+			draw.Text(screen_w / 2 - 782, screen_h / 2 - 160, "大角度")
 		end
 		if antiteammate:GetValue() then
 			draw.Text(screen_w / 2 - 782, screen_h / 2 - 180, "自动反队友炸")

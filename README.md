@@ -1,11 +1,11 @@
 # Aimware-DangerZone-Lua<br />
-**Last Updated 2023/8/31 1.1.8(Stable)(New Version)**<br />
+**Last Updated 2023/9/15 1.1.9(Stable)(New Version)**<br />
 
 （&nbsp;）Tips1:Use low aastep/aimstep angle and not enable unsafe function that u will never been banned<br />
 （&nbsp;）Tips2:if your suffer performance issue you should consider turn off some function<br />
 （&nbsp;）Like part of snapline ,ESP,distance visual,etc <br />
 
-EZ KILLED NOOB Bilibili Streamer<br />
+EZ KILLED NOOB Bilibili Streamer BY FISTS<br />
 ![Alt text](/imgs/punchkill.png)<br />
 
 From DZ Pro Player's respects<br />
@@ -34,7 +34,7 @@ Ref:I have used some code from<br />
 
 Note:I have hard coded <br />
 1.smg hitchance, due to smg need different value(like bizon,mac10 need low,and mp9,mp7 for high hitchance)<br />
-2.static fov 23,For your acc safety,i'm highly recommend you not change the value,and keep "SmoothAim" on (Aimstep).I have banned for lots of acc due to high fov.<br />
+2.static fov 15,For your acc safety,i'm highly recommend you not change the value,and keep "SmoothAim" on (Aimstep)<br />
 3.force set shotgun baim(Headshot is very hard before you being killed)<br />
 4.force set sniper baim (this mode awp cant get too much ammo and HS miss will LOSE your winner chance rate)<br />
 WARNING:IF YOU WANT USE HIGH FOV you can turn off AimSmooth and FOV will be dynamic that you could always hit cloest ENEMY.(abandon function but still work)<br />
@@ -150,7 +150,11 @@ Updated 1.1.8:<br />
 Removed all unstable GOTV Selection<br />
 <br />
 
-
+Updated 1.1.9:<br />
+<DZe_rage.lua> Add kniefbot support for Fists(weaponid 69)<br />
+<DZe_rage.lua> Fix up autostafer conflict with direction control when bhop<br />
+<DZe_rage.lua> Use AW self roll AA switch instead cmd.viewangle set<br />
+<DZe_visual.lua> add code to remove yellow tail(Temp CoolDown) on mainmenu<br />
 
 OLDVERSION Update:<br />
 Update 1.0.1:<br />
