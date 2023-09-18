@@ -16,7 +16,6 @@ local barrelmaster = gui.Checkbox(main_box, "vis.barrelmaster", "Show Barrel ESP
 local remotebombmaster = gui.Checkbox(main_box, "vis.remotebombmaster", "Show RemoteBomb ESP", 1)
 local removegrassmaster = gui.Checkbox(main_box, "vis.removegrassmaster", "Remove Grass", 1)
 removegrassmaster:SetDescription("It will only makes change on game start")
-
 local linemaster = gui.Checkbox(visual_box, "vis.dzespmaster", "Line Master Switch", 1)
 local linesubmaster = gui.Checkbox(line_box, "vis.dzespmaster", "SubLine Master Switch", 1)
 local hsmaster = gui.Checkbox(line_box, "vis.hsmaster", "Hostage Snapline", 0)
@@ -61,6 +60,7 @@ local drawespxy = {}
 local isNeedW = false
 local Teamcalled = false
 local player_respawn_times = {}
+local visualenabled = gui.GetValue("esp.master")
 local function returnweaponstr(player)
 	if player:IsPlayer() and player:IsAlive() then
 		local recstr = ""
@@ -134,7 +134,7 @@ local function ingame()
 end
 
 callbacks.Register("CreateMove", function()
-	if not espmaster:GetValue() or not gui.GetValue("esp.master") or not isNeedW or not showteamstatus:GetValue() or client.GetConVar("game_type") ~= "6" then
+	if not espmaster:GetValue() or not visualenabled or not isNeedW or not showteamstatus:GetValue() or client.GetConVar("game_type") ~= "6" then
 		Teamcalled = false
 		return
 	end
@@ -165,7 +165,7 @@ end)
 
 
 local function drawEspHookESP(builder)
-	if not espmaster:GetValue() or not gui.GetValue("esp.master") or not isNeedW then return end
+	if not espmaster:GetValue() or not visualenabled or not isNeedW then return end
 	local builder_entity = builder:GetEntity()
 	if builder_entity == nil then return end
 	if not builder_entity:IsPlayer() or not builder_entity:IsAlive() then return end
@@ -258,7 +258,8 @@ local function SnapLines()
 	BestMDistance = math.huge
 	drawxy = {}
 	dronetable = {}
-	if not linemaster:GetValue() or not gui.GetValue("esp.master") then return end
+	visualenabled = gui.GetValue("esp.master")
+	if not linemaster:GetValue() or not visualenabled then return end
 	if plocallive then
 		if hsmaster:GetValue() then hss = entities.FindByClass("CHostage") end
 		if boxmaster:GetValue() then lcs = entities.FindByClass("CPhysPropLootCrate") end
@@ -409,7 +410,7 @@ local function SnapLines()
 end
 
 local function drawEspHook(builder)
-	if not linemaster:GetValue() or not gui.GetValue("esp.master") then return end
+	if not linemaster:GetValue() or not visualenabled then return end
 
 	if plocallive then
 		drawespxy = {}
@@ -480,7 +481,7 @@ end
 
 
 local function DrawLine()
-	if not linemaster:GetValue() or not gui.GetValue("esp.master") then return end
+	if not linemaster:GetValue() or not visualenabled then return end
 	if linesubmaster:GetValue() and ingame() then
 		draw.Color(255, 255, 255, 255);
 		draw.SetFont(font1);
@@ -520,8 +521,6 @@ callbacks.Register("CreateMove", "SnapLines", SnapLines)
 callbacks.Register('DrawESP', "drawEspHook", drawEspHook)
 callbacks.Register('DrawESP', "drawEspHookESP", drawEspHookESP)
 callbacks.Register("Draw", "DrawLine", DrawLine)
-
-
 
 callbacks.Register("CreateMove", function()
 	pLocal = entities.GetLocalPlayer()
@@ -587,7 +586,6 @@ local function RemoteBombDetector()
 			local rb = rbs[i]
 			local rbabs = rb:GetProp("m_vecOrigin")
 			local Distance = (localabs - rbabs):Length()
-
 			if Distance < 1599 then
 				if bestRemoteBombDistance > Distance then bestRemoteBombDistance = Distance end
 				local x, y = client.WorldToScreen(rbabs)
@@ -627,7 +625,7 @@ end
 callbacks.Register("CreateMove", "RemoteBombDetector", RemoteBombDetector)
 callbacks.Register("CreateMove", "BarrelsDetector", BarrelsDetector)
 callbacks.Register("Draw", "DrawRB", function()
-	if plocallive and gui.GetValue("esp.master") then
+	if plocallive and visualenabled then
 		for _, v in pairs(rbvec) do
 			draw.SetTexture(charge_image.texture)
 			draw.Color(255, 255, 255, 255)

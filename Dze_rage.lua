@@ -65,7 +65,6 @@ local healthshotinject = false
 local shieldhit = false
 local plocallive = false
 local stargetangle = 0
--- local roll = 0
 local kvelocity = 0
 local shieldjumper = false
 local shieldjumpername = ""
@@ -133,6 +132,7 @@ local teammatehp = 0
 local onlyshieldguyin = false
 local aimteammate = false
 local antibreachtime = 0
+local isTouchingGround = true
 gui.SetValue("rbot.master", true)
 local weapons_table = {
 	["asniper"] = true,
@@ -284,6 +284,7 @@ callbacks.Register("CreateMove", function()
 		if vx ~= nil then
 			velo = math.floor(math.min(10000, math.sqrt(vx * vx + vy * vy) + 0.5))
 		end
+		isTouchingGround = bit.band(pLocal:GetPropInt("m_fFlags"), 1) ~= 0
 	else
 		plocallive = false
 	end
@@ -534,7 +535,7 @@ local function lockonitlegprecalc(Enemy)
 			hitboxnumber = 11
 		end
 	end
-	if tra == nil or bestfraction < 0.95 then
+	if tra == nil or bestfraction < 0.99 then
 		return 1
 	else
 		return hitboxnumber
@@ -617,7 +618,6 @@ callbacks.Register("CreateMove", function(ucmd)
 		shieldhit = false
 		local Enemies = entities.FindByClass("CCSPlayer")
 		if Enemies == nil then return end
-		local TBestEnemy = nil
 		local BestEnemy = nil
 		local owner = nil
 		local BestDistance = math.huge
@@ -722,7 +722,6 @@ callbacks.Register("CreateMove", function(ucmd)
 							end
 							local btrace = engine.TraceLine(Enemy:GetHitboxPosition(1), localheadbox)
 							if Distance < BestDistance and btrace.fraction > 0.99 and Distance < 5999 then
-								TBestEnemy = Enemy
 								if not pass then
 									BestDistance = Distance
 									BestEnemy = Enemy
@@ -781,8 +780,8 @@ callbacks.Register("CreateMove", function(ucmd)
 				owner = Cowner
 				Nobest = true
 			end
-			if TBestEnemy ~= nil then
-				enemydir, enemydirangle = detectEnemydir(TBestEnemy)
+			if BestEnemy ~= nil then
+				enemydir, enemydirangle = detectEnemydir(BestEnemy)
 			else
 				enemydirangle = 180
 			end
@@ -1123,7 +1122,7 @@ callbacks.Register("CreateMove", function(ucmd)
 		else
 			setColors(255, 255, 255)
 		end
-		if not (angle == 0) or smoothon or needoffaim or aimteammate then
+		if not (angle == 0) or smoothon or needoffaim or aimteammate or not isTouchingGround then
 			gui.SetValue("rbot.antiaim.condition.use", 0)
 			if not (angle == 0) or needshieldprotect then
 				if weaponClass == "SHIELD" or weaponClass == "kniefetc" or weaponClass == "Fists" then
@@ -1207,17 +1206,12 @@ callbacks.Register("CreateMove", function(ucmd)
 		end
 		if needesync then
 			local sign = aa_side and 1 or -1
-			-- roll = 40 * sign
 			targetde = 58 * sign
 			if backward then
-				-- roll = 40 * sign
 				targetde = 40 * sign
 			end
 			if gui.GetValue("rbot.antiaim.base.rotation") ~= targetde then
 				gui.SetValue("rbot.antiaim.base.rotation", targetde)
-				-- if roll_aa_switch:GetValue() then
-				-- 	ucmd.viewangles = EulerAngles(ucmd.viewangles.x, ucmd.viewangles.y, roll)
-				-- end
 			end
 		elseif gui.GetValue("rbot.antiaim.base.rotation") ~= 0 then
 			gui.SetValue("rbot.antiaim.base.rotation", 0)
@@ -1233,15 +1227,10 @@ callbacks.Register("CreateMove", function(ucmd)
 				gui.SetValue("rbot.hitscan.accuracy.smg.hitchanceburst", 40)
 				gui.SetValue("rbot.hitscan.accuracy.smg.mindamage", 15)
 			end
-		elseif weaponClass == "SHIELD" or (dzkniefbot:GetValue() and (weaponClass == "kniefetc" or weaponClass == "Fists")) then
+		elseif shieldhit and weaponClass == "SHIELD" or (dzkniefbot:GetValue() and (weaponClass == "kniefetc" or weaponClass == "Fists")) then
 			hascalledattack2 = true
-			if shieldhit then
-				client.Command("+attack", true);
-				iscommandattack2 = true
-			else
-				client.Command("-attack", true);
-				iscommandattack2 = false
-			end
+			client.Command("+attack", true);
+			iscommandattack2 = true
 		end
 		if iscommandattack2 and hascalledattack2 == false then
 			client.Command("-attack", true);
@@ -1287,7 +1276,6 @@ callbacks.Register("CreateMove", function(ucmd)
 		if not (velo < 169 and (math.abs(angle) > 135 and math.abs(angle) < 45)) and fasthop:GetValue() ~= nil and fasthop:GetValue() ~= 0 and input.IsButtonDown(fasthop:GetValue()) then
 			ucmd.buttons = f < 2 and (f == 0 and ucmd.buttons - 4 or (f == 1 and ucmd.buttons - 2 or ucmd.buttons)) or
 				(n and ucmd.buttons - 6 or ucmd.buttons);
-			local isTouchingGround = bit.band(pLocal:GetPropInt("m_fFlags"), 1) ~= 0
 			local rappeling = pLocal:GetProp("m_bIsSpawnRappelling") == 1
 			local in_water = pLocal:GetProp("m_nWaterLevel") ~= 0
 			local adpressed = input.IsButtonDown(65) or input.IsButtonDown(68)
@@ -1568,6 +1556,10 @@ local function switch()
 		end
 	end
 end
+local weaponEvents = {
+	["weapon_fire"] = true,
+	["bullet_impact"] = true
+}
 callbacks.Register("Draw", "switch", switch);
 client.AllowListener("weapon_fire");
 client.AllowListener("bullet_impact");
@@ -1576,26 +1568,25 @@ client.AllowListener("client_disconnect");
 client.AllowListener("begin_new_match");
 callbacks.Register("FireGameEvent", function(e)
 	local eventName = e:GetName()
-	local weaponEvents = {
-		["weapon_fire"] = true,
-		["bullet_impact"] = true
-	}
-	if weaponEvents[eventName] and localhp <= 90 and plocallive then
-		if client.GetPlayerIndexByUserID(e:GetInt("userid")) ~= localindex and entities.GetByUserID(e:GetInt("userid")):GetPropInt("m_nSurvivalTeam") ~= localteamid then
-			attacker = entities.GetByUserID(e:GetInt("userid"))
+	if plocallive then
+		if weaponEvents[eventName] and localhp <= 90 and plocallive then
+			if client.GetPlayerIndexByUserID(e:GetInt("userid")) ~= localindex and entities.GetByUserID(e:GetInt("userid")):GetPropInt("m_nSurvivalTeam") ~= localteamid then
+				attacker = entities.GetByUserID(e:GetInt("userid"))
+			end
+		else
+			attacker = nil
 		end
-	else
-		attacker = nil
-		if (eventName == "client_disconnect") or (eventName == "begin_new_match") then
-			antibreachtime = 0
-			plocallive = false
-			beshieldid = -1
-			cachedmutedplayer = {}
-			onlyshieldguyin = false
-			gui.SetValue("rbot.antiaim.base", "0 Desync")
-			gui.SetValue("rbot.antiaim.condition.autodir.targets", 0)
-			gui.SetValue("rbot.aim.enable", "Off")
-			gui.SetValue("rbot.antiaim.base.rotation", 0)
-		end
+	end
+	if (eventName == "client_disconnect") or (eventName == "begin_new_match") then
+		antibreachtime = 0
+		plocallive = false
+		beshieldid = -1
+		cachedmutedplayer = {}
+		onlyshieldguyin = false
+		isTouchingGround = true
+		gui.SetValue("rbot.antiaim.base", "0 Desync")
+		gui.SetValue("rbot.antiaim.condition.autodir.targets", 0)
+		gui.SetValue("rbot.aim.enable", "Off")
+		gui.SetValue("rbot.antiaim.base.rotation", 0)
 	end
 end)

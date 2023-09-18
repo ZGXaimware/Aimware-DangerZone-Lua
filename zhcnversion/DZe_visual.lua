@@ -7,9 +7,6 @@ local tab = gui.Tab(gui.Reference("Visuals"), "DZevis", "特训专家视觉");
 local main_box = gui.Groupbox(tab, "ESP", 16, 16, 200, 0);
 local visual_box = gui.Groupbox(tab, "导航线", 232, 16, 200, 0);
 local line_box = gui.Groupbox(tab, "次要导航线", 448, 16, 174, 0);
-
-
-
 local espmaster = gui.Checkbox(main_box, "vis.dzespmaster", "ESP总开关", 1)
 local showammo = gui.Checkbox(main_box, "vis.showammo", "显示子弹", 1)
 local showdistance = gui.Checkbox(main_box, "vis.showdistance", "显示距离", 1)
@@ -19,7 +16,6 @@ local barrelmaster = gui.Checkbox(main_box, "vis.barrelmaster", "显示油桶ESP
 local remotebombmaster = gui.Checkbox(main_box, "vis.remotebombmaster", "显示遥控炸弹ESP", 1)
 local removegrassmaster = gui.Checkbox(main_box, "vis.removegrassmaster", "开局除草", 1)
 removegrassmaster:SetDescription("只会在游戏开始时被触发")
-
 local linemaster = gui.Checkbox(visual_box, "vis.dzespmaster", "主要导航线开关", 1)
 local linesubmaster = gui.Checkbox(line_box, "vis.dzespmaster", "次要导航线开关", 1)
 local hsmaster = gui.Checkbox(line_box, "vis.hsmaster", "人质导航线", 0)
@@ -32,12 +28,6 @@ local endcirclemaster = gui.Checkbox(visual_box, "vis.endzone", "最终安全区
 local shieldarmormaster = gui.Checkbox(line_box, "vis.shieldarmormaster", "大盾/护甲导航线", 1)
 local guidemaster = gui.Checkbox(visual_box, "vis.endzone", "必备物品引导线(非常有用)", 1)
 local wpmaster = gui.Checkbox(line_box, "vis.wpmaster", "武器/武器箱导航线", 1)
-
-
-
-
-
-
 local pLocal = nil
 local font = draw.CreateFont("Microsoft Tai Le", 45, 1000);
 local fontA = draw.CreateFont("Microsoft Tai Le", 80, 1000);

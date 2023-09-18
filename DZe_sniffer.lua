@@ -27,9 +27,8 @@ end
 local playerlist = {}
 local ingamestatus = false
 local cachelist = {}
--- local cachelistpurchaseid = {}
--- local cachemoneylist = {}
 local deadlist = {}
+local reslist = {}
 local player_respawn_times = {}
 local tabletitemindex = {
     [-1] = "None",
@@ -78,7 +77,20 @@ local function partyapisay(message)
     end
 end
 
-
+local function returnweaponstr(player)
+    if player:IsPlayer() and player:IsAlive() then
+        local recstr = ""
+        for i = 0, 63 do
+            local weapon = player:GetPropEntity("m_hMyWeapons", i)
+            if weapon:GetClass() ~= nil then
+                recstr = recstr .. tostring(weapon) .. " "
+            end
+        end
+        return recstr
+    else
+        return ""
+    end
+end
 
 callbacks.Register("CreateMove", function()
     pLocal = entities.GetLocalPlayer()
@@ -107,15 +119,21 @@ callbacks.Register("CreateMove", function()
 
             if player:GetName() ~= "GOTV" then
                 if ingamestatus and respawnmaster:GetValue() then
-                    if player:IsAlive() and deadlist[playername] == true then
-                        local addstr = ""
-                        if player_respawn_times[playername] then
-                            addstr = "Next_Time:" ..
-                                math.floor(player_respawn_times[playername])
+                    if player:IsAlive() then
+                        if deadlist[playername] == true then
+                            local addstr = ""
+                            if player_respawn_times[playername] then
+                                addstr = "Next_Time:" ..
+                                    math.floor(player_respawn_times[playername])
+                            end
+                            partyapisay("Respawn_Select" ..
+                                string.gsub(': ' .. playername, '%s', '') .. addstr)
+                            deadlist[playername] = false
+                        elseif reslist[playername] then
+                            if returnweaponstr(player) ~= "weapon_fists " then
+                                partyapisay(string.gsub(': ' .. playername, '%s', '') .. "已经跳伞！")
+                            end
                         end
-                        partyapisay("Respawn" ..
-                            string.gsub(': ' .. playername, '%s', '') .. addstr)
-                        deadlist[playername] = false
                     end
                 end
                 local playerteamid = player:GetPropInt("m_nSurvivalTeam")
@@ -152,7 +170,6 @@ callbacks.Register("CreateMove", function()
             cachelist = playerlist
         end
         lastcssplayernumber = playernumber
-        
         if purchasedex then
             local thisplayer = entities.GetByUserID(purchaseguy)
             if thisplayer == nil or not thisplayer:IsPlayer() then purchasedex = false end
@@ -179,6 +196,7 @@ callbacks.Register("FireGameEvent", function(e)
     if (eventName == "client_disconnect") or (eventName == "begin_new_match") then
         cachelist = {}
         deadlist = {}
+        reslist = {}
         lastcssplayernumber = 0
         player_respawn_times = {}
         teammatename = ""
@@ -198,6 +216,7 @@ callbacks.Register("FireGameEvent", function(e)
     end
     if eventName == "player_death" and ingamestatus then
         deadlist[(entities.GetByUserID(e:GetInt("userid"))):GetName()] = true
+        reslist[(entities.GetByUserID(e:GetInt("userid"))):GetName()] = true
         if (entities.GetByUserID(e:GetInt("userid"))):IsPlayer() then
             local teamid = (entities.GetByUserID(e:GetInt("userid"))):GetPropInt("m_nSurvivalTeam")
             if teamid == -1 or teamid == nil then return end
