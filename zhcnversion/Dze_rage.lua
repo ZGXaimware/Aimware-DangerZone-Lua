@@ -4,9 +4,9 @@ local tab = gui.Tab(gui.Reference("Ragebot"), "DZe", "特训专家");
 local main_box = gui.Groupbox(tab, "主要", 16, 16, 200, 0);
 local smooth = gui.Checkbox(main_box, "main.aimsmooth", "平滑自瞄", 1)
 smooth:SetDescription("关闭将采用基于动态FOV的攻击(会死号)")
-local aimsmoothstep = gui.Slider(main_box, "main.aimstepsmooth", "平滑自瞄度数(推荐8以下)", 6, 5, 15, 1)
-local aastep        = gui.Slider(main_box, "main.aastep", "平滑AA度数(推荐8以下)", 6, 5, 15, 1)
-local aimsmoothfov  = gui.Slider(main_box, "main.fov", "自瞄机器人Fov", 15, 10, 20, 1)
+local aimsmoothstep = gui.Slider(main_box, "main.aimstepsmooth", "平滑自瞄度数(推荐8以下)", 3, 1, 15, 1)
+local aastep        = gui.Slider(main_box, "main.aastep", "平滑AA度数(推荐8以下)", 3, 1, 15, 1)
+local aimsmoothfov  = gui.Slider(main_box, "main.fov", "自瞄机器人Fov", 10, 10, 20, 1)
 local teammatecheck = gui.Checkbox(main_box, "main.teammatecheck", "队友指示器", 1)
 local antiteammate  = gui.Checkbox(main_box, "main.antiteammate", "自动反队友炸", 1)
 local autoshield    = gui.Checkbox(main_box, "main.autoshield", "自动背身大盾打针", 1)
@@ -1236,7 +1236,6 @@ callbacks.Register("CreateMove", function(ucmd)
 		elseif gui.GetValue("rbot.antiaim.base.rotation") ~= 0 then
 			gui.SetValue("rbot.antiaim.base.rotation", 0)
 		end
-		local hascalledattack2 = false
 		if weaponClass == "smg" then
 			if localweaponid == 17 or localweaponid == 26 then
 				gui.SetValue("rbot.hitscan.accuracy.smg.hitchance", 10)
@@ -1248,13 +1247,7 @@ callbacks.Register("CreateMove", function(ucmd)
 				gui.SetValue("rbot.hitscan.accuracy.smg.mindamage", 15)
 			end
 		elseif shieldhit and weaponClass == "SHIELD" or (dzkniefbot:GetValue() and (weaponClass == "kniefetc" or weaponClass == "Fists")) then
-			hascalledattack2 = true
-			client.Command("+attack", true);
-			iscommandattack2 = true
-		end
-		if iscommandattack2 and hascalledattack2 == false then
-			client.Command("-attack", true);
-			iscommandattack2 = false
+			ucmd.buttons = 1
 		end
 		if needshieldprotect then
 			if lowesthp >= localhp or lowesthp == 0 then

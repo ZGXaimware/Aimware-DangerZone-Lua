@@ -132,6 +132,7 @@ callbacks.Register("CreateMove", function()
                         elseif reslist[playername] then
                             if returnweaponstr(player) ~= "weapon_fists " then
                                 partyapisay(string.gsub(': ' .. playername, '%s', '') .. "已经跳伞！")
+                                reslist[playername] = false
                             end
                         end
                     end

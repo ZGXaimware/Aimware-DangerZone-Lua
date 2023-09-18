@@ -4,9 +4,9 @@ local tab = gui.Tab(gui.Reference("Ragebot"), "DZe", "DangerZone Elite");
 local main_box = gui.Groupbox(tab, "Main", 16, 16, 200, 0);
 local smooth = gui.Checkbox(main_box, "main.aimsmooth", "AimSmooth", 1)
 smooth:SetDescription("Aimstep like function, turn off will use fov based(Unsafe)")
-local aimsmoothstep = gui.Slider(main_box, "main.aimstepsmooth", "AimSmoothStep", 8, 5, 15, 1)
-local aastep        = gui.Slider(main_box, "main.aastep", "AAStep", 8, 5, 15, 1)
-local aimsmoothfov  = gui.Slider(main_box, "main.fov", "AimStep Fov", 15, 20, 20, 1)
+local aimsmoothstep = gui.Slider(main_box, "main.aimstepsmooth", "AimSmoothStep", 3, 1, 15, 1)
+local aastep        = gui.Slider(main_box, "main.aastep", "AAStep", 3, 1, 15, 1)
+local aimsmoothfov  = gui.Slider(main_box, "main.fov", "AimStep Fov", 10, 20, 20, 1)
 local teammatecheck = gui.Checkbox(main_box, "main.teammatecheck", "Teammate Indicater", 1)
 local antiteammate  = gui.Checkbox(main_box, "main.antiteammate", "Anti-Teammate", 1)
 local autoshield    = gui.Checkbox(main_box, "main.autoshield", "Autoshield", 1)
@@ -1216,7 +1216,6 @@ callbacks.Register("CreateMove", function(ucmd)
 		elseif gui.GetValue("rbot.antiaim.base.rotation") ~= 0 then
 			gui.SetValue("rbot.antiaim.base.rotation", 0)
 		end
-		local hascalledattack2 = false
 		if weaponClass == "smg" then
 			if localweaponid == 17 or localweaponid == 26 then
 				gui.SetValue("rbot.hitscan.accuracy.smg.hitchance", 10)
@@ -1228,13 +1227,7 @@ callbacks.Register("CreateMove", function(ucmd)
 				gui.SetValue("rbot.hitscan.accuracy.smg.mindamage", 15)
 			end
 		elseif shieldhit and weaponClass == "SHIELD" or (dzkniefbot:GetValue() and (weaponClass == "kniefetc" or weaponClass == "Fists")) then
-			hascalledattack2 = true
-			client.Command("+attack", true);
-			iscommandattack2 = true
-		end
-		if iscommandattack2 and hascalledattack2 == false then
-			client.Command("-attack", true);
-			iscommandattack2 = false
+			ucmd.buttons = 1
 		end
 		if needshieldprotect then
 			if lowesthp >= localhp or lowesthp == 0 then
