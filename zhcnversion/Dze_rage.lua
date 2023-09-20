@@ -135,20 +135,10 @@ local aimteammate = false
 local antibreachtime = 0
 local isTouchingGround = true
 gui.SetValue("rbot.master", true)
-local weapons_table = {
-	["asniper"] = true,
-	["hpistol"] = true,
-	["lmg"] = true,
-	["pistol"] = true,
-	["rifle"] = true,
-	["scout"] = true,
-	["smg"] = true,
-	["shotgun"] = true,
-	["sniper"] = true
-}
+local weapons_table = {"asniper", "hpistol", "lmg", "pistol", "rifle", "scout", "smg", "shotgun", "sniper", "zeus","shared"};
 local cachedmutedplayer = {}
 local cache_weapontable = {}
-for v, _ in ipairs(weapons_table) do
+for _, v in ipairs(weapons_table) do
 	if v ~= "shotgun" and v ~= "sniper" then
 		cache_weapontable[v] = gui.GetValue("rbot.hitscan.hitbox." .. v .. ".head.priority")
 	end
@@ -596,7 +586,7 @@ local cacheswitch = false
 local function switchtobaim(switch)
 	if switch == nil or switch == cacheswitch then return end
 	cacheswitch = switch
-	for v, _ in ipairs(weapons_table) do
+	for _, v in ipairs(weapons_table) do
 		if v ~= "shotgun" and v ~= "sniper" then
 			if switch then
 				gui.SetValue("rbot.hitscan.hitbox." .. v .. ".body.priority", 1)
@@ -609,8 +599,7 @@ local function switchtobaim(switch)
 	end
 end
 local function autoreloadback(bedistance)
-	local weaponvalid = weapons_table[weaponClass]
-	if weaponvalid == nil or not shieldreturn:GetValue() or input.IsButtonDown(69) then
+	if not shieldreturn:GetValue() or input.IsButtonDown(69) then
 		return false
 	end
 	local pwentitie = pLocal:GetPropEntity("m_hActiveWeapon")
@@ -1153,7 +1142,7 @@ callbacks.Register("CreateMove", function(ucmd)
 			else
 				client.Command("bind mouse1 +attack", true)
 			end
-			if aimstatus ~= '"Off"' and not smoothon and not needoffaim and not aimteammate and gui.GetValue("esp.master") and not disablesound:GetValue() then
+			if aimstatus ~= '"Off"' and not smoothon and not needoffaim and not aimteammate and gui.GetValue("esp.master") and not disablesound:GetValue() and not (not isTouchingGround and velo > 59 ) then
 				client.Command("play training/light_on", true)
 			end
 			gui.SetValue("rbot.aim.enable", "Off")
@@ -1236,19 +1225,6 @@ callbacks.Register("CreateMove", function(ucmd)
 		elseif gui.GetValue("rbot.antiaim.base.rotation") ~= 0 then
 			gui.SetValue("rbot.antiaim.base.rotation", 0)
 		end
-		if weaponClass == "smg" then
-			if localweaponid == 17 or localweaponid == 26 then
-				gui.SetValue("rbot.hitscan.accuracy.smg.hitchance", 10)
-				gui.SetValue("rbot.hitscan.accuracy.smg.hitchanceburst", 10)
-				gui.SetValue("rbot.hitscan.accuracy.smg.mindamage", 5)
-			else
-				gui.SetValue("rbot.hitscan.accuracy.smg.hitchance", 40)
-				gui.SetValue("rbot.hitscan.accuracy.smg.hitchanceburst", 40)
-				gui.SetValue("rbot.hitscan.accuracy.smg.mindamage", 15)
-			end
-		elseif shieldhit and weaponClass == "SHIELD" or (dzkniefbot:GetValue() and (weaponClass == "kniefetc" or weaponClass == "Fists")) then
-			ucmd.buttons = 1
-		end
 		if needshieldprotect then
 			if lowesthp >= localhp or lowesthp == 0 then
 				if string.find(weaponstr, "healthshot") ~= nil then
@@ -1306,6 +1282,19 @@ callbacks.Register("CreateMove", function(ucmd)
 			steptotargetangle(angle, stargetangle, aastep:GetValue())
 		else
 			--gui.SetValue("misc.strafe.enable", false)
+			if weaponClass == "smg" then
+				if localweaponid == 17 or localweaponid == 26 then
+					gui.SetValue("rbot.hitscan.accuracy.smg.hitchance", 10)
+					gui.SetValue("rbot.hitscan.accuracy.smg.hitchanceburst", 10)
+					gui.SetValue("rbot.hitscan.accuracy.smg.mindamage", 5)
+				else
+					gui.SetValue("rbot.hitscan.accuracy.smg.hitchance", 40)
+					gui.SetValue("rbot.hitscan.accuracy.smg.hitchanceburst", 40)
+					gui.SetValue("rbot.hitscan.accuracy.smg.mindamage", 15)
+				end
+			elseif shieldhit and (weaponClass == "SHIELD" or (dzkniefbot:GetValue() and (weaponClass == "kniefetc" or weaponClass == "Fists"))) then
+				ucmd.buttons = 1
+			end
 			if not input.IsButtonDown(17) and pLocal:GetProp('m_flDuckAmount') >= 0.1 then
 				client.Command("-duck", true);
 			end
@@ -1380,7 +1369,7 @@ local function switch()
 		if switch_awall_key_value ~= 0 and input.IsButtonPressed(switch_awall_key_value) then
 			switch_awall = not switch_awall
 			local autowall_value = switch_awall and 1 or 0
-			for v, _ in ipairs(weapons_table) do
+			for _, v in ipairs(weapons_table) do
 				gui.SetValue("rbot.hitscan.accuracy." .. v .. ".autowall", autowall_value)
 			end
 		end
@@ -1546,6 +1535,8 @@ local function switch()
 				draw.Text(screen_w / 2 - 450, screen_h / 2 - 160, "AA角度: " .. angle .. " 换弹背身!")
 			elseif healthshotinject then
 				draw.Text(screen_w / 2 - 500, screen_h / 2 - 220, "AA角度: " .. angle .. " 正在保护打针!")
+			elseif (velo > 59 and not isTouchingGround) then
+				draw.Text(screen_w / 2 - 500, screen_h / 2 - 220, "AA角度: " .. angle .. " 在空中!")
 			else
 				draw.Text(screen_w / 2 - 450, screen_h / 2 - 160, "AA角度: " .. angle .. " 关闭自瞄!")
 			end

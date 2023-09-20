@@ -62,16 +62,16 @@ local Teamcalled = false
 local player_respawn_times = {}
 local visualenabled = gui.GetValue("esp.master")
 local function returnweaponstr(player)
+	local recstr = ""
 	if player:IsPlayer() and player:IsAlive() then
-		local recstr = ""
 		for i = 0, 63 do
 			local weapon = player:GetPropEntity("m_hMyWeapons", i)
 			if weapon:GetClass() ~= nil then
 				recstr = recstr .. tostring(weapon) .. " "
 			end
 		end
-		return recstr
 	end
+	return recstr
 end
 local weaponClasses = {
 	[11] = "asniper",
