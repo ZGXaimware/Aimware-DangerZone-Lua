@@ -1142,7 +1142,7 @@ callbacks.Register("CreateMove", function(ucmd)
 		else
 			setColors(255, 255, 255)
 		end
-		if not (angle == 0) or smoothon or needoffaim or aimteammate or not isTouchingGround then
+		if not (angle == 0) or smoothon or needoffaim or aimteammate or (not isTouchingGround and velo > 59 )then
 			gui.SetValue("rbot.antiaim.condition.use", 0)
 			if not (angle == 0) or needshieldprotect then
 				if weaponClass == "SHIELD" or weaponClass == "kniefetc" or weaponClass == "Fists" then
