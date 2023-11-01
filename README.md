@@ -1,4 +1,10 @@
 # Aimware-DangerZone-Lua<br />
+** Legacy CSGO not receive new updated and no official Server then this project discontinued **<br />
+
+
+
+
+
 **Last Updated 2023/9/15 1.1.9(Stable)(New Version)**<br />
 
 （&nbsp;）Tips1:Use low aastep/aimstep angle and not enable unsafe function that u will never been banned<br />
